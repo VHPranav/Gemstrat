@@ -3,6 +3,8 @@ import Hero from '@/components/Hero';
 import Statement from '@/components/Statement';
 import AboutIntro from '@/components/AboutIntro';
 import GemstratAdvantage from '@/components/GemstratAdvantage';
+import ScalingExpertise from '@/components/ScalingExpertise';
+import ReviewsSection from '@/components/ReviewsSection';
 
 export default function HomePage() {
   return (
@@ -11,6 +13,8 @@ export default function HomePage() {
       <Statement />
       <AboutIntro />
       <GemstratAdvantage />
+      <ScalingExpertise />
+      <ReviewsSection />
     </main>
   );
 }

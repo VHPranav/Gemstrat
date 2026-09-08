@@ -106,12 +106,39 @@ const ADVANTAGE_PILLARS = [
   },
 ];
 
+// 4 new dummy content items revealed by the black blinds transition
+const DARK_ADVANTAGE_PILLARS = [
+  {
+    id: 'dark-pillar-1',
+    title: 'Bespoke Strategy, Zero Template',
+    subtext: 'Tailored roadmaps engineered specifically for your market edge.',
+  },
+  {
+    id: 'dark-pillar-2',
+    title: 'High-Velocity Execution',
+    subtext: 'Turning strategic clarity into deployed assets in record time.',
+  },
+  {
+    id: 'dark-pillar-3',
+    title: 'Engineering & Design Synergy',
+    subtext: 'Where technical rigor empowers world-class brand experiences.',
+  },
+  {
+    id: 'dark-pillar-4',
+    title: 'Measurable Commercial Impact',
+    subtext: 'Every deliverable calibrated directly against your growth metrics.',
+  },
+];
+
 export default function GemstratAdvantage() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mainTrackRef = useRef<HTMLDivElement>(null);
   const pillarContentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const blindRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const blindEdgeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const stickyRef = useRef<HTMLDivElement>(null);
 
   const isAlignedRef = useRef(false);
 
@@ -152,12 +179,12 @@ export default function GemstratAdvantage() {
       const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
 
       // ==========================================================
-      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.20)
+      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.16)
       // ==========================================================
       const totalWords = ALL_WORDS.length;
       const startWord = 0.02;
-      const endWord = 0.20;
-      const windowSize = 0.06;
+      const endWord = 0.16;
+      const windowSize = 0.05;
       const activeRange = endWord - startWord - windowSize;
 
       wordRefs.current.forEach((span, index) => {
@@ -178,10 +205,10 @@ export default function GemstratAdvantage() {
       });
 
       // ==========================================================
-      // Phase 2: Images Emerge from Center-Bottom of Screen 1 (progress 0.20 -> 0.48)
+      // Phase 2: Images Emerge from Center-Bottom of Screen 1 (progress 0.16 -> 0.36)
       // ==========================================================
-      const imgPhaseStart = 0.20;
-      const imgPhaseEnd = 0.48;
+      const imgPhaseStart = 0.16;
+      const imgPhaseEnd = 0.36;
 
       const startX = 0;
       const startY = 46;
@@ -218,10 +245,10 @@ export default function GemstratAdvantage() {
 
       // ==========================================================
       // Phase 3: Screen 1 slides left while Screen 2 (all 4 rows) slides in!
-      // (NO FADING: buttery smootherstep physical slide across progress 0.48 -> 0.70)
+      // (NO FADING: buttery smootherstep physical slide across progress 0.38 -> 0.56)
       // ==========================================================
-      const slideStart = 0.48;
-      const slideEnd = 0.70;
+      const slideStart = 0.38;
+      const slideEnd = 0.56;
 
       if (mainTrackRef.current) {
         if (progress < slideStart) {
@@ -240,16 +267,16 @@ export default function GemstratAdvantage() {
 
       // ==========================================================
       // Phase 4: Buttery Automatic Slide into Left Alignment!
-      // Once Screen 2 arrives in viewport (progress >= 0.70),
+      // Once Screen 2 arrives in viewport (progress >= 0.55),
       // the rows glide gracefully into left alignment via smooth quintic transition.
-      // If scrolling back up (progress < 0.58), smoothly reset to staggered state.
+      // If scrolling back up (progress < 0.45), smoothly reset to staggered state.
       // ==========================================================
-      if (progress >= 0.70 && !isAlignedRef.current) {
+      if (progress >= 0.55 && !isAlignedRef.current) {
         isAlignedRef.current = true;
         pillarContentRefs.current.forEach((el) => {
           if (el) el.style.transform = 'translate3d(0vw, 0, 0)';
         });
-      } else if (progress < 0.58 && isAlignedRef.current) {
+      } else if (progress < 0.45 && isAlignedRef.current) {
         isAlignedRef.current = false;
         pillarContentRefs.current.forEach((el, idx) => {
           if (el) {
@@ -257,6 +284,53 @@ export default function GemstratAdvantage() {
             el.style.transform = `translate3d(${initialStagger}vw, 0, 0)`;
           }
         });
+      }
+
+      // ==========================================================
+      // Phase 5: The 4 Blinds Transition (motion.dev curtains blinds)
+      // 4 black blinds expand down from each divider line,
+      // changing each row into black and revealing the new 4 contents!
+      // (progress 0.66 -> 0.88)
+      // ==========================================================
+      const blindsStart = 0.66;
+      const blindsEnd = 0.88;
+
+      blindRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const edgeEl = blindEdgeRefs.current[idx];
+
+        if (progress < blindsStart) {
+          el.style.clipPath = 'inset(0 0 100% 0)';
+          if (edgeEl) {
+            edgeEl.style.opacity = '0';
+            edgeEl.style.top = '0%';
+          }
+        } else if (progress <= blindsEnd) {
+          const pBlinds = (progress - blindsStart) / (blindsEnd - blindsStart);
+          const stagger = idx * 0.035;
+          const localT = Math.min(Math.max((pBlinds - stagger) / (1 - 3 * 0.035), 0), 1);
+          // Smootherstep for clean, mechanical yet organic blinds wipe
+          const easeBlind = localT * localT * (3 - 2 * localT);
+          const bottomInset = (1 - easeBlind) * 100;
+          el.style.clipPath = `inset(0 0 ${bottomInset.toFixed(2)}% 0)`;
+          if (edgeEl) {
+            edgeEl.style.top = `${(easeBlind * 100).toFixed(2)}%`;
+            edgeEl.style.opacity = easeBlind > 0.01 && easeBlind < 0.99 ? '1' : '0';
+          }
+        } else {
+          el.style.clipPath = 'inset(0 0 0% 0)';
+          if (edgeEl) {
+            edgeEl.style.opacity = '0';
+            edgeEl.style.top = '100%';
+          }
+        }
+      });
+
+      if (sectionRef.current) {
+        sectionRef.current.style.backgroundColor = progress >= 0.86 ? '#090909' : '#ffffff';
+      }
+      if (stickyRef.current) {
+        stickyRef.current.style.backgroundColor = progress >= 0.86 ? '#090909' : '#ffffff';
       }
     };
 
@@ -281,9 +355,12 @@ export default function GemstratAdvantage() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[340vh] bg-white text-[#090909] z-40 overflow-visible"
+      className="relative w-full h-[460vh] bg-white text-[#090909] z-40 overflow-visible transition-colors duration-300"
     >
-      <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-white box-border">
+      <div
+        ref={stickyRef}
+        className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-white box-border transition-colors duration-300"
+      >
         
         {/* Continuous Horizontal Track (Screen 1 + Screen 2 side-by-side) */}
         <div
@@ -354,7 +431,8 @@ export default function GemstratAdvantage() {
 
           {/* ========================================================= */}
           {/* Screen 2: All 4 Advantage Rows Together (Single Viewport) */}
-          {/* Starts staggered diagonally (Ref 1), then slides by itself into left alignment (Ref 2) */}
+          {/* 1. Staggered -> Auto-slides left into alignment           */}
+          {/* 2. 4 Blinds Transition wipes down from lines into black!  */}
           {/* ========================================================= */}
           <div className="w-screen h-full shrink-0 flex flex-col justify-between relative pointer-events-none select-none">
             {ADVANTAGE_PILLARS.map((pillar, pIdx) => (
@@ -362,9 +440,9 @@ export default function GemstratAdvantage() {
                 key={pillar.id}
                 className={`flex-1 relative flex flex-col justify-center border-b border-black/[0.12] ${
                   pIdx === 0 ? 'border-t border-black/[0.12]' : ''
-                } pointer-events-none select-none px-6`}
+                } pointer-events-none select-none px-6 overflow-hidden`}
               >
-                {/* Content Block: starts offset by diagonal stagger, then auto-slides left */}
+                {/* 1. White Content Block: starts staggered, auto-slides left */}
                 <div
                   ref={(el) => {
                     pillarContentRefs.current[pIdx] = el;
@@ -382,6 +460,42 @@ export default function GemstratAdvantage() {
                     {pillar.subtext}
                   </p>
                 </div>
+
+                {/* 2. Black Blind Slat (Wipes down from divider line, revealing new dark dummy content) */}
+                <div
+                  ref={(el) => {
+                    blindRefs.current[pIdx] = el;
+                  }}
+                  className="absolute inset-0 bg-[#090909] z-20 pointer-events-none select-none will-change-[clip-path]"
+                  style={{
+                    clipPath: 'inset(0 0 100% 0)',
+                  }}
+                >
+                  {/* Dark Content Block inside blind */}
+                  <div className="absolute top-1/2 -translate-y-1/2 left-[6vw] sm:left-[8vw] lg:left-[10vw] max-w-[90vw] sm:max-w-[700px] lg:max-w-[950px] pointer-events-none select-none">
+                    <h3 className="font-jakarta text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#f5f5f7] leading-[1.08] tracking-[-0.035em] m-0 text-left">
+                      {DARK_ADVANTAGE_PILLARS[pIdx].title}
+                    </h3>
+                    <p className="font-jakarta text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#9a9a9f] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
+                      {DARK_ADVANTAGE_PILLARS[pIdx].subtext}
+                    </p>
+                  </div>
+
+                  {/* Ultra-fine whisper-thin hairline white divider after transition */}
+                  <div className="absolute inset-x-0 bottom-0 h-[1px] scale-y-[0.35] origin-bottom bg-white/[0.05] pointer-events-none" />
+                  {pIdx === 0 && (
+                    <div className="absolute inset-x-0 top-0 h-[1px] scale-y-[0.35] origin-top bg-white/[0.05] pointer-events-none" />
+                  )}
+                </div>
+
+                {/* 3. Moving bottom slat edge line during the blinds transition */}
+                <div
+                  ref={(el) => {
+                    blindEdgeRefs.current[pIdx] = el;
+                  }}
+                  className="absolute inset-x-0 h-[1px] scale-y-[0.35] bg-white/12 pointer-events-none select-none z-30 opacity-0 will-change-[top,opacity]"
+                  style={{ top: '0%' }}
+                />
               </div>
             ))}
           </div>
