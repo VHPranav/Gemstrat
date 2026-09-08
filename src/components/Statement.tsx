@@ -15,7 +15,7 @@ const ALL_WORDS = QUOTE_LINES.flat();
 // Non-sequential, scattered blur-out sequence across lines:
 const RANDOM_DISSOLVE_SEQUENCE = [7, 2, 11, 4, 9, 1, 8, 5, 12, 3, 10, 0, 6];
 
-// 4 images with same height but different widths, no text
+// 4 items with same height but different widths, last one is video
 const GALLERY_IMAGES = [
   {
     src: '/images/618189486392349653.jpeg',
@@ -33,9 +33,10 @@ const GALLERY_IMAGES = [
     widthClass: 'w-[clamp(260px,28vw,390px)]', // Slim card
   },
   {
-    src: '/images/698128379778759116.jpeg',
-    alt: 'Gallery showcase image 4',
+    src: '/videos/Gemstart rough cut 02 (1).mp4',
+    alt: 'Gallery showcase video 4',
     widthClass: 'w-[clamp(360px,38vw,540px)]', // Medium-wide card
+    isVideo: true,
   },
 ];
 
@@ -47,6 +48,8 @@ export default function Statement() {
   const galleryTrackRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const expandCardRef = useRef<HTMLDivElement>(null);
+  const trackVideoRef = useRef<HTMLVideoElement>(null);
+  const expandVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -162,6 +165,16 @@ export default function Statement() {
             expandCardRef.current.style.display = 'none';
           }
 
+          // Sync video time when scrolling back to track
+          if (trackVideoRef.current && expandVideoRef.current) {
+            if (Math.abs(trackVideoRef.current.currentTime - expandVideoRef.current.currentTime) > 0.1) {
+              trackVideoRef.current.currentTime = expandVideoRef.current.currentTime;
+            }
+            if (trackVideoRef.current.paused) {
+              trackVideoRef.current.play().catch(() => {});
+            }
+          }
+
           // Cards at regular appearance
           cardRefs.current.forEach((card) => {
             if (card) {
@@ -191,6 +204,16 @@ export default function Statement() {
 
           if (expandCardRef.current) {
             expandCardRef.current.style.display = 'block';
+
+            // Sync video playback time from track video to expanding overlay video
+            if (expandVideoRef.current && trackVideoRef.current) {
+              if (Math.abs(expandVideoRef.current.currentTime - trackVideoRef.current.currentTime) > 0.1) {
+                expandVideoRef.current.currentTime = trackVideoRef.current.currentTime;
+              }
+              if (expandVideoRef.current.paused) {
+                expandVideoRef.current.play().catch(() => {});
+              }
+            }
 
             const baseW = card4?.offsetWidth || 540;
             const baseH = card4?.offsetHeight || 500;
@@ -286,14 +309,25 @@ export default function Statement() {
                 }}
                 className={`shrink-0 ${img.widthClass} h-[65vh] max-h-[560px] min-h-[380px] relative rounded-2xl overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 will-change-[width,height,border-radius,opacity]`}
               >
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  sizes={idx === 3 ? '100vw' : '(max-width: 768px) 80vw, 680px'}
-                  priority={idx === 3}
-                  className="object-cover"
-                />
+                {idx === 3 ? (
+                  <video
+                    ref={trackVideoRef}
+                    src={img.src}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
+                ) : (
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    sizes="(max-width: 768px) 80vw, 680px"
+                    className="object-cover"
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -305,13 +339,14 @@ export default function Statement() {
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 will-change-[width,height,border-radius,opacity] pointer-events-none"
           style={{ display: 'none' }}
         >
-          <Image
+          <video
+            ref={expandVideoRef}
             src={GALLERY_IMAGES[3].src}
-            alt={GALLERY_IMAGES[3].alt}
-            fill
-            sizes="100vw"
-            priority
-            className="object-cover"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover pointer-events-none"
           />
         </div>
       </div>

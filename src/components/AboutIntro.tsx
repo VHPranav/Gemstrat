@@ -2,6 +2,22 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import ImageTrail from './ImageTrail';
+
+const TRAIL_IMAGES = [
+  '/images/1010565603896276505.jpeg',
+  '/images/246572148347325364.jpeg',
+  '/images/618189486392349653.jpeg',
+  '/images/698128379778759116.jpeg',
+  '/images/844284261438464223.jpeg',
+  '/images/933511829023645883.jpeg',
+  '/images/984599537320872120.jpeg',
+  '/images/@maxross_design.jpeg',
+  '/images/Dynamic Typography Poster Inspired by Motion and Deadlines.jpeg',
+  '/images/Graphic Designer Job Opening at 134 Agency _ Creative Careers.jpeg',
+  '/images/Creative_people_need_creative_people.jpeg_202609071623.jpeg',
+  '/images/Dream Big, Act Bigger — Motion Running Phone Wallpaper.jpeg',
+];
 
 const FOCUS_ITEMS = [
   {
@@ -36,6 +52,53 @@ const FOCUS_ITEMS = [
   },
 ];
 
+const CLARITY_HEADLINE_LINES = [
+  ['Clarity,'],
+  ['execution,'],
+  ['momentum'],
+];
+
+const CLARITY_BODY = "Businesses come to Gemstrat when they're ready to move past complexity, stagnation, or uncertainty. We specialize in turning challenges into momentum.";
+
+const CLARITY_BODY_WORDS = CLARITY_BODY.split(' ');
+
+const CLARITY_ALL_WORDS = [
+  ...CLARITY_HEADLINE_LINES.flat(),
+  ...CLARITY_BODY_WORDS,
+];
+
+// 24 pseudo-random unique ranks to interleave headline and body blur-out timings
+const CLARITY_RANDOM_ORDER = [
+  8, 18, 1, 13, 5, 21, 0, 15, 9, 23, 3, 11, 2, 17, 7, 20, 4, 14, 10, 22, 6, 12, 16, 19,
+];
+
+const HORIZONTAL_CARDS = [
+  {
+    number: '1.',
+    titleLine1: 'Clarity in',
+    titleLine2: 'complexity',
+    image: '/images/618189486392349653.jpeg',
+    alt: 'Clarity in complexity',
+    description: 'We decode tangled operations and markets into clear roadmaps.',
+  },
+  {
+    number: '2.',
+    titleLine1: 'Scalable',
+    titleLine2: 'execution',
+    image: '/images/Dream Big, Act Bigger — Motion Running Phone Wallpaper.jpeg',
+    alt: 'Scalable execution',
+    description: 'Every framework we build is tied to practical action.',
+  },
+  {
+    number: '3.',
+    titleLine1: 'Momentum',
+    titleLine2: 'at every stage',
+    image: '/images/Instagram.jpeg',
+    alt: 'Momentum at every stage',
+    description: 'Early-stage founder or multinational — we deliver solutions that create traction.',
+  },
+];
+
 export default function AboutIntro() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const introWrapRef = useRef<HTMLDivElement>(null);
@@ -47,6 +110,11 @@ export default function AboutIntro() {
 
   const themeCircleRef = useRef<HTMLDivElement>(null);
   const nextSectionRef = useRef<HTMLElement>(null);
+
+  const clarityTrackRef = useRef<HTMLDivElement>(null);
+  const clarityTextWrapRef = useRef<HTMLDivElement>(null);
+  const clarityWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const horizontalTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -60,6 +128,17 @@ export default function AboutIntro() {
           }
         });
       });
+      clarityWordRefs.current.forEach((w) => {
+        if (w) {
+          w.style.opacity = '1';
+          w.style.filter = 'none';
+          w.style.transform = 'none';
+        }
+      });
+      if (horizontalTrackRef.current) {
+        horizontalTrackRef.current.style.opacity = '1';
+        horizontalTrackRef.current.style.transform = 'none';
+      }
       return;
     }
 
@@ -228,36 +307,53 @@ export default function AboutIntro() {
         const totalScrollable = rect.height - viewportH;
 
         if (totalScrollable > 0) {
+          // Radius from viewport center to furthest corner (with 6% buffer to guarantee full bleed)
+          const distToCorner = Math.hypot(viewportW / 2, viewportH / 2);
+          const baseSize = 2600; // 2600px base circle diameter: renders at ultra-crisp Retina quality without stretching
+          const targetScale = (distToCorner * 2 * 1.06) / baseSize;
+
           if (rect.top > 0) {
             // Still scrolling towards center: circle remains dormant
             themeCircleRef.current.style.opacity = '0';
             themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
             if (nextSectionRef.current) {
               nextSectionRef.current.style.opacity = '0';
+              nextSectionRef.current.style.transform = 'translate3d(0, 0, 0)';
               nextSectionRef.current.style.pointerEvents = 'none';
             }
-          } else if (rect.bottom <= 0) {
-            // Scrolled past: keep next section active
-            themeCircleRef.current.style.opacity = '0';
-            themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
-            if (nextSectionRef.current) {
-              nextSectionRef.current.style.opacity = '1';
-              nextSectionRef.current.style.pointerEvents = 'auto';
+          } else if (rect.bottom <= viewportH) {
+            // Scrolled past the pin track: Sequence 3 scrolls up in exact 1:1 lockstep with Sequence 4!
+            const exitOffset = Math.max(viewportH - rect.bottom, 0);
+
+            if (exitOffset >= viewportH) {
+              // Completely scrolled past Sequence 3 into Sequence 4:
+              // Hide fixed overlay elements so Sequence 4 is 100% visible and interactive!
+              themeCircleRef.current.style.opacity = '0';
+              themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
+              if (nextSectionRef.current) {
+                nextSectionRef.current.style.opacity = '0';
+                nextSectionRef.current.style.transform = `translate3d(0, ${-exitOffset}px, 0)`;
+                nextSectionRef.current.style.pointerEvents = 'none';
+              }
+            } else {
+              // During the 1:1 scroll transition between Sequence 3 and Sequence 4:
+              themeCircleRef.current.style.opacity = '1';
+              themeCircleRef.current.style.transform = `translate3d(-50%, -50%, 0) scale(${targetScale.toFixed(5)})`;
+              if (nextSectionRef.current) {
+                nextSectionRef.current.style.opacity = '1';
+                nextSectionRef.current.style.transform = `translate3d(0, ${-exitOffset}px, 0)`;
+                nextSectionRef.current.style.pointerEvents = 'auto';
+              }
             }
           } else {
             // Locked centered! Progress runs from 0 (centered) to 1 (end of track)
             const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
 
-            // Radius from viewport center to furthest corner (with 6% buffer to guarantee full bleed)
-            const distToCorner = Math.hypot(viewportW / 2, viewportH / 2);
-            const baseSize = 2600; // 2600px base circle diameter: renders at ultra-crisp Retina quality without stretching
-            const targetScale = (distToCorner * 2 * 1.06) / baseSize;
-
             // Normalized circle progress u:
             // 0 to 0.04: Settles cleanly at center (matches user screenshot)
-            // 0.04 to 0.62: Continuous, buttery smooth expansion to full screen pure white
+            // 0.04 to 0.60: Continuous, buttery smooth expansion to full screen pure white
             const startU = 0.04;
-            const endU = 0.62;
+            const endU = 0.60;
             const u = Math.min(Math.max((progress - startU) / (endU - startU), 0), 1);
 
             if (u <= 0) {
@@ -265,6 +361,7 @@ export default function AboutIntro() {
               themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
               if (nextSectionRef.current) {
                 nextSectionRef.current.style.opacity = '0';
+                nextSectionRef.current.style.transform = 'translate3d(0, 0, 0)';
                 nextSectionRef.current.style.pointerEvents = 'none';
               }
             } else {
@@ -281,6 +378,7 @@ export default function AboutIntro() {
               // Once the circle fills the entire viewport, next section fades in immediately!
               // No scrolling needed after the transition!
               if (nextSectionRef.current) {
+                nextSectionRef.current.style.transform = 'translate3d(0, 0, 0)';
                 if (u >= 0.94) {
                   nextSectionRef.current.style.opacity = '1';
                   nextSectionRef.current.style.pointerEvents = 'auto';
@@ -289,6 +387,103 @@ export default function AboutIntro() {
                   nextSectionRef.current.style.pointerEvents = 'none';
                 }
               }
+            }
+          }
+        }
+      }
+
+      // ----------------------------------------------------
+      // 4. Clarity Section: Random Word-by-Word Blur-Out on scroll
+      // ----------------------------------------------------
+      if (clarityTrackRef.current) {
+        const rect = clarityTrackRef.current.getBoundingClientRect();
+        const totalScrollable = rect.height - viewportH;
+
+        if (totalScrollable > 0) {
+          // Progress: 0 when clarity section locks sticky at top (rect.top <= 0), 1 when track finishes
+          const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+
+          // Phase 1: Words blur out randomly between progress 0.02 and 0.18
+          const totalWords = CLARITY_ALL_WORDS.length;
+          const startBuffer = 0.02;
+          const endBuffer = 0.18;
+          const windowSize = 0.05;
+          const activeRange = endBuffer - startBuffer - windowSize;
+
+          clarityWordRefs.current.forEach((span, index) => {
+            if (!span) return;
+            const rank = CLARITY_RANDOM_ORDER[index] ?? index;
+            const wordStart = startBuffer + (rank / (totalWords - 1 || 1)) * activeRange;
+            const wordEnd = wordStart + windowSize;
+
+            // Word progress: 0 (fully sharp & visible) -> 1 (fully blurred out)
+            const wordP = Math.min(Math.max((progress - wordStart) / (wordEnd - wordStart), 0), 1);
+
+            const opacity = 1 - wordP;
+            const blur = wordP * 16;
+            const translateY = -wordP * 10;
+
+            span.style.opacity = opacity.toFixed(3);
+            span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+            span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+          });
+
+          // Container for initial text fades out completely once words are gone
+          if (clarityTextWrapRef.current) {
+            if (progress >= 0.20) {
+              clarityTextWrapRef.current.style.opacity = '0';
+            } else {
+              clarityTextWrapRef.current.style.opacity = '1';
+            }
+            clarityTextWrapRef.current.style.pointerEvents = 'none';
+          }
+
+          // Phase 2: Horizontal Scroll Track across 3 cards
+          if (horizontalTrackRef.current) {
+            const hStart = 0.19;
+            const hEnd = 0.95;
+
+            if (progress < hStart) {
+              // Before words fade out: parked offscreen to the right
+              horizontalTrackRef.current.style.opacity = '0';
+              horizontalTrackRef.current.style.transform = `translate3d(${viewportW}px, 0, 0)`;
+              horizontalTrackRef.current.style.pointerEvents = 'none';
+            } else {
+              const pHoriz = Math.min(Math.max((progress - hStart) / (hEnd - hStart), 0), 1);
+              const opacity = Math.min(pHoriz / 0.04, 1);
+
+              // Calculate translation across 3 cards with smooth dwell per card
+              let targetXOffset = 1.0; // in units of viewportW
+              if (pHoriz <= 0.16) {
+                // Card 1 enters from right (1.0 -> 0.0)
+                const t = pHoriz / 0.16;
+                const ease = 1 - Math.pow(1 - t, 2.2);
+                targetXOffset = 1.0 - ease * 1.0;
+              } else if (pHoriz <= 0.28) {
+                // Card 1 dwells centered
+                targetXOffset = 0.0;
+              } else if (pHoriz <= 0.48) {
+                // Smooth transition: Card 1 -> Card 2 (0.0 -> -1.0)
+                const t = (pHoriz - 0.28) / (0.48 - 0.28);
+                const ease = t * t * (3 - 2 * t);
+                targetXOffset = 0.0 - ease * 1.0;
+              } else if (pHoriz <= 0.60) {
+                // Card 2 dwells centered
+                targetXOffset = -1.0;
+              } else if (pHoriz <= 0.80) {
+                // Smooth transition: Card 2 -> Card 3 (-1.0 -> -2.0)
+                const t = (pHoriz - 0.60) / (0.80 - 0.60);
+                const ease = t * t * (3 - 2 * t);
+                targetXOffset = -1.0 - ease * 1.0;
+              } else {
+                // Card 3 dwells centered
+                targetXOffset = -2.0;
+              }
+
+              const currentX = targetXOffset * viewportW;
+              horizontalTrackRef.current.style.opacity = opacity.toFixed(3);
+              horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
+              horizontalTrackRef.current.style.pointerEvents = 'none';
             }
           }
         }
@@ -310,6 +505,8 @@ export default function AboutIntro() {
       cancelAnimationFrame(rafId);
     };
   }, []);
+
+  let clarityWordCounter = 0;
 
   return (
     <>
@@ -418,7 +615,7 @@ export default function AboutIntro() {
             </div>
 
             {/* Right Column: 5 items */}
-            <div className="lg:col-span-7 w-full flex flex-col items-start space-y-36 sm:space-y-48 lg:space-y-64 py-16 sm:py-24 lg:py-32">
+            <div className="lg:col-span-7 w-full flex flex-col items-start space-y-36 sm:space-y-48 lg:space-y-64 pt-16 sm:pt-24 lg:pt-32 pb-0">
               {FOCUS_ITEMS.map((item, idx) => {
                 const isLast = idx === FOCUS_ITEMS.length - 1;
 
@@ -503,10 +700,126 @@ export default function AboutIntro() {
         </div>
       </div>
 
+      {/* Sequence 4: Clarity, execution, momentum + Horizontal Scroll */}
+      <section
+        ref={clarityTrackRef}
+        className="relative w-full h-[520vh] bg-white text-[#090909] z-50 -mt-[2px] overflow-visible"
+      >
+        <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center px-6 sm:px-12 lg:px-20 box-border overflow-hidden">
+          {/* Interactive GSAP Image Trail Layer */}
+          <div className="absolute inset-0 z-10 pointer-events-auto overflow-hidden">
+            <ImageTrail
+              items={TRAIL_IMAGES}
+              variant="2"
+            />
+          </div>
+
+          {/* Layer 1: Initial "Clarity, execution, momentum" Text (Words blur out randomly on scroll) */}
+          <div
+            ref={clarityTextWrapRef}
+            className="absolute inset-0 flex items-center justify-center z-20 px-6 sm:px-12 lg:px-20 pointer-events-none select-none transition-opacity duration-150"
+          >
+            <div className="w-full max-w-[1440px] mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 lg:gap-20 xl:gap-24 items-center">
+                
+                {/* Left Column: 3-line Heading */}
+                <div className="lg:col-span-7">
+                  <h2 className="font-jakarta text-[clamp(3.2rem,6.8vw,92px)] font-medium text-[#090909] leading-[1.03] tracking-[-0.038em] m-0 text-left">
+                    {CLARITY_HEADLINE_LINES.map((line, lIdx) => (
+                      <span key={lIdx} className="block">
+                        {line.map((word) => {
+                          const idx = clarityWordCounter++;
+                          return (
+                            <span
+                              key={idx}
+                              ref={(el) => {
+                                clarityWordRefs.current[idx] = el;
+                              }}
+                              className="inline-block will-change-[opacity,filter,transform]"
+                            >
+                              {word}
+                            </span>
+                          );
+                        })}
+                      </span>
+                    ))}
+                  </h2>
+                </div>
+
+                {/* Right Column: Editorial Paragraph */}
+                <div className="lg:col-span-5 flex justify-start lg:justify-end">
+                  <p className="font-jakarta text-[clamp(1.18rem,1.6vw,23px)] font-normal text-[#1a1a1a] leading-[1.56] tracking-[-0.015em] max-w-[520px] m-0 text-left">
+                    {CLARITY_BODY_WORDS.map((word) => {
+                      const idx = clarityWordCounter++;
+                      return (
+                        <span
+                          key={idx}
+                          ref={(el) => {
+                            clarityWordRefs.current[idx] = el;
+                          }}
+                          className="inline-block mr-[0.28em] will-change-[opacity,filter,transform]"
+                        >
+                          {word}
+                        </span>
+                      );
+                    })}
+                  </p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          {/* Layer 2: Horizontal Scroll Track (3 Cards) */}
+          <div
+            ref={horizontalTrackRef}
+            className="absolute top-0 left-0 h-full flex flex-row flex-nowrap items-center z-30 will-change-[transform,opacity] pointer-events-none select-none"
+            style={{ width: '300vw', transform: 'translate3d(100vw, 0, 0)', opacity: 0 }}
+          >
+            {HORIZONTAL_CARDS.map((card, idx) => (
+              <div
+                key={idx}
+                className="w-screen h-full flex items-center justify-center shrink-0 px-6 sm:px-12 lg:px-20 box-border pointer-events-none"
+              >
+                <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-8 sm:gap-12 lg:gap-16 xl:gap-24 w-full max-w-[1440px] mx-auto px-6 sm:px-12 box-border pointer-events-none">
+                  
+                  {/* Left Title */}
+                  <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
+                    <h3 className="font-jakarta text-[clamp(2.8rem,5.2vw,72px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 text-left pointer-events-none">
+                      {card.number}{card.titleLine1}<br />{card.titleLine2}
+                    </h3>
+                  </div>
+
+                  {/* Center Image from public/images */}
+                  <div className="relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-[#eaeaea] shrink-0 border border-black/5 pointer-events-none">
+                    <Image
+                      src={card.image}
+                      alt={card.alt}
+                      fill
+                      sizes="(max-width: 1024px) 340px, 420px"
+                      className="object-cover pointer-events-none"
+                    />
+                  </div>
+
+                  {/* Right Description: Aligned to bottom right */}
+                  <div className="lg:self-end max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] pb-2 sm:pb-4 shrink-0 pointer-events-none">
+                    <p className="font-jakarta text-[clamp(1.05rem,1.35vw,19px)] font-normal text-[#1a1a1a] leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none">
+                      {card.description}
+                    </p>
+                  </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
       {/* Sequence 3: Enterprise Architecture & Mapping (Fades in immediately once circle fills viewport) */}
       <section
         ref={nextSectionRef}
-        className="fixed inset-0 z-40 bg-white text-[#090909] overflow-hidden flex items-center transition-opacity duration-700 ease-out pointer-events-none"
+        className="fixed inset-0 z-40 bg-white text-[#090909] overflow-hidden flex items-center transition-[opacity] duration-700 ease-out pointer-events-none will-change-[transform,opacity] h-[calc(100vh+4px)]"
         style={{ opacity: 0 }}
       >
         {/* Background Image: last.jpeg */}
@@ -525,11 +838,11 @@ export default function AboutIntro() {
 
         {/* Editorial Text Content on Left */}
         <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 py-24 sm:py-32 lg:py-36 box-border">
-          <div className="max-w-[520px] lg:max-w-[560px]">
-            <h2 className="font-jakarta text-[clamp(2.4rem,4.6vw,62px)] font-medium text-[#090909] leading-[1.08] tracking-[-0.035em] m-0 mb-8 sm:mb-10 text-left">
+          <div className="max-w-[580px] lg:max-w-[660px]">
+            <h2 className="font-jakarta text-[clamp(2.8rem,5.4vw,76px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 mb-8 sm:mb-10 text-left">
               Enterprise architecture<br />& mapping
             </h2>
-            <p className="font-jakarta text-[clamp(1rem,1.2vw,17px)] font-normal text-[#1c1c1c] leading-[1.65] tracking-[-0.015em] m-0 text-left">
+            <p className="font-jakarta text-[clamp(1.15rem,1.5vw,22px)] font-normal text-[#1a1a1a] leading-[1.58] tracking-[-0.015em] m-0 text-left">
               We help you structure your business to scale, aligning people, processes, and platforms — because big moves need solid foundations. It isn&#39;t a buzzword at Gemstrat, it&#39;s a core discipline; we break down complex operations into clear, visual structures that highlight friction points, streamline systems, and identify areas of growth.
             </p>
           </div>

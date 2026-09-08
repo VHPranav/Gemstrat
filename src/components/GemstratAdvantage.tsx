@@ -1,0 +1,394 @@
+'use client';
+
+import React, { useEffect, useRef } from 'react';
+import Image from 'next/image';
+
+interface DispersalItem {
+  id: string;
+  src: string;
+  alt: string;
+  targetX: number; // Final target X in vw relative to center of Screen 1
+  targetY: number; // Final target Y in vh relative to center of Screen 1
+  widthClass: string;
+  aspectClass: string;
+  stagger: number; // Staggered release offset (0 to 0.15)
+}
+
+// 5 images placed around "The Gemstrat Advantage"
+const DISPERSAL_ITEMS: DispersalItem[] = [
+  {
+    id: 'top-left',
+    src: '/images/698128379778759116.jpeg',
+    alt: 'What a privilege it is to be exhausted by a challenge you chose for yourself',
+    targetX: -38, // Floating top-left of "The"
+    targetY: -30,
+    widthClass: 'w-[145px] sm:w-[180px] lg:w-[225px]',
+    aspectClass: 'aspect-[3/4]',
+    stagger: 0.0,
+  },
+  {
+    id: 'top-right',
+    src: '/images/933511829023645883.jpeg',
+    alt: 'Run at your own pace motion poster',
+    targetX: 28, // Floating top-right of "Advantage"
+    targetY: -30,
+    widthClass: 'w-[145px] sm:w-[175px] lg:w-[215px]',
+    aspectClass: 'aspect-[4/5]',
+    stagger: 0.06,
+  },
+  {
+    id: 'bottom-left',
+    src: '/images/844284261438464223.jpeg',
+    alt: 'Noise off Focus on eyewear portrait',
+    targetX: -36, // Floating bottom-left under "The"
+    targetY: 28,
+    widthClass: 'w-[135px] sm:w-[165px] lg:w-[205px]',
+    aspectClass: 'aspect-[4/5]',
+    stagger: 0.03,
+  },
+  {
+    id: 'bottom-center',
+    src: '/images/984599537320872120.jpeg',
+    alt: 'The next batch will arrive desk visual',
+    targetX: 4, // Floating below center
+    targetY: 33,
+    widthClass: 'w-[135px] sm:w-[165px] lg:w-[200px]',
+    aspectClass: 'aspect-[4/5]',
+    stagger: 0.10,
+  },
+  {
+    id: 'bottom-right',
+    src: '/images/246572148347325364.jpeg',
+    alt: 'Homie delivery vehicle motion shot',
+    targetX: 38, // Floating right of "Advantage"
+    targetY: 16,
+    widthClass: 'w-[145px] sm:w-[180px] lg:w-[225px]',
+    aspectClass: 'aspect-[4/5]',
+    stagger: 0.05,
+  },
+];
+
+const ADVANTAGE_LINES = [
+  ['The', 'Gemstrat'],
+  ['Advantage'],
+];
+
+const ALL_WORDS = ADVANTAGE_LINES.flat();
+
+// Random order for word-by-word blur-up in: "Gemstrat" (1) -> "The" (0) -> "Advantage" (2)
+const WORD_RANDOM_ORDER = [1, 0, 2];
+
+// 4 advantage rows: start staggered diagonally (Ref 1), then slide left to align together (Ref 2)
+const ADVANTAGE_PILLARS = [
+  {
+    id: 'pillar-1',
+    title: 'Client-Centric, Always',
+    subtext: 'We listen deeply and co-create solutions.',
+    initialStaggerVw: 0, // Starts aligned at base left
+  },
+  {
+    id: 'pillar-2',
+    title: 'Industry Fluency',
+    subtext: 'We listen deeply and co-create solutions.',
+    initialStaggerVw: 12, // Starts indented +12vw, slides left to 0
+  },
+  {
+    id: 'pillar-3',
+    title: 'Global Reach, Local Pulse',
+    subtext: 'We listen deeply and co-create solutions.',
+    initialStaggerVw: 24, // Starts indented +24vw, slides left to 0
+  },
+  {
+    id: 'pillar-4',
+    title: 'Creative Meets Commercial',
+    subtext: 'We listen deeply and co-create solutions.',
+    initialStaggerVw: 38, // Starts indented +38vw, slides left to 0
+  },
+];
+
+export default function GemstratAdvantage() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const mainTrackRef = useRef<HTMLDivElement>(null);
+  const pillarContentRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const isAlignedRef = useRef(false);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      wordRefs.current.forEach((span) => {
+        if (span) {
+          span.style.opacity = '1';
+          span.style.filter = 'none';
+          span.style.transform = 'none';
+        }
+      });
+      itemRefs.current.forEach((el, index) => {
+        if (!el) return;
+        const item = DISPERSAL_ITEMS[index];
+        el.style.transform = `translate3d(${item.targetX}vw, ${item.targetY}vh, 0) scale(1)`;
+        el.style.opacity = '1';
+      });
+      pillarContentRefs.current.forEach((el) => {
+        if (el) el.style.transform = 'translate3d(0, 0, 0)';
+      });
+      return;
+    }
+
+    let rafId: number;
+
+    const updateAnimation = () => {
+      if (!sectionRef.current) return;
+      const rect = sectionRef.current.getBoundingClientRect();
+      const viewportH = window.innerHeight;
+      const viewportW = window.innerWidth;
+      const totalScrollable = rect.height - viewportH;
+
+      if (totalScrollable <= 0) return;
+
+      // Progress: 0 when sticky locks, 1 when section completes
+      const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+
+      // ==========================================================
+      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.20)
+      // ==========================================================
+      const totalWords = ALL_WORDS.length;
+      const startWord = 0.02;
+      const endWord = 0.20;
+      const windowSize = 0.06;
+      const activeRange = endWord - startWord - windowSize;
+
+      wordRefs.current.forEach((span, index) => {
+        if (!span) return;
+        const rank = WORD_RANDOM_ORDER[index] ?? index;
+        const wordStart = startWord + (rank / (totalWords - 1 || 1)) * activeRange;
+        const wordEnd = wordStart + windowSize;
+
+        const wordP = Math.min(Math.max((progress - wordStart) / (wordEnd - wordStart), 0), 1);
+
+        const opacity = wordP;
+        const blur = (1 - wordP) * 24;
+        const translateY = (1 - wordP) * 32;
+
+        span.style.opacity = opacity.toFixed(3);
+        span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+        span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+      });
+
+      // ==========================================================
+      // Phase 2: Images Emerge from Center-Bottom of Screen 1 (progress 0.20 -> 0.48)
+      // ==========================================================
+      const imgPhaseStart = 0.20;
+      const imgPhaseEnd = 0.48;
+
+      const startX = 0;
+      const startY = 46;
+
+      itemRefs.current.forEach((el, index) => {
+        if (!el) return;
+        const item = DISPERSAL_ITEMS[index];
+
+        if (progress < imgPhaseStart) {
+          el.style.opacity = '0';
+          el.style.transform = `translate3d(${startX}vw, ${startY}vh, 0) scale(0.2)`;
+        } else {
+          const pImg = Math.min(
+            Math.max((progress - imgPhaseStart) / (imgPhaseEnd - imgPhaseStart), 0),
+            1
+          );
+
+          const localT = Math.min(
+            Math.max((pImg - item.stagger) / (1 - item.stagger), 0),
+            1
+          );
+
+          const ease = 1 - Math.pow(1 - localT, 2.4);
+
+          const curX = startX + ease * (item.targetX - startX);
+          const curY = startY + ease * (item.targetY - startY);
+          const curScale = 0.2 + ease * 0.8;
+          const curOpacity = Math.min(localT / 0.20, 1);
+
+          el.style.opacity = curOpacity.toFixed(3);
+          el.style.transform = `translate3d(${curX.toFixed(2)}vw, ${curY.toFixed(2)}vh, 0) scale(${curScale.toFixed(4)})`;
+        }
+      });
+
+      // ==========================================================
+      // Phase 3: Screen 1 slides left while Screen 2 (all 4 rows) slides in!
+      // (NO FADING: buttery smootherstep physical slide across progress 0.48 -> 0.70)
+      // ==========================================================
+      const slideStart = 0.48;
+      const slideEnd = 0.70;
+
+      if (mainTrackRef.current) {
+        if (progress < slideStart) {
+          mainTrackRef.current.style.transform = 'translate3d(0, 0, 0)';
+        } else if (progress <= slideEnd) {
+          const pSlide = (progress - slideStart) / (slideEnd - slideStart);
+          // Smootherstep (zero velocity at both start and end for zero-jerk slide)
+          const easeSlide = pSlide * pSlide * pSlide * (pSlide * (pSlide * 6 - 15) + 10);
+          const currentX = -easeSlide * viewportW;
+          mainTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
+        } else {
+          // Screen 2 is locked fully centered in viewport
+          mainTrackRef.current.style.transform = `translate3d(${-viewportW}px, 0, 0)`;
+        }
+      }
+
+      // ==========================================================
+      // Phase 4: Buttery Automatic Slide into Left Alignment!
+      // Once Screen 2 arrives in viewport (progress >= 0.70),
+      // the rows glide gracefully into left alignment via smooth quintic transition.
+      // If scrolling back up (progress < 0.58), smoothly reset to staggered state.
+      // ==========================================================
+      if (progress >= 0.70 && !isAlignedRef.current) {
+        isAlignedRef.current = true;
+        pillarContentRefs.current.forEach((el) => {
+          if (el) el.style.transform = 'translate3d(0vw, 0, 0)';
+        });
+      } else if (progress < 0.58 && isAlignedRef.current) {
+        isAlignedRef.current = false;
+        pillarContentRefs.current.forEach((el, idx) => {
+          if (el) {
+            const initialStagger = ADVANTAGE_PILLARS[idx].initialStaggerVw;
+            el.style.transform = `translate3d(${initialStagger}vw, 0, 0)`;
+          }
+        });
+      }
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(updateAnimation);
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    updateAnimation();
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  let wordIndexCounter = 0;
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative w-full h-[340vh] bg-white text-[#090909] z-40 overflow-visible"
+    >
+      <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-white box-border">
+        
+        {/* Continuous Horizontal Track (Screen 1 + Screen 2 side-by-side) */}
+        <div
+          ref={mainTrackRef}
+          className="h-full flex flex-row flex-nowrap items-center will-change-transform pointer-events-none select-none"
+          style={{ width: '200vw', transform: 'translate3d(0, 0, 0)' }}
+        >
+          
+          {/* ========================================================= */}
+          {/* Screen 1: "The Gemstrat Advantage" Headline + 5 Images   */}
+          {/* ========================================================= */}
+          <div className="w-screen h-full shrink-0 relative flex items-center justify-center overflow-hidden px-6 sm:px-12 lg:px-16 pointer-events-none select-none">
+            
+            {/* Giant Editorial Headline */}
+            <div className="relative z-10 text-center pointer-events-none select-none max-w-[1440px] mx-auto">
+              <h2 className="font-jakarta text-[clamp(4.6rem,12vw,165px)] font-medium text-[#090909] leading-[0.96] tracking-[-0.04em] m-0">
+                {ADVANTAGE_LINES.map((line, lIdx) => (
+                  <span key={lIdx} className="block">
+                    {line.map((word) => {
+                      const idx = wordIndexCounter++;
+                      return (
+                        <span
+                          key={idx}
+                          ref={(el) => {
+                            wordRefs.current[idx] = el;
+                          }}
+                          className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] opacity-0"
+                          style={{
+                            transform: 'translate3d(0, 32px, 0)',
+                            filter: 'blur(24px)',
+                          }}
+                        >
+                          {word}
+                        </span>
+                      );
+                    })}
+                  </span>
+                ))}
+              </h2>
+            </div>
+
+            {/* 5 Dispersing Visual Cards from Center-Bottom of Screen 1 */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-20">
+              {DISPERSAL_ITEMS.map((item, idx) => (
+                <div
+                  key={item.id}
+                  ref={(el) => {
+                    itemRefs.current[idx] = el;
+                  }}
+                  className={`absolute ${item.widthClass} ${item.aspectClass} rounded-xl overflow-hidden shadow-2xl bg-[#eaeaea] border border-black/5 will-change-[transform,opacity] pointer-events-none select-none`}
+                  style={{
+                    transform: 'translate3d(0, 46vh, 0) scale(0.2)',
+                    opacity: 0,
+                  }}
+                >
+                  <Image
+                    src={item.src}
+                    alt={item.alt}
+                    fill
+                    sizes="(max-width: 768px) 160px, 225px"
+                    className="object-cover pointer-events-none"
+                  />
+                </div>
+              ))}
+            </div>
+
+          </div>
+
+          {/* ========================================================= */}
+          {/* Screen 2: All 4 Advantage Rows Together (Single Viewport) */}
+          {/* Starts staggered diagonally (Ref 1), then slides by itself into left alignment (Ref 2) */}
+          {/* ========================================================= */}
+          <div className="w-screen h-full shrink-0 flex flex-col justify-between relative pointer-events-none select-none">
+            {ADVANTAGE_PILLARS.map((pillar, pIdx) => (
+              <div
+                key={pillar.id}
+                className={`flex-1 relative flex flex-col justify-center border-b border-black/[0.12] ${
+                  pIdx === 0 ? 'border-t border-black/[0.12]' : ''
+                } pointer-events-none select-none px-6`}
+              >
+                {/* Content Block: starts offset by diagonal stagger, then auto-slides left */}
+                <div
+                  ref={(el) => {
+                    pillarContentRefs.current[pIdx] = el;
+                  }}
+                  className="absolute top-1/2 -translate-y-1/2 left-[6vw] sm:left-[8vw] lg:left-[10vw] max-w-[90vw] sm:max-w-[700px] lg:max-w-[950px] transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform pointer-events-none select-none"
+                  style={{
+                    transitionDelay: `${pIdx * 110}ms`,
+                    transform: `translate3d(${pillar.initialStaggerVw}vw, 0, 0)`,
+                  }}
+                >
+                  <h3 className="font-jakarta text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#090909] leading-[1.08] tracking-[-0.035em] m-0 text-left">
+                    {pillar.title}
+                  </h3>
+                  <p className="font-jakarta text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#555555] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
+                    {pillar.subtext}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+  );
+}

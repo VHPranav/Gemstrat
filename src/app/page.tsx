@@ -2,6 +2,7 @@ import React from 'react';
 import Hero from '@/components/Hero';
 import Statement from '@/components/Statement';
 import AboutIntro from '@/components/AboutIntro';
+import GemstratAdvantage from '@/components/GemstratAdvantage';
 
 export default function HomePage() {
   return (
@@ -9,6 +10,7 @@ export default function HomePage() {
       <Hero />
       <Statement />
       <AboutIntro />
+      <GemstratAdvantage />
     </main>
   );
 }
