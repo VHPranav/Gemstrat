@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0b0b0c;
+  --color-ink-2: #151516;
+  --color-paper: #f6f4ee;
+  --color-sand: #ece6d8;
+  --color-graphite: #46474a;
+  --color-silver: #b7b8bb;
+  --color-silver-soft: #dcdcd8;
+  --color-bronze: #9c7a44;
+  --color-bronze-soft: #c9ad7e;
+  --color-hero-bg: #090909;
+
+  --font-jakarta: 'Plus Jakarta Sans', var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-archivo: 'Archivo', sans-serif;
+  --font-archivo-expanded: 'Archivo Expanded', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-work: 'Work Sans', sans-serif;
+}
+
+/* ---------- design tokens ---------- */
+:root {
+  --ink: #0b0b0c;
+  --ink-2: #151516;
+  --paper: #f6f4ee;
+  --sand: #ece6d8;
+  --graphite: #46474a;
+  --silver: #b7b8bb;
+  --silver-soft: #dcdcd8;
+  --bronze: #9c7a44;
+  --bronze-soft: #c9ad7e;
+  --line-on-paper: rgba(11, 11, 12, 0.14);
+  --line-on-ink: rgba(246, 244, 238, 0.16);
+  --text-on-paper: var(--ink);
+  --text-on-ink: var(--paper);
+  --sub-on-paper: var(--graphite);
+  --sub-on-ink: #c7c6c1;
+
+  --gutter: clamp(20px, 5vw, 64px);
+  --maxw: 1400px;
+  --hero-bg: #090909;
+  --font-jakarta: 'Plus Jakarta Sans', var(--font-plus-jakarta), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--text-on-paper);
+  font-family: 'Work Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--bronze);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* ---------- generative beam fields ---------- */
+.beam-host {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.beam-host svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+@keyframes beamTravel {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: calc(var(--L, 1000px) * -1);
+  }
+}
+
+/* ---------- scroll reveal ---------- */
+.reveal {
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.pre {
+  opacity: 0;
+  transform: translateY(22px);
+}
+
+/* ---------- marquee ---------- */
+@keyframes scroll-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: inline-flex;
+  animation: scroll-left 28s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}

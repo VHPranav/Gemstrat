@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 97" fill="none">
+  <!-- Top white bracket: horizontal bar and left vertical stem -->
+  <polygon points="0,0 100,0 100,17.5 17.5,17.5 17.5,48.5 0,48.5" fill="#FFFFFF" />
+  
+  <!-- Bottom white bracket: horizontal bar and right vertical stem -->
+  <polygon points="0,79.5 82.5,79.5 82.5,48.5 100,48.5 100,97 0,97" fill="#FFFFFF" />
+  
+  <!-- Fold shadow triangle under top-left stem -->
+  <polygon points="17.5,17.5 35,17.5 17.5,48.5" fill="#4E5054" />
+  
+  <!-- Diagonal ribbon connecting top-left fold to bottom-right -->
+  <polygon points="35,17.5 100,68 82.5,79.5 17.5,48.5" fill="#A7A9AC" />
+</svg>
