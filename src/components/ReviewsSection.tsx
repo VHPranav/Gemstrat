@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import BeamField from '@/components/BeamField';
 
 interface ReviewItem {
   id: string;
@@ -25,19 +26,19 @@ const REVIEWS: ReviewItem[] = [
 ];
 
 const DIRECTORY_LINKS = [
-  { num: '01', title: 'ABOUT US', href: '#about' },
-  { num: '02', title: 'WHAT WE ENABLE', href: '#enable' },
-  { num: '03', title: 'INDUSTRIES WE SHAPE', href: '#industries' },
-  { num: '04', title: 'WORK', href: '#work' },
-  { num: '05', title: 'FAQS', href: '#faqs' },
-  { num: '06', title: 'CONTACT', href: '#contact' },
+  { num: '01', title: 'About us', href: '#about' },
+  { num: '02', title: 'What we enable', href: '#enable' },
+  { num: '03', title: 'Industries we shape', href: '#industries' },
+  { num: '04', title: 'Work', href: '#work' },
+  { num: '05', title: 'FAQs', href: '#faqs' },
+  { num: '06', title: 'Contact', href: '#contact' },
 ];
 
 const SOCIAL_NETWORKS = [
-  { name: 'LINKEDIN', href: 'https://linkedin.com' },
-  { name: 'INSTAGRAM', href: 'https://instagram.com' },
-  { name: 'X / TWITTER', href: 'https://x.com' },
-  { name: 'YOUTUBE', href: 'https://youtube.com' },
+  { name: 'LinkedIn', href: 'https://linkedin.com' },
+  { name: 'Instagram', href: 'https://instagram.com' },
+  { name: 'X / Twitter', href: 'https://x.com' },
+  { name: 'YouTube', href: 'https://youtube.com' },
 ];
 
 export default function ReviewsSection() {
@@ -256,9 +257,20 @@ export default function ReviewsSection() {
           className="absolute inset-0 w-full h-full bg-[#090909] z-20 shadow-[35px_0_90px_rgba(0,0,0,0.98)] border-r border-white/[0.14] will-change-transform overflow-hidden"
           style={{ transform: 'translate3d(0, 0, 0)' }}
         >
+          {/* 100vh Ambient BeamField: Diagonal Family */}
+          <BeamField
+            family="diagonal"
+            theme="inkSoft"
+            count={11}
+            w={1600}
+            h={1000}
+            staticOpacity={0.03}
+            className="opacity-25 pointer-events-none"
+          />
+
           <div
             ref={trackRef}
-            className="h-full flex flex-col justify-between pt-16 sm:pt-20 pb-12 sm:pb-16 will-change-transform pointer-events-none select-none"
+            className="relative z-10 h-full flex flex-col justify-between pt-16 sm:pt-20 pb-12 sm:pb-16 will-change-transform pointer-events-none select-none"
             style={{ width: 'max-content', transform: 'translate3d(0, 0, 0)' }}
           >
             {/* Top Row: 2 Reviews Placed Horizontally */}
@@ -314,6 +326,17 @@ export default function ReviewsSection() {
           className="absolute inset-0 w-full h-full bg-[#070708] z-30 shadow-[-40px_0_100px_rgba(0,0,0,0.98)] border-l border-white/[0.14] will-change-transform overflow-hidden select-none flex flex-col justify-between"
           style={{ transform: 'translate3d(100%, 0, 0)' }}
         >
+          {/* 100vh Ambient BeamField: Cross Family */}
+          <BeamField
+            family="cross"
+            theme="inkSoft"
+            count={10}
+            w={1600}
+            h={1000}
+            staticOpacity={0.025}
+            className="opacity-20 pointer-events-none"
+          />
+
           {/* Subtle Left Edge Glow Line */}
           <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
@@ -341,30 +364,30 @@ export default function ReviewsSection() {
           {/* Internal Track Container with Parallax Glide */}
           <div
             ref={footerTrackRef}
-            className="w-full h-full flex flex-col justify-between will-change-transform"
+            className="relative z-10 w-full h-full flex flex-col justify-between will-change-transform"
           >
 
             {/* Giant Kinetic Marquee Banner */}
-            <div className="w-full border-b border-white/[0.08] overflow-hidden py-3 bg-white/[0.015]">
+            <div className="w-full border-b border-white/[0.08] overflow-hidden py-4 sm:py-5 bg-white/[0.015]">
               <div className="kinetic-marquee-track">
                 {[0, 1].map((copyIndex) => (
                   <div key={copyIndex} className="flex items-center shrink-0">
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-white/90 mr-8">
+                    <span className="font-jakarta font-normal text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-white/90 mr-10 sm:mr-14">
                       Let&apos;s Build What&apos;s Next
                     </span>
-                    <span className="font-mono text-white/30 mr-8">✦</span>
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-[#71717a] mr-8">
+                    <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">✦</span>
+                    <span className="font-jakarta font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#8e8e93] mr-10 sm:mr-14">
                       Scale What Matters
                     </span>
-                    <span className="font-mono text-white/30 mr-8">—</span>
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-white/90 mr-8">
+                    <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">—</span>
+                    <span className="font-jakarta font-normal text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-white/90 mr-10 sm:mr-14">
                       Systems Architecture &amp; Brand Acceleration
                     </span>
-                    <span className="font-mono text-white/30 mr-8">✦</span>
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-[#a1a1aa] mr-8">
+                    <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">✦</span>
+                    <span className="font-jakarta font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#a1a1aa] mr-10 sm:mr-14">
                       Gemstrat Global
                     </span>
-                    <span className="font-mono text-white/30 mr-8">—</span>
+                    <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">—</span>
                   </div>
                 ))}
               </div>
@@ -376,13 +399,13 @@ export default function ReviewsSection() {
               {/* Left Column: Monumental Headline & Magnetic Button */}
               <div className="lg:col-span-7 flex flex-col justify-between px-6 sm:px-12 lg:px-16 py-8 sm:py-10 border-b lg:border-b-0 lg:border-r border-white/[0.08]">
                 <div>
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] uppercase block mb-3">
-                    // ARCHITECTURE STATEMENT
+                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
+                    // Architecture statement
                   </span>
-                  <h2 className="font-jakarta text-[clamp(2.6rem,6.8vw,104px)] font-black text-white leading-[0.88] tracking-[-0.04em] uppercase m-0">
-                    <span className="block">LET&apos;S BUILD</span>
-                    <span className="block text-white/95">WHAT&apos;S NEXT,</span>
-                    <span className="block text-white/60">TOGETHER.</span>
+                  <h2 className="font-jakarta text-[clamp(2.6rem,6.8vw,104px)] font-black text-white leading-[0.88] tracking-[-0.04em] m-0">
+                    <span className="block">Let&apos;s build</span>
+                    <span className="block text-white/95">what&apos;s next,</span>
+                    <span className="block text-white/60">together.</span>
                   </h2>
                 </div>
 
@@ -390,16 +413,16 @@ export default function ReviewsSection() {
                   {/* Brutalist Button with High-Contrast Inversion */}
                   <a
                     href="mailto:ask@gemstrat.com"
-                    className="group relative inline-flex items-center justify-center bg-white text-black px-8 sm:px-10 py-4 sm:py-4.5 rounded-none font-mono text-[12px] sm:text-[13px] font-bold tracking-[0.2em] uppercase transition-all duration-300 hover:bg-[#070708] hover:text-white border border-white pointer-events-auto"
+                    className="group relative inline-flex items-center justify-center bg-white text-black px-8 sm:px-10 py-4 sm:py-4.5 rounded-none font-mono text-[12px] sm:text-[13px] font-bold tracking-[0.15em] transition-all duration-300 hover:bg-[#070708] hover:text-white border border-white pointer-events-auto"
                   >
-                    <span>GET IN TOUCH</span>
+                    <span>Get in touch</span>
                     <span className="ml-3 inline-block transition-transform duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-0.5">
                       ↗
                     </span>
                   </a>
 
-                  <div className="font-mono text-[10px] tracking-[0.18em] text-[#71717a] uppercase leading-relaxed max-w-[280px]">
-                    READY TO CO-FOUND, RETHINK, AND SCALE YOUR SYSTEM ARCHITECTURE.
+                  <div className="font-mono text-[10px] tracking-[0.14em] text-[#71717a] leading-relaxed max-w-[280px]">
+                    Ready to co-found, rethink, and scale your system architecture.
                   </div>
                 </div>
               </div>
@@ -409,8 +432,8 @@ export default function ReviewsSection() {
 
                 {/* Direct Transmission Block */}
                 <div className="px-6 sm:px-10 lg:px-12 py-8 flex flex-col justify-center">
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] uppercase block mb-4">
-                    [ 01 // DIRECT TRANSMISSION ]
+                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-4">
+                    [ 01 // Direct transmission ]
                   </span>
 
                   <div className="flex flex-col gap-2">
@@ -425,12 +448,12 @@ export default function ReviewsSection() {
                     </a>
 
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/[0.05]">
-                      <span className="font-mono text-[clamp(0.95rem,1.2vw,18px)] text-[#a1a1aa] tracking-[0.1em]">
+                      <span className="font-mono text-[clamp(0.95rem,1.2vw,18px)] text-[#a1a1aa] tracking-[0.05em]">
                         +1 647 472 2085
                       </span>
-                      <span className="font-mono text-[10px] tracking-[0.15em] text-emerald-400/90 uppercase flex items-center gap-1.5">
+                      <span className="font-mono text-[10px] tracking-[0.1em] text-emerald-400/90 flex items-center gap-1.5">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                        EST RESPONSE &lt; 4H
+                        Est response &lt; 4h
                       </span>
                     </div>
                   </div>
@@ -438,11 +461,11 @@ export default function ReviewsSection() {
 
                 {/* Directory Index Matrix */}
                 <div className="px-6 sm:px-10 lg:px-12 py-7 flex-1 flex flex-col justify-center">
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] uppercase block mb-3">
-                    [ 02 // DIRECTORY INDEX ]
+                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
+                    [ 02 // Directory index ]
                   </span>
 
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[11px] sm:text-[12px] tracking-[0.16em] uppercase">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[11px] sm:text-[12px] tracking-[0.1em]">
                     {DIRECTORY_LINKS.map((link) => (
                       <a
                         key={link.num}
@@ -464,21 +487,21 @@ export default function ReviewsSection() {
             </div>
 
             {/* Bottom Bar: Architectural Metadata & Social Coordinates */}
-            <div className="w-full border-t border-white/[0.08] px-6 sm:px-12 lg:px-16 py-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-[10px] sm:text-[11px] tracking-[0.18em] text-[#71717a] uppercase">
+            <div className="w-full border-t border-white/[0.08] px-6 sm:px-12 lg:px-16 py-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-[10px] sm:text-[11px] tracking-[0.12em] text-[#71717a]">
               {/* Copyright & Legal */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                <span className="text-white/80">&copy; 2026 GEMSTRAT LTD.</span>
+                <span className="text-white/80">&copy; 2026 Gemstrat Ltd.</span>
                 <span className="text-white/20">/</span>
                 <a href="#privacy" className="hover:text-white transition-colors pointer-events-auto">
-                  PRIVACY POLICY
+                  Privacy policy
                 </a>
                 <span className="text-white/20">/</span>
                 <a href="#terms" className="hover:text-white transition-colors pointer-events-auto">
-                  TERMS &amp; CONDITIONS
+                  Terms &amp; conditions
                 </a>
               </div>
 
-              {/* Social Channels in Brutalist Notation */}
+              {/* Social Channels */}
               <div className="flex flex-wrap items-center gap-4 sm:gap-6">
                 {SOCIAL_NETWORKS.map((item) => (
                   <a

@@ -1,5 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
+import BeamField from '@/components/BeamField';
 
 export default function Hero() {
   return (
@@ -7,7 +8,18 @@ export default function Hero() {
       className="relative w-full min-h-[100svh] bg-[#090909] text-white flex flex-col justify-center items-center overflow-hidden py-20 font-jakarta"
       id="hero"
     >
-      <div className="w-full max-w-full m-0 grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center justify-items-center gap-8 lg:gap-12 px-6 sm:px-12 lg:px-20 box-border">
+      {/* 100vh Ambient BeamField: Orbit Family */}
+      <BeamField
+        family="orbit"
+        theme="inkSoft"
+        count={12}
+        w={1600}
+        h={1000}
+        staticOpacity={0.035}
+        className="opacity-30 pointer-events-none"
+      />
+
+      <div className="relative z-10 w-full max-w-full m-0 grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center justify-items-center gap-8 lg:gap-12 px-6 sm:px-12 lg:px-20 box-border">
         {/* Left column */}
         <div className="justify-self-center lg:justify-self-start text-center lg:text-left">
           <h1 className="font-jakarta text-[clamp(2.2rem,4.3vw,100px)] font-medium leading-[1.15] tracking-[-0.025em] text-white m-0 text-center lg:text-left">

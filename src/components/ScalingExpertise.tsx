@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import BeamField from '@/components/BeamField';
 
 const PARAGRAPH_TEXT =
   "With over two decades of experience in enterprise architecture, marketing, and technology, Deepak has built and scaled businesses across continents. As the creator of Webzgo and the Convergence Suite, he brings a rare blend of systems thinking, brand strategy, and tech innovation — driving transformation at Gemstrat with hands-on leadership and expert teams assembled for each client's needs.";
@@ -152,8 +153,18 @@ export default function ScalingExpertise() {
       className="relative w-full h-[230vh] bg-[#090909] text-white z-30 overflow-visible"
     >
       <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-[#090909] box-border">
+        {/* 100vh Ambient BeamField: Vertical Family */}
+        <BeamField
+          family="vertical"
+          theme="inkSoft"
+          count={10}
+          w={1600}
+          h={1000}
+          staticOpacity={0.03}
+          className="opacity-25 pointer-events-none"
+        />
 
-        <div className="w-full max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex flex-col justify-center">
+        <div className="relative z-10 w-full max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex flex-col justify-center">
 
           {/* Reference Grid: Row 1 = Photo + Heading (Bottom-aligned), Row 2 = Paragraph */}
           <div className="w-full grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-6 sm:gap-y-8 lg:gap-y-10 items-end">

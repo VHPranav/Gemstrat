@@ -179,12 +179,12 @@ export default function GemstratAdvantage() {
       const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
 
       // ==========================================================
-      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.16)
+      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.13)
       // ==========================================================
       const totalWords = ALL_WORDS.length;
       const startWord = 0.02;
-      const endWord = 0.16;
-      const windowSize = 0.05;
+      const endWord = 0.13;
+      const windowSize = 0.045;
       const activeRange = endWord - startWord - windowSize;
 
       wordRefs.current.forEach((span, index) => {
@@ -205,10 +205,12 @@ export default function GemstratAdvantage() {
       });
 
       // ==========================================================
-      // Phase 2: Images Emerge from Center-Bottom of Screen 1 (progress 0.16 -> 0.36)
+      // Phase 2: Images Emerge One by One on Scrolling (progress 0.135 -> 0.35)
+      // Each image launches sequentially with distinct start and arrival points
       // ==========================================================
-      const imgPhaseStart = 0.16;
-      const imgPhaseEnd = 0.36;
+      const imgPhaseStart = 0.135;
+      const stepDuration = 0.048; // duration of individual image journey
+      const stepInterval = 0.038; // interval between successive launches
 
       const startX = 0;
       const startY = 46;
@@ -217,26 +219,25 @@ export default function GemstratAdvantage() {
         if (!el) return;
         const item = DISPERSAL_ITEMS[index];
 
-        if (progress < imgPhaseStart) {
+        const itemStart = imgPhaseStart + index * stepInterval;
+        const itemEnd = itemStart + stepDuration;
+
+        if (progress < itemStart) {
           el.style.opacity = '0';
-          el.style.transform = `translate3d(${startX}vw, ${startY}vh, 0) scale(0.2)`;
+          el.style.transform = `translate3d(${startX}vw, ${startY}vh, 0) scale(0.18)`;
         } else {
-          const pImg = Math.min(
-            Math.max((progress - imgPhaseStart) / (imgPhaseEnd - imgPhaseStart), 0),
+          const localP = Math.min(
+            Math.max((progress - itemStart) / (itemEnd - itemStart), 0),
             1
           );
 
-          const localT = Math.min(
-            Math.max((pImg - item.stagger) / (1 - item.stagger), 0),
-            1
-          );
-
-          const ease = 1 - Math.pow(1 - localT, 2.4);
+          // Silky cubic ease-out
+          const ease = 1 - Math.pow(1 - localP, 2.5);
 
           const curX = startX + ease * (item.targetX - startX);
           const curY = startY + ease * (item.targetY - startY);
-          const curScale = 0.2 + ease * 0.8;
-          const curOpacity = Math.min(localT / 0.20, 1);
+          const curScale = 0.18 + ease * 0.82;
+          const curOpacity = Math.min(localP / 0.22, 1);
 
           el.style.opacity = curOpacity.toFixed(3);
           el.style.transform = `translate3d(${curX.toFixed(2)}vw, ${curY.toFixed(2)}vh, 0) scale(${curScale.toFixed(4)})`;

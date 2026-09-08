@@ -171,7 +171,7 @@ export default function Statement() {
               trackVideoRef.current.currentTime = expandVideoRef.current.currentTime;
             }
             if (trackVideoRef.current.paused) {
-              trackVideoRef.current.play().catch(() => {});
+              trackVideoRef.current.play().catch(() => { });
             }
           }
 
@@ -211,7 +211,7 @@ export default function Statement() {
                 expandVideoRef.current.currentTime = trackVideoRef.current.currentTime;
               }
               if (expandVideoRef.current.paused) {
-                expandVideoRef.current.play().catch(() => {});
+                expandVideoRef.current.play().catch(() => { });
               }
             }
 
