@@ -1,5 +1,5 @@
 import React from 'react';
-import BeamField from './BeamField';
+import BeamField from '@/components/ui/BeamField';
 
 export default function About() {
   return (

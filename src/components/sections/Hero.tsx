@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import BeamField from '@/components/BeamField';
+import BeamField from '@/components/ui/BeamField';
 
 export default function Hero() {
   return (

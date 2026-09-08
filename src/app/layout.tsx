@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Plus_Jakarta_Sans } from 'next/font/google';
-import SmoothScroll from '@/components/SmoothScroll';
+import SmoothScroll from '@/components/providers/SmoothScroll';
 import './globals.css';
 
 const plusJakartaSans = Plus_Jakarta_Sans({

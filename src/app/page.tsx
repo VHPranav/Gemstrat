@@ -1,10 +1,12 @@
 import React from 'react';
-import Hero from '@/components/Hero';
-import Statement from '@/components/Statement';
-import AboutIntro from '@/components/AboutIntro';
-import GemstratAdvantage from '@/components/GemstratAdvantage';
-import ScalingExpertise from '@/components/ScalingExpertise';
-import ReviewsSection from '@/components/ReviewsSection';
+import {
+  Hero,
+  Statement,
+  AboutIntro,
+  GemstratAdvantage,
+  ScalingExpertise,
+  ReviewsSection,
+} from '@/components/sections';
 
 export default function HomePage() {
   return (

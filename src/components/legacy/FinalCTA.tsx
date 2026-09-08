@@ -1,5 +1,5 @@
 import React from 'react';
-import BeamField from './BeamField';
+import BeamField from '@/components/ui/BeamField';
 
 export default function FinalCTA() {
   return (
@@ -21,7 +21,7 @@ export default function FinalCTA() {
       />
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 relative z-[1]">
         <p className="font-mono text-xs tracking-[0.14em] uppercase text-silver mb-3">Ready to scale what matters?</p>
-        <h2 className="font-archivo-expanded text-[clamp(2.2rem,4.8vw,4.5rem)] font-extrabold uppercase tracking-[-0.02em] leading-[1.05] text-paper max-w-[20ch] mb-12">
+        <h2 className="font-archivo-expanded text-[clamp(2.2rem,4.8vw,4.5rem)] font-bold uppercase tracking-[-0.02em] leading-[1.05] text-paper max-w-[20ch] mb-12">
           Let&apos;s build what&apos;s next, together.
         </h2>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-8 pt-8 border-t border-line-on-ink">

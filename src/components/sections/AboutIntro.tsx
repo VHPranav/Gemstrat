@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import ImageTrail from './ImageTrail';
+import ImageTrail from '@/components/ui/ImageTrail';
 
 const TRAIL_IMAGES = [
   '/images/1010565603896276505.jpeg',

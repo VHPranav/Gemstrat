@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import BeamField from '@/components/BeamField';
+import BeamField from '@/components/ui/BeamField';
 
 const PARAGRAPH_TEXT =
   "With over two decades of experience in enterprise architecture, marketing, and technology, Deepak has built and scaled businesses across continents. As the creator of Webzgo and the Convergence Suite, he brings a rare blend of systems thinking, brand strategy, and tech innovation — driving transformation at Gemstrat with hands-on leadership and expert teams assembled for each client's needs.";

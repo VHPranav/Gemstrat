@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import BeamField from '@/components/BeamField';
+import BeamField from '@/components/ui/BeamField';
 
 interface ReviewItem {
   id: string;
@@ -26,12 +26,12 @@ const REVIEWS: ReviewItem[] = [
 ];
 
 const DIRECTORY_LINKS = [
-  { num: '01', title: 'About us', href: '#about' },
-  { num: '02', title: 'What we enable', href: '#enable' },
-  { num: '03', title: 'Industries we shape', href: '#industries' },
-  { num: '04', title: 'Work', href: '#work' },
-  { num: '05', title: 'FAQs', href: '#faqs' },
-  { num: '06', title: 'Contact', href: '#contact' },
+  { num: '01', title: 'About us', href: '#about', image: '/images/698128379778759116.jpeg' },
+  { num: '02', title: 'What we enable', href: '#enable', image: '/images/933511829023645883.jpeg' },
+  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/844284261438464223.jpeg' },
+  { num: '04', title: 'Work', href: '#work', image: '/images/984599537320872120.jpeg' },
+  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/246572148347325364.jpeg' },
+  { num: '06', title: 'Contact', href: '#contact', image: '/images/618189486392349653.jpeg' },
 ];
 
 const SOCIAL_NETWORKS = [
@@ -326,17 +326,6 @@ export default function ReviewsSection() {
           className="absolute inset-0 w-full h-full bg-[#070708] z-30 shadow-[-40px_0_100px_rgba(0,0,0,0.98)] border-l border-white/[0.14] will-change-transform overflow-hidden select-none flex flex-col justify-between"
           style={{ transform: 'translate3d(100%, 0, 0)' }}
         >
-          {/* 100vh Ambient BeamField: Cross Family */}
-          <BeamField
-            family="cross"
-            theme="inkSoft"
-            count={10}
-            w={1600}
-            h={1000}
-            staticOpacity={0.025}
-            className="opacity-20 pointer-events-none"
-          />
-
           {/* Subtle Left Edge Glow Line */}
           <div className="absolute top-0 left-0 w-[1px] h-full bg-gradient-to-b from-transparent via-white/40 to-transparent pointer-events-none z-20" />
 
@@ -402,7 +391,7 @@ export default function ReviewsSection() {
                   <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
                     // Architecture statement
                   </span>
-                  <h2 className="font-jakarta text-[clamp(2.6rem,6.8vw,104px)] font-black text-white leading-[0.88] tracking-[-0.04em] m-0">
+                  <h2 className="font-jakarta text-[clamp(2.6rem,6.8vw,104px)] font-bold text-white leading-[0.88] tracking-[-0.04em] m-0">
                     <span className="block">Let&apos;s build</span>
                     <span className="block text-white/95">what&apos;s next,</span>
                     <span className="block text-white/60">together.</span>
@@ -459,27 +448,48 @@ export default function ReviewsSection() {
                   </div>
                 </div>
 
-                {/* Directory Index Matrix */}
-                <div className="px-6 sm:px-10 lg:px-12 py-7 flex-1 flex flex-col justify-center">
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
-                    [ 02 // Directory index ]
-                  </span>
+                {/* Directory Index Matrix - Seamless Edge-to-Edge Grid with Hover Image Backgrounds */}
+                <div className="flex-1 w-full h-full flex flex-col min-h-0">
+                  <div className="grid grid-cols-2 grid-rows-3 flex-1 w-full h-full">
+                    {DIRECTORY_LINKS.map((link, index) => {
+                      const isLeft = index % 2 === 0;
+                      const hasBottomBorder = index < 4;
+                      return (
+                        <a
+                          key={link.num}
+                          href={link.href}
+                          className={`group relative flex items-center justify-between px-6 sm:px-8 py-5 sm:py-6 bg-transparent overflow-hidden transition-colors duration-300 pointer-events-auto h-full ${
+                            isLeft ? 'border-r border-white/[0.12]' : ''
+                          } ${hasBottomBorder ? 'border-b border-white/[0.12]' : ''}`}
+                        >
+                          {/* Hover Background Image Layer */}
+                          <div className="absolute inset-0 z-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ease-out pointer-events-none">
+                            <Image
+                              src={link.image}
+                              alt={link.title}
+                              fill
+                              sizes="(max-width: 1024px) 50vw, 25vw"
+                              className="object-cover scale-110 group-hover:scale-100 transition-transform duration-700 ease-out"
+                            />
+                            {/* Cinematic Contrast Overlay to keep text perfectly legible */}
+                            <div className="absolute inset-0 bg-[#070708]/65 backdrop-blur-[0.5px]" />
+                          </div>
 
-                  <div className="grid grid-cols-2 gap-x-6 gap-y-3 font-mono text-[11px] sm:text-[12px] tracking-[0.1em]">
-                    {DIRECTORY_LINKS.map((link) => (
-                      <a
-                        key={link.num}
-                        href={link.href}
-                        className="group flex items-center gap-2 text-[#8e8e93] hover:text-white transition-colors pointer-events-auto py-1"
-                      >
-                        <span className="text-white/30 text-[10px] group-hover:text-white/70">
-                          {link.num}
-                        </span>
-                        <span className="group-hover:translate-x-0.5 transition-transform">
-                          {link.title}
-                        </span>
-                      </a>
-                    ))}
+                          {/* Foreground Content */}
+                          <div className="relative z-10 flex items-center gap-3 sm:gap-4 min-w-0">
+                            <span className="font-mono text-white/40 text-[11px] sm:text-[12px] group-hover:text-white transition-colors shrink-0">
+                              {link.num}
+                            </span>
+                            <span className="font-jakarta text-white/90 group-hover:text-white transition-colors truncate tracking-[-0.01em] text-[13px] sm:text-[15px] font-medium">
+                              {link.title}
+                            </span>
+                          </div>
+                          <span className="relative z-10 font-mono text-[13px] sm:text-[14px] text-white/30 group-hover:text-white transition-all duration-300 group-hover:translate-x-1 group-hover:-translate-y-1 shrink-0 ml-2">
+                            ↗
+                          </span>
+                        </a>
+                      );
+                    })}
                   </div>
                 </div>
 

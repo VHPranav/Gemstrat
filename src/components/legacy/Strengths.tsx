@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import BeamField from './BeamField';
+import BeamField from '@/components/ui/BeamField';
 
 const STRENGTHS = [
   {
