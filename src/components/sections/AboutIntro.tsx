@@ -563,7 +563,7 @@ export default function AboutIntro() {
           <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none">
             <div
               ref={textTrackRef}
-              className="whitespace-nowrap font-jakarta text-[clamp(120px,22vw,350px)] font-bold tracking-[-0.04em] text-white leading-none will-change-transform"
+              className="whitespace-nowrap font-jakarta text-[clamp(120px,22vw,350px)] font-medium tracking-[-0.04em] text-white leading-none will-change-transform"
               style={{ transform: 'translate3d(100vw, 0, 0)' }}
             >
               Focus areas
@@ -576,7 +576,7 @@ export default function AboutIntro() {
       <div className="relative w-full bg-[#090909] text-white">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 box-border">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 lg:gap-20 xl:gap-24 items-start relative">
-            
+
             {/* Pinned Left Column: Stays fixed at eye level; content changes dynamically in place! */}
             <div className="lg:col-span-5 w-full hidden lg:block lg:sticky lg:top-[34vh] self-start z-20">
               <div className="relative w-full max-w-[440px] min-h-[160px]">
@@ -721,7 +721,7 @@ export default function AboutIntro() {
           >
             <div className="w-full max-w-[1440px] mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 lg:gap-20 xl:gap-24 items-center">
-                
+
                 {/* Left Column: 3-line Heading */}
                 <div className="lg:col-span-7">
                   <h2 className="font-jakarta text-[clamp(3.2rem,6.8vw,92px)] font-medium text-[#090909] leading-[1.03] tracking-[-0.038em] m-0 text-left">
@@ -782,7 +782,7 @@ export default function AboutIntro() {
                 className="w-screen h-full flex items-center justify-center shrink-0 px-6 sm:px-12 lg:px-20 box-border pointer-events-none"
               >
                 <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-8 sm:gap-12 lg:gap-16 xl:gap-24 w-full max-w-[1440px] mx-auto px-6 sm:px-12 box-border pointer-events-none">
-                  
+
                   {/* Left Title */}
                   <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
                     <h3 className="font-jakarta text-[clamp(2.8rem,5.2vw,72px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 text-left pointer-events-none">
