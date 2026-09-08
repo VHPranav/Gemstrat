@@ -349,19 +349,19 @@ export default function ReviewsSection() {
               <div className="kinetic-marquee-track">
                 {[0, 1].map((copyIndex) => (
                   <div key={copyIndex} className="flex items-center shrink-0">
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] uppercase tracking-[-0.03em] text-white/90 mr-8">
+                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-white/90 mr-8">
                       Let&apos;s Build What&apos;s Next
                     </span>
                     <span className="font-mono text-white/30 mr-8">✦</span>
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] uppercase tracking-[-0.03em] text-[#71717a] mr-8">
+                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-[#71717a] mr-8">
                       Scale What Matters
                     </span>
                     <span className="font-mono text-white/30 mr-8">—</span>
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] uppercase tracking-[-0.03em] text-white/90 mr-8">
-                      Systems Architecture & Brand Acceleration
+                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-white/90 mr-8">
+                      Systems Architecture &amp; Brand Acceleration
                     </span>
                     <span className="font-mono text-white/30 mr-8">✦</span>
-                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] uppercase tracking-[-0.03em] text-[#a1a1aa] mr-8">
+                    <span className="font-jakarta font-extrabold text-[clamp(1.8rem,3.8vw,56px)] tracking-[-0.03em] text-[#a1a1aa] mr-8">
                       Gemstrat Global
                     </span>
                     <span className="font-mono text-white/30 mr-8">—</span>
