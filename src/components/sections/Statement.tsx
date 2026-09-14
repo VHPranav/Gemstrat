@@ -150,7 +150,7 @@ export default function Statement() {
           cardRefs.current.forEach((card) => {
             if (card) {
               card.style.opacity = '1';
-              card.style.borderRadius = '1rem';
+              card.style.borderRadius = '0';
               card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
             }
           });
@@ -179,7 +179,7 @@ export default function Statement() {
           cardRefs.current.forEach((card) => {
             if (card) {
               card.style.opacity = '1';
-              card.style.borderRadius = '1rem';
+              card.style.borderRadius = '0';
               card.style.borderColor = 'rgba(255, 255, 255, 0.1)';
             }
           });
@@ -222,12 +222,11 @@ export default function Statement() {
             const currentW = baseW + pScale * (viewportW - baseW);
             const currentH = baseH + pScale * (viewportH - baseH);
 
-            const borderRadius = (16 * (1 - pScale)).toFixed(1);
             const borderOpacity = Math.max(1 - pScale * 2, 0);
 
             expandCardRef.current.style.width = `${currentW.toFixed(1)}px`;
             expandCardRef.current.style.height = `${currentH.toFixed(1)}px`;
-            expandCardRef.current.style.borderRadius = `${borderRadius}px`;
+            expandCardRef.current.style.borderRadius = '0';
             expandCardRef.current.style.borderColor = `rgba(255, 255, 255, ${(0.1 * borderOpacity).toFixed(3)})`;
             expandCardRef.current.style.boxShadow = `0 25px 50px -12px rgba(0, 0, 0, ${(0.8 * borderOpacity).toFixed(3)})`;
           }
@@ -268,7 +267,7 @@ export default function Statement() {
           className="absolute inset-0 flex items-center justify-center transition-opacity duration-150"
         >
           <div className="w-full max-w-[1500px] mx-auto px-6 sm:px-12 lg:px-16">
-            <blockquote className="m-0 p-0 font-jakarta text-[clamp(2.5rem,7vw,100px)] font-semibold leading-[1.12] tracking-[-0.03em] text-white text-left">
+            <blockquote className="m-0 p-0 font-archivo-expanded text-[clamp(2.5rem,7vw,100px)] font-semibold leading-[1.12] tracking-[-0.03em] text-white text-left">
               {QUOTE_LINES.map((line, lineIdx) => (
                 <span key={lineIdx} className="block">
                   {line.map((word) => {
@@ -307,7 +306,7 @@ export default function Statement() {
                 ref={(el) => {
                   cardRefs.current[idx] = el;
                 }}
-                className={`shrink-0 ${img.widthClass} h-[65vh] max-h-[560px] min-h-[380px] relative rounded-2xl overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 will-change-[width,height,border-radius,opacity]`}
+                className={`shrink-0 ${img.widthClass} h-[65vh] max-h-[560px] min-h-[380px] relative overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 will-change-[width,height,border-radius,opacity]`}
               >
                 {idx === 3 ? (
                   <video
@@ -336,7 +335,7 @@ export default function Statement() {
         {/* Layer 3: Expanding Overlay Card (Scales symmetrically in all directions from center to fit viewport) */}
         <div
           ref={expandCardRef}
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 overflow-hidden rounded-2xl border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 will-change-[width,height,border-radius,opacity] pointer-events-none"
+          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-30 overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 will-change-[width,height,border-radius,opacity] pointer-events-none"
           style={{ display: 'none' }}
         >
           <video

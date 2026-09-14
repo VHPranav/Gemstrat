@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import BeamField from '@/components/ui/BeamField';
 
 const PARAGRAPH_TEXT =
   "With over two decades of experience in enterprise architecture, marketing, and technology, Deepak has built and scaled businesses across continents. As the creator of Webzgo and the Convergence Suite, he brings a rare blend of systems thinking, brand strategy, and tech innovation — driving transformation at Gemstrat with hands-on leadership and expert teams assembled for each client's needs.";
@@ -153,17 +152,6 @@ export default function ScalingExpertise() {
       className="relative w-full h-[230vh] bg-[#090909] text-white z-30 overflow-visible"
     >
       <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-[#090909] box-border">
-        {/* 100vh Ambient BeamField: Vertical Family */}
-        <BeamField
-          family="vertical"
-          theme="inkSoft"
-          count={10}
-          w={1600}
-          h={1000}
-          staticOpacity={0.03}
-          className="opacity-25 pointer-events-none"
-        />
-
         <div className="relative z-10 w-full max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex flex-col justify-center">
 
           {/* Reference Grid: Row 1 = Photo + Heading (Bottom-aligned), Row 2 = Paragraph */}
@@ -194,7 +182,7 @@ export default function ScalingExpertise() {
               ref={headingRef}
               className="flex flex-col justify-end items-end text-right will-change-[transform,opacity]"
             >
-              <h2 className="font-jakarta text-[clamp(4.5rem,13vw,230px)] font-normal text-white leading-[0.86] tracking-[-0.04em] text-right m-0 w-full">
+              <h2 className="font-archivo-expanded text-[clamp(4.5rem,13vw,230px)] font-normal text-white leading-[0.86] tracking-[-0.04em] text-right m-0 w-full">
                 <span className="block">Scaling</span>
                 <span className="block">Expertise</span>
               </h2>
@@ -208,7 +196,7 @@ export default function ScalingExpertise() {
               ref={paraRef}
               className="flex flex-col items-end w-full"
             >
-              <p className="font-jakarta text-[clamp(1.15rem,1.75vw,24px)] font-normal text-[#d4d4d8] leading-[1.42] tracking-[-0.02em] max-w-[920px] text-left m-0 w-full">
+              <p className="font-archivo text-[clamp(1.15rem,1.75vw,24px)] font-normal text-[#d4d4d8] leading-[1.42] tracking-[-0.02em] max-w-[920px] text-left m-0 w-full">
                 {PARAGRAPH_WORDS.map((word, wIdx) => (
                   <span
                     key={wIdx}

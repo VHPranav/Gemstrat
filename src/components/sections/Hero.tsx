@@ -1,54 +1,51 @@
 import React from 'react';
-import Image from 'next/image';
-import BeamField from '@/components/ui/BeamField';
 
 export default function Hero() {
   return (
     <section
-      className="relative w-full min-h-[100svh] bg-[#090909] text-white flex flex-col justify-center items-center overflow-hidden py-20 font-jakarta"
+      className="relative w-full min-h-[100svh] bg-[#090909] text-white flex flex-col justify-center items-center overflow-hidden py-20 font-archivo"
       id="hero"
     >
-      {/* 100vh Ambient BeamField: Orbit Family */}
-      <BeamField
-        family="orbit"
-        theme="inkSoft"
-        count={12}
-        w={1600}
-        h={1000}
-        staticOpacity={0.035}
-        className="opacity-30 pointer-events-none"
-      />
+      {/* Real heading for SEO/accessibility; the marquee below is decorative */}
+      <h1 className="sr-only">Solving What Matters. Building What Lasts.</h1>
 
-      <div className="relative z-10 w-full max-w-full m-0 grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] items-center justify-items-center gap-8 lg:gap-12 px-6 sm:px-12 lg:px-20 box-border">
-        {/* Left column */}
-        <div className="justify-self-center lg:justify-self-start text-center lg:text-left">
-          <h1 className="font-jakarta text-[clamp(2.2rem,4.3vw,100px)] font-medium leading-[1.15] tracking-[-0.025em] text-white m-0 text-center lg:text-left">
-            <span className="block whitespace-nowrap">Solving What</span>
-            <span className="block whitespace-nowrap">Matters</span>
-          </h1>
+      {/* Center: brand video, framed */}
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
+        <div className="pointer-events-auto relative w-[clamp(200px,26vw,420px)] aspect-square overflow-hidden bg-black border border-white/10 shadow-2xl shadow-black/80 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105">
+          <video
+            src="/videos/Gemstart rough cut 02 (1).mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          />
         </div>
+      </div>
 
-        {/* Center column: dummy image placeholder */}
-        <div className="justify-self-center flex items-center justify-center relative">
-          <div className="relative flex items-center justify-center">
-            {/* DUMMY IMAGE AT CENTER: Replace src="/hero-dummy.png" with your real image later */}
-            <Image
-              src="/hero-dummy.png"
-              alt="Gemstrat Emblem Placeholder"
-              width={160}
-              height={155}
-              priority
-              className="w-[clamp(120px,13vw,175px)] h-auto aspect-[100/97] object-contain block select-none transition-transform duration-400 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105"
-            />
-          </div>
-        </div>
-
-        {/* Right column */}
-        <div className="justify-self-center lg:justify-self-end text-center lg:text-right">
-          <h2 className="font-jakarta text-[clamp(2.2rem,4.3vw,100px)] font-medium leading-[1.15] tracking-[-0.025em] text-white m-0 text-center lg:text-right">
-            <span className="block whitespace-nowrap">Building What</span>
-            <span className="block whitespace-nowrap">Lasts</span>
-          </h2>
+      {/* Kinetic horizontal marquee headline — sits above the video with a
+          difference blend, so its colour inverts wherever it crosses the video */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none relative z-20 w-full flex items-center overflow-hidden select-none mix-blend-difference"
+      >
+        <div className="marquee-track whitespace-nowrap">
+          {[0, 1].map((copyIndex) => (
+            <div key={copyIndex} className="flex items-center shrink-0">
+              <span className="font-archivo-expanded text-[clamp(3.2rem,8vw,180px)] font-medium tracking-[-0.025em] text-white mr-10 sm:mr-14">
+                Solving What Matters
+              </span>
+              <span className="font-archivo text-[clamp(1.8rem,3.5vw,80px)] text-white mr-10 sm:mr-14">
+                •
+              </span>
+              <span className="font-archivo-expanded text-[clamp(3.2rem,8vw,180px)] font-medium tracking-[-0.025em] text-white mr-10 sm:mr-14">
+                Building What Lasts
+              </span>
+              <span className="font-archivo text-[clamp(1.8rem,3.5vw,80px)] text-white mr-10 sm:mr-14">
+                •
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </section>

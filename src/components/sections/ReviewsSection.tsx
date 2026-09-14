@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import BeamField from '@/components/ui/BeamField';
 
 interface ReviewItem {
   id: string;
@@ -229,10 +228,10 @@ export default function ReviewsSection() {
                 <span className="font-mono text-[11px] tracking-[0.25em] uppercase text-white/60 mb-2">
                   03 // Architecture of Speed
                 </span>
-                <h3 className="font-jakarta text-[clamp(1.75rem,3.2vw,48px)] font-normal text-white leading-tight tracking-[-0.03em] m-0">
+                <h3 className="font-archivo text-[clamp(1.75rem,3.2vw,48px)] font-normal text-white leading-tight tracking-[-0.03em] m-0">
                   Interesting beats perfect.
                 </h3>
-                <p className="font-jakarta text-[clamp(0.95rem,1.1vw,17px)] font-light text-[#a1a1aa] leading-[1.5] mt-2 m-0">
+                <p className="font-archivo text-[clamp(0.95rem,1.1vw,17px)] font-light text-[#a1a1aa] leading-[1.5] mt-2 m-0">
                   We partner with founders and enterprise teams doing things no one else is doing.
                 </p>
               </div>
@@ -257,17 +256,6 @@ export default function ReviewsSection() {
           className="absolute inset-0 w-full h-full bg-[#090909] z-20 shadow-[35px_0_90px_rgba(0,0,0,0.98)] border-r border-white/[0.14] will-change-transform overflow-hidden"
           style={{ transform: 'translate3d(0, 0, 0)' }}
         >
-          {/* 100vh Ambient BeamField: Diagonal Family */}
-          <BeamField
-            family="diagonal"
-            theme="inkSoft"
-            count={11}
-            w={1600}
-            h={1000}
-            staticOpacity={0.03}
-            className="opacity-25 pointer-events-none"
-          />
-
           <div
             ref={trackRef}
             className="relative z-10 h-full flex flex-col justify-between pt-16 sm:pt-20 pb-12 sm:pb-16 will-change-transform pointer-events-none select-none"
@@ -279,10 +267,10 @@ export default function ReviewsSection() {
                 ref={review1Ref}
                 className="w-[85vw] sm:w-[560px] lg:w-[640px] xl:w-[700px] shrink-0 pointer-events-auto"
               >
-                <p className="font-jakarta text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
+                <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
                   {REVIEWS[0].quote}
                 </p>
-                <p className="font-jakarta text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
+                <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
                   {REVIEWS[0].author}
                 </p>
               </div>
@@ -291,10 +279,10 @@ export default function ReviewsSection() {
                 ref={review2Ref}
                 className="w-[85vw] sm:w-[560px] lg:w-[640px] xl:w-[700px] shrink-0 pointer-events-auto ml-[36vw]"
               >
-                <p className="font-jakarta text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
+                <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
                   {REVIEWS[1].quote}
                 </p>
-                <p className="font-jakarta text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
+                <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
                   {REVIEWS[1].author}
                 </p>
               </div>
@@ -305,7 +293,7 @@ export default function ReviewsSection() {
               ref={headlineRef}
               className="pl-[6vw] sm:pl-[8vw] lg:pl-[8vw] pr-12 lg:pr-16 shrink-0"
             >
-              <h2 className="font-jakarta text-[clamp(4.5rem,13.8vw,268px)] font-normal text-white leading-[0.88] tracking-[-0.04em] whitespace-nowrap m-0">
+              <h2 className="font-archivo-expanded text-[clamp(4.5rem,13.8vw,268px)] font-normal text-white leading-[0.88] tracking-[-0.04em] whitespace-nowrap m-0">
                 <span className="block">Trusted</span>
                 <span className="block">
                   by Teams that don&apos;t settl<span ref={lastERef}>e</span>
@@ -361,19 +349,19 @@ export default function ReviewsSection() {
               <div className="kinetic-marquee-track">
                 {[0, 1].map((copyIndex) => (
                   <div key={copyIndex} className="flex items-center shrink-0">
-                    <span className="font-jakarta font-normal text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-white/90 mr-10 sm:mr-14">
+                    <span className="font-archivo-expanded font-normal text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-white/90 mr-10 sm:mr-14">
                       Let&apos;s Build What&apos;s Next
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">✦</span>
-                    <span className="font-jakarta font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#8e8e93] mr-10 sm:mr-14">
+                    <span className="font-archivo-expanded font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#8e8e93] mr-10 sm:mr-14">
                       Scale What Matters
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">—</span>
-                    <span className="font-jakarta font-normal text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-white/90 mr-10 sm:mr-14">
+                    <span className="font-archivo-expanded font-normal text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-white/90 mr-10 sm:mr-14">
                       Systems Architecture &amp; Brand Acceleration
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">✦</span>
-                    <span className="font-jakarta font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#a1a1aa] mr-10 sm:mr-14">
+                    <span className="font-archivo-expanded font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#a1a1aa] mr-10 sm:mr-14">
                       Gemstrat Global
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">—</span>
@@ -391,7 +379,7 @@ export default function ReviewsSection() {
                   <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
                     // Architecture statement
                   </span>
-                  <h2 className="font-jakarta text-[clamp(2.6rem,6.8vw,104px)] font-bold text-white leading-[0.88] tracking-[-0.04em] m-0">
+                  <h2 className="font-archivo-expanded text-[clamp(2.6rem,6.8vw,104px)] font-bold text-white leading-[0.88] tracking-[-0.04em] m-0">
                     <span className="block">Let&apos;s build</span>
                     <span className="block text-white/95">what&apos;s next,</span>
                     <span className="block text-white/60">together.</span>
@@ -428,7 +416,7 @@ export default function ReviewsSection() {
                   <div className="flex flex-col gap-2">
                     <a
                       href="mailto:ask@gemstrat.com"
-                      className="font-jakarta text-[clamp(1.4rem,2.2vw,36px)] font-bold text-white tracking-[-0.02em] hover:text-[#c59b63] transition-colors pointer-events-auto flex items-center justify-between group"
+                      className="font-archivo text-[clamp(1.4rem,2.2vw,36px)] font-bold text-white tracking-[-0.02em] hover:text-[#c59b63] transition-colors pointer-events-auto flex items-center justify-between group"
                     >
                       <span>ask@gemstrat.com</span>
                       <span className="font-mono text-[18px] text-[#71717a] group-hover:text-white transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">
@@ -480,7 +468,7 @@ export default function ReviewsSection() {
                             <span className="font-mono text-white/40 text-[11px] sm:text-[12px] group-hover:text-white transition-colors shrink-0">
                               {link.num}
                             </span>
-                            <span className="font-jakarta text-white/90 group-hover:text-white transition-colors truncate tracking-[-0.01em] text-[13px] sm:text-[15px] font-medium">
+                            <span className="font-archivo text-white/90 group-hover:text-white transition-colors truncate tracking-[-0.01em] text-[13px] sm:text-[15px] font-medium">
                               {link.title}
                             </span>
                           </div>

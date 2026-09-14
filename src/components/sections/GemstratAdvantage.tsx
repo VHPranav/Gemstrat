@@ -377,7 +377,7 @@ export default function GemstratAdvantage() {
             
             {/* Giant Editorial Headline */}
             <div className="relative z-10 text-center pointer-events-none select-none max-w-[1440px] mx-auto">
-              <h2 className="font-jakarta text-[clamp(4.6rem,12vw,165px)] font-medium text-[#090909] leading-[0.96] tracking-[-0.04em] m-0">
+              <h2 className="font-archivo-expanded text-[clamp(4.6rem,12vw,165px)] font-medium text-[#090909] leading-[0.96] tracking-[-0.04em] m-0">
                 {ADVANTAGE_LINES.map((line, lIdx) => (
                   <span key={lIdx} className="block">
                     {line.map((word) => {
@@ -411,7 +411,7 @@ export default function GemstratAdvantage() {
                   ref={(el) => {
                     itemRefs.current[idx] = el;
                   }}
-                  className={`absolute ${item.widthClass} ${item.aspectClass} rounded-xl overflow-hidden shadow-2xl bg-[#eaeaea] border border-black/5 will-change-[transform,opacity] pointer-events-none select-none`}
+                  className={`absolute ${item.widthClass} ${item.aspectClass} overflow-hidden shadow-2xl bg-[#eaeaea] border border-black/5 will-change-[transform,opacity] pointer-events-none select-none`}
                   style={{
                     transform: 'translate3d(0, 46vh, 0) scale(0.2)',
                     opacity: 0,
@@ -454,10 +454,10 @@ export default function GemstratAdvantage() {
                     transform: `translate3d(${pillar.initialStaggerVw}vw, 0, 0)`,
                   }}
                 >
-                  <h3 className="font-jakarta text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#090909] leading-[1.08] tracking-[-0.035em] m-0 text-left">
+                  <h3 className="font-archivo-expanded text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#090909] leading-[1.08] tracking-[-0.035em] m-0 text-left">
                     {pillar.title}
                   </h3>
-                  <p className="font-jakarta text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#555555] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
+                  <p className="font-archivo text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#555555] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
                     {pillar.subtext}
                   </p>
                 </div>
@@ -474,10 +474,10 @@ export default function GemstratAdvantage() {
                 >
                   {/* Dark Content Block inside blind */}
                   <div className="absolute top-1/2 -translate-y-1/2 left-[6vw] sm:left-[8vw] lg:left-[10vw] max-w-[90vw] sm:max-w-[700px] lg:max-w-[950px] pointer-events-none select-none">
-                    <h3 className="font-jakarta text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#f5f5f7] leading-[1.08] tracking-[-0.035em] m-0 text-left">
+                    <h3 className="font-archivo-expanded text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#f5f5f7] leading-[1.08] tracking-[-0.035em] m-0 text-left">
                       {DARK_ADVANTAGE_PILLARS[pIdx].title}
                     </h3>
-                    <p className="font-jakarta text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#9a9a9f] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
+                    <p className="font-archivo text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#9a9a9f] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
                       {DARK_ADVANTAGE_PILLARS[pIdx].subtext}
                     </p>
                   </div>

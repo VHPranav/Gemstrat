@@ -158,16 +158,18 @@ export default function AboutIntro() {
         if (totalScrollable > 0) {
           const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
 
-          // Intro content fades out completely (progress 0.00 -> 0.20)
+          // Intro content holds fully visible (progress 0.00 -> 0.15),
+          // then fades out gradually (0.15 -> 0.40) — more scroll time to read it
           if (introWrapRef.current) {
-            const introOpacity = Math.max(1 - progress / 0.18, 0);
-            const translateY = -progress * 40;
+            const introOpacity =
+              progress <= 0.15 ? 1 : Math.max(1 - (progress - 0.15) / 0.25, 0);
+            const translateY = -Math.max(progress - 0.15, 0) * 60;
             introWrapRef.current.style.opacity = introOpacity.toFixed(3);
             introWrapRef.current.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
             introWrapRef.current.style.pointerEvents = introOpacity > 0.1 ? 'auto' : 'none';
           }
 
-          // Horizontal scroll for 350px "Focus areas"
+          // Horizontal scroll for 350px "Focus areas" (starts once intro has cleared)
           if (textTrackRef.current) {
             const trackW = textTrackRef.current.scrollWidth;
             const startX = viewportW + 60;
@@ -175,10 +177,10 @@ export default function AboutIntro() {
             const endX = viewportW - trackW - rightMargin;
             const totalDistance = startX - endX;
 
-            if (progress <= 0.20) {
+            if (progress <= 0.38) {
               textTrackRef.current.style.transform = `translate3d(${startX}px, 0, 0)`;
             } else {
-              const pText = Math.min(Math.max((progress - 0.20) / (0.75 - 0.20), 0), 1);
+              const pText = Math.min(Math.max((progress - 0.38) / (0.90 - 0.38), 0), 1);
               const currentTranslate = startX - pText * totalDistance;
               textTrackRef.current.style.transform = `translate3d(${currentTranslate.toFixed(1)}px, 0, 0)`;
             }
@@ -514,7 +516,7 @@ export default function AboutIntro() {
       <div
         ref={sectionRef}
         id="about-intro"
-        className="relative h-[260vh] bg-[#090909] m-0 p-0 border-none overflow-visible"
+        className="relative h-[340vh] bg-[#090909] m-0 p-0 border-none overflow-visible"
         aria-label="About Gemstrat & Focus Areas"
       >
         <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center bg-[#090909] overflow-hidden">
@@ -523,38 +525,79 @@ export default function AboutIntro() {
             ref={introWrapRef}
             className="absolute inset-0 flex items-center justify-center will-change-[opacity,transform] transition-opacity duration-75"
           >
-            <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 box-border">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 lg:gap-20 xl:gap-24 items-end">
-                {/* Left Column: Visual Card aligned to bottom of text */}
-                <div className="lg:col-span-5 w-full flex justify-center lg:justify-start items-end self-end">
-                  <div className="relative w-full max-w-[500px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
+            <div className="w-full max-w-[1600px] mx-auto px-6 sm:px-12 lg:px-16 box-border">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,600px)_1fr] items-center gap-10 lg:gap-6">
+
+                {/* Left: two overlapping candid photos */}
+                <div className="hidden lg:flex items-center justify-start relative h-[380px]">
+                  <div className="relative w-[170px] aspect-[3/4] shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-10">
                     <Image
-                      src="/images/Conteúdo _ motivacional _ social media.jpeg"
-                      alt="Gemstrat strategic and architectural focus"
+                      src="/images/698128379778759116.jpeg"
+                      alt="Inside Gemstrat"
                       fill
-                      sizes="(max-width: 1024px) 100vw, 500px"
+                      sizes="170px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="relative w-[190px] aspect-[3/4] -ml-10 mt-20 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-20">
+                    <Image
+                      src="/images/844284261438464223.jpeg"
+                      alt="Inside Gemstrat"
+                      fill
+                      sizes="190px"
                       className="object-cover"
                     />
                   </div>
                 </div>
 
-                {/* Right Column: Editorial Paragraphs */}
-                <div className="lg:col-span-7 w-full flex flex-col justify-end self-end">
-                  <div className="max-w-[760px] flex flex-col space-y-6 sm:space-y-8 font-jakarta text-white/90 text-[clamp(1.15rem,1.7vw,26px)] leading-[1.55] tracking-[-0.015em] font-normal">
-                    <p className="indent-12 sm:indent-16 lg:indent-20 m-0 text-left">
-                      Gemstrat is where sharp minds and bold ideas come together. We are a boutique
-                      strategic consultancy built for ambitious businesses ready to scale, transform, and
-                      succeed. With a footprint spanning the USA, Canada, India, the Middle East, and Africa, we
-                      combine global perspective with local insight to solve complex challenges.
-                    </p>
-                    <p className="indent-12 sm:indent-16 lg:indent-20 m-0 text-left">
-                      Our belief is simple: solutions should be practical, human, and built to last. We don't stop at
-                      advice. We execute, ensuring strategy translates into measurable outcomes. From enterprise
-                      architecture to AI integration, from branding to digital transformation, Gemstrat helps businesses
-                      move forward with clarity and confidence.
+                {/* Center: bracketed label + two short paragraphs */}
+                <div className="flex flex-col items-center text-center gap-8 sm:gap-10">
+                  <span className="font-mono text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/40">
+                    [ who we are ]
+                  </span>
+                  <div className="max-w-[640px]">
+                    <p className="font-archivo text-white/85 text-[clamp(1.5rem,2.4vw,32px)] leading-[1.35] tracking-[-0.015em] font-normal m-0">
+                      A boutique strategic consultancy for ambitious businesses ready to scale and transform — we don&apos;t stop at advice, we execute.
                     </p>
                   </div>
                 </div>
+
+                {/* Right: two more photos, one styled as a floating-tag card */}
+                <div className="hidden lg:flex items-center justify-end relative h-[380px]">
+                  <div className="relative w-[160px] aspect-[3/4] mt-24 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-10">
+                    <Image
+                      src="/images/984599537320872120.jpeg"
+                      alt="Inside Gemstrat"
+                      fill
+                      sizes="160px"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="relative w-[190px] aspect-[3/4] -ml-10 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-20 overflow-hidden">
+                    <Image
+                      src="/images/933511829023645883.jpeg"
+                      alt="Inside Gemstrat"
+                      fill
+                      sizes="190px"
+                      className="object-cover"
+                    />
+                    <span className="absolute top-4 right-4 font-mono text-[9px] tracking-[0.1em] text-white bg-black/50 backdrop-blur-md px-2 py-1 border border-white/10">
+                      clarity
+                    </span>
+                    <span className="absolute top-16 left-4 font-mono text-[9px] tracking-[0.1em] text-white bg-black/50 backdrop-blur-md px-2 py-1 border border-white/10">
+                      momentum
+                    </span>
+                    <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-md px-3 py-2 flex items-center gap-2.5 border-t border-white/10">
+                      <span className="text-white/60 text-[10px] leading-none">⏮</span>
+                      <span className="text-white text-[11px] leading-none">⏸</span>
+                      <span className="text-white/60 text-[10px] leading-none">⏭</span>
+                      <div className="flex-1 h-[2px] bg-white/20 relative">
+                        <div className="absolute inset-y-0 left-0 w-2/3 bg-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
           </div>
@@ -563,7 +606,7 @@ export default function AboutIntro() {
           <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none">
             <div
               ref={textTrackRef}
-              className="whitespace-nowrap font-jakarta text-[clamp(120px,22vw,350px)] font-medium tracking-[-0.04em] text-white leading-none will-change-transform"
+              className="whitespace-nowrap font-archivo-expanded text-[clamp(120px,22vw,350px)] font-medium tracking-[-0.04em] text-white leading-none will-change-transform"
               style={{ transform: 'translate3d(100vw, 0, 0)' }}
             >
               Focus areas
@@ -595,7 +638,7 @@ export default function AboutIntro() {
                       className="absolute inset-0 flex flex-col justify-start will-change-[opacity,filter,transform] pointer-events-none"
                       style={{ opacity: idx === 0 ? 1 : 0 }}
                     >
-                      <p className="font-jakarta text-white text-[clamp(1.15rem,1.7vw,24px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
+                      <p className="font-archivo text-white text-[clamp(1.15rem,1.7vw,24px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
                         {words.map((word, wIdx) => (
                           <span
                             key={wIdx}
@@ -632,12 +675,12 @@ export default function AboutIntro() {
                       <div className="sticky top-0 h-screen h-[100svh] w-full flex flex-col items-start justify-center">
                         {/* Mobile-only quote */}
                         <div className="block lg:hidden mb-8">
-                          <p className="font-jakarta text-white/80 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
+                          <p className="font-archivo text-white/80 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
                             {item.quote}
                           </p>
                         </div>
 
-                        <h2 className="font-jakarta text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
+                        <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                           {item.titleLines.map((line, lIdx) => (
                             <span key={lIdx} className="block whitespace-nowrap">
                               {line}
@@ -645,7 +688,7 @@ export default function AboutIntro() {
                           ))}
                         </h2>
 
-                        <div className="relative w-full max-w-[580px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
+                        <div className="relative w-full max-w-[580px] aspect-[16/10] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
                           <Image
                             src={item.image}
                             alt={item.alt}
@@ -669,12 +712,12 @@ export default function AboutIntro() {
                   >
                     {/* Mobile-only quote */}
                     <div className="block lg:hidden mb-8">
-                      <p className="font-jakarta text-white/80 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
+                      <p className="font-archivo text-white/80 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
                         {item.quote}
                       </p>
                     </div>
 
-                    <h2 className="font-jakarta text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
+                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                       {item.titleLines.map((line, lIdx) => (
                         <span key={lIdx} className="block whitespace-nowrap">
                           {line}
@@ -682,7 +725,7 @@ export default function AboutIntro() {
                       ))}
                     </h2>
 
-                    <div className="relative w-full max-w-[580px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
+                    <div className="relative w-full max-w-[580px] aspect-[16/10] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
                       <Image
                         src={item.image}
                         alt={item.alt}
@@ -724,7 +767,7 @@ export default function AboutIntro() {
 
                 {/* Left Column: 3-line Heading */}
                 <div className="lg:col-span-7">
-                  <h2 className="font-jakarta text-[clamp(3.2rem,6.8vw,92px)] font-medium text-[#090909] leading-[1.03] tracking-[-0.038em] m-0 text-left">
+                  <h2 className="font-archivo-expanded text-[clamp(3.2rem,6.8vw,92px)] font-medium text-[#090909] leading-[1.03] tracking-[-0.038em] m-0 text-left">
                     {CLARITY_HEADLINE_LINES.map((line, lIdx) => (
                       <span key={lIdx} className="block">
                         {line.map((word) => {
@@ -748,7 +791,7 @@ export default function AboutIntro() {
 
                 {/* Right Column: Editorial Paragraph */}
                 <div className="lg:col-span-5 flex justify-start lg:justify-end">
-                  <p className="font-jakarta text-[clamp(1.18rem,1.6vw,23px)] font-normal text-[#1a1a1a] leading-[1.56] tracking-[-0.015em] max-w-[520px] m-0 text-left">
+                  <p className="font-archivo text-[clamp(1.18rem,1.6vw,23px)] font-normal text-[#1a1a1a] leading-[1.56] tracking-[-0.015em] max-w-[520px] m-0 text-left">
                     {CLARITY_BODY_WORDS.map((word) => {
                       const idx = clarityWordCounter++;
                       return (
@@ -785,13 +828,13 @@ export default function AboutIntro() {
 
                   {/* Left Title */}
                   <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
-                    <h3 className="font-jakarta text-[clamp(2.8rem,5.2vw,72px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 text-left pointer-events-none">
+                    <h3 className="font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-medium text-[#090909] leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none">
                       {card.number}{card.titleLine1}<br />{card.titleLine2}
                     </h3>
                   </div>
 
                   {/* Center Image from public/images */}
-                  <div className="relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] rounded-xl overflow-hidden shadow-2xl bg-[#eaeaea] shrink-0 border border-black/5 pointer-events-none">
+                  <div className="relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shadow-2xl bg-[#eaeaea] shrink-0 border border-black/5 pointer-events-none">
                     <Image
                       src={card.image}
                       alt={card.alt}
@@ -803,7 +846,7 @@ export default function AboutIntro() {
 
                   {/* Right Description: Aligned to bottom right */}
                   <div className="lg:self-end max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] pb-2 sm:pb-4 shrink-0 pointer-events-none">
-                    <p className="font-jakarta text-[clamp(1.05rem,1.35vw,19px)] font-normal text-[#1a1a1a] leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none">
+                    <p className="font-archivo text-[clamp(1.05rem,1.35vw,19px)] font-normal text-[#1a1a1a] leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none">
                       {card.description}
                     </p>
                   </div>
@@ -839,10 +882,10 @@ export default function AboutIntro() {
         {/* Editorial Text Content on Left */}
         <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 py-24 sm:py-32 lg:py-36 box-border">
           <div className="max-w-[580px] lg:max-w-[660px]">
-            <h2 className="font-jakarta text-[clamp(2.8rem,5.4vw,76px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 mb-8 sm:mb-10 text-left">
+            <h2 className="font-archivo-expanded text-[clamp(2.8rem,5.4vw,76px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 mb-8 sm:mb-10 text-left">
               Enterprise architecture<br />& mapping
             </h2>
-            <p className="font-jakarta text-[clamp(1.15rem,1.5vw,22px)] font-normal text-[#1a1a1a] leading-[1.58] tracking-[-0.015em] m-0 text-left">
+            <p className="font-archivo text-[clamp(1.15rem,1.5vw,22px)] font-normal text-[#1a1a1a] leading-[1.58] tracking-[-0.015em] m-0 text-left">
               We help you structure your business to scale, aligning people, processes, and platforms — because big moves need solid foundations. It isn&#39;t a buzzword at Gemstrat, it&#39;s a core discipline; we break down complex operations into clear, visual structures that highlight friction points, streamline systems, and identify areas of growth.
             </p>
           </div>

@@ -1,14 +1,7 @@
 import type { Metadata } from 'next';
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import SmoothScroll from '@/components/providers/SmoothScroll';
+import Loader from '@/components/ui/Loader';
 import './globals.css';
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-plus-jakarta',
-  weight: ['300', '400', '500', '600', '700', '800'],
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'Gemstrat — Boutique Strategic Consultancy',
@@ -22,16 +15,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={plusJakartaSans.variable}>
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400;100,500;100,600;100,700;100,800;100,900;125,400;125,500;125,600;125,700;125,800&family=JetBrains+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className={plusJakartaSans.className}>
+      <body className="font-archivo">
+        <Loader />
         <SmoothScroll />
         {children}
       </body>

@@ -1484,14 +1484,14 @@ export default function ImageTrail({
 
   return (
     <div
-      className={`w-full h-full relative rounded-lg bg-transparent overflow-visible ${className}`}
+      className={`w-full h-full relative bg-transparent overflow-visible ${className}`}
       style={style}
       ref={containerRef}
     >
       {children}
       {items.map((url, i) => (
         <div
-          className="content__img pointer-events-none select-none w-[190px] aspect-[1.1] rounded-[15px] absolute top-0 left-0 opacity-0 overflow-hidden [will-change:transform,filter]"
+          className="content__img pointer-events-none select-none w-[190px] aspect-[1.1] absolute top-0 left-0 opacity-0 overflow-hidden [will-change:transform,filter]"
           key={i}
         >
           <div

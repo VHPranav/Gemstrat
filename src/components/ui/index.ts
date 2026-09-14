@@ -1,2 +1,3 @@
 export { default as BeamField } from './BeamField';
 export { default as ImageTrail } from './ImageTrail';
+export { default as Loader } from './Loader';
