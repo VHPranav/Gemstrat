@@ -1,7 +1,64 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useRef, useState } from 'react';
 import BeamField from '@/components/ui/BeamField';
 
+const APPROACH_CARDS = [
+  {
+    step: '01',
+    title: 'Clarity in complexity',
+    description: 'We decode tangled operations and markets into clear roadmaps.',
+  },
+  {
+    step: '02',
+    title: 'Scalable execution',
+    description: 'Every framework we build is tied to practical action.',
+  },
+  {
+    step: '03',
+    title: 'Momentum at every stage',
+    description: 'Early-stage founder or multinational — we deliver solutions that create traction.',
+  },
+];
+
 export default function Approach() {
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [visibleCards, setVisibleCards] = useState<boolean[]>([false, false, false]);
+
+  useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) {
+      setVisibleCards([true, true, true]);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const index = cardRefs.current.indexOf(entry.target as HTMLDivElement);
+            if (index !== -1) {
+              setVisibleCards((prev) => {
+                if (prev[index]) return prev;
+                const next = [...prev];
+                next[index] = true;
+                return next;
+              });
+              observer.unobserve(entry.target);
+            }
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+
+    cardRefs.current.forEach((el) => {
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="relative bg-paper text-ink py-20 lg:py-28" id="approach">
       <div className="max-w-[1400px] mx-auto px-6 sm:px-10 lg:px-16 relative z-[1]">
@@ -19,27 +76,54 @@ export default function Approach() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-12">
-          <div className="bg-sand/30 border border-ink/10 rounded p-8 flex flex-col justify-between reveal">
-            <div className="font-mono text-xs text-graphite mb-8">01</div>
-            <div>
-              <h3 className="font-archivo font-bold text-xl uppercase mb-3 text-ink">Clarity in complexity</h3>
-              <p className="text-graphite text-sm leading-relaxed">We decode tangled operations and markets into clear roadmaps.</p>
-            </div>
-          </div>
-          <div className="bg-sand/30 border border-ink/10 rounded p-8 flex flex-col justify-between reveal">
-            <div className="font-mono text-xs text-graphite mb-8">02</div>
-            <div>
-              <h3 className="font-archivo font-bold text-xl uppercase mb-3 text-ink">Scalable execution</h3>
-              <p className="text-graphite text-sm leading-relaxed">Every framework we build is tied to practical action.</p>
-            </div>
-          </div>
-          <div className="bg-sand/30 border border-ink/10 rounded p-8 flex flex-col justify-between reveal">
-            <div className="font-mono text-xs text-graphite mb-8">03</div>
-            <div>
-              <h3 className="font-archivo font-bold text-xl uppercase mb-3 text-ink">Momentum at every stage</h3>
-              <p className="text-graphite text-sm leading-relaxed">Early-stage founder or multinational — we deliver solutions that create traction.</p>
-            </div>
-          </div>
+          {APPROACH_CARDS.map((card, idx) => {
+            const inView = visibleCards[idx];
+            return (
+              <div
+                key={card.step}
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
+                }}
+                className="bg-sand/30 border border-ink/10 rounded p-8 flex flex-col justify-between reveal"
+              >
+                <div className="font-mono text-xs text-graphite mb-8">{card.step}</div>
+                <div>
+                  <h3 className="font-archivo font-bold text-xl uppercase mb-3 text-ink">
+                    {card.title.split(' ').map((word, wIdx) => (
+                      <span
+                        key={wIdx}
+                        className="inline-block mr-[0.28em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                        style={{
+                          opacity: inView ? 1 : 0,
+                          filter: inView ? 'blur(0px)' : 'blur(12px)',
+                          transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0)',
+                          transitionDelay: inView ? `${idx * 120 + wIdx * 65}ms` : '0ms',
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </h3>
+                  <p className="text-graphite text-sm leading-relaxed">
+                    {card.description.split(' ').map((word, wIdx) => (
+                      <span
+                        key={wIdx}
+                        className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                        style={{
+                          opacity: inView ? 1 : 0,
+                          filter: inView ? 'blur(0px)' : 'blur(10px)',
+                          transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
+                          transitionDelay: inView ? `${idx * 120 + 180 + wIdx * 35}ms` : '0ms',
+                        }}
+                      >
+                        {word}
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="relative rounded bg-ink text-paper p-8 lg:p-14 overflow-hidden border border-line-on-ink reveal">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 interface ReviewItem {
@@ -52,12 +52,19 @@ export default function ReviewsSection() {
   const review2Ref = useRef<HTMLDivElement>(null);
   const lastERef = useRef<HTMLSpanElement>(null);
 
+  const [review1InView, setReview1InView] = useState(false);
+  const [review2InView, setReview2InView] = useState(false);
+  const review1ActiveRef = useRef(false);
+  const review2ActiveRef = useRef(false);
+
   const footerCurtainRef = useRef<HTMLDivElement>(null);
   const footerTrackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
+      setReview1InView(true);
+      setReview2InView(true);
       if (trackRef.current) trackRef.current.style.transform = 'none';
       if (curtainRef.current) curtainRef.current.style.transform = 'none';
       if (bgImageRef.current) bgImageRef.current.style.transform = 'none';
@@ -98,6 +105,33 @@ export default function ReviewsSection() {
 
       // Overall section progress: 0 to 1
       const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+
+      // ===================================================================
+      // Blur-In-Up Trigger: ONLY starts when the section is 100% in the viewport (rect.top <= 0)
+      // ===================================================================
+      if (rect.top <= 0) {
+        if (!review1ActiveRef.current) {
+          review1ActiveRef.current = true;
+          setReview1InView(true);
+        }
+      } else if (rect.top > viewportH * 0.3 && review1ActiveRef.current) {
+        review1ActiveRef.current = false;
+        setReview1InView(false);
+      }
+
+      // Review 2 triggers as it horizontally glides into the viewport
+      if (review2Ref.current) {
+        const r2Rect = review2Ref.current.getBoundingClientRect();
+        if (rect.top <= 0 && r2Rect.left < window.innerWidth * 0.92) {
+          if (!review2ActiveRef.current) {
+            review2ActiveRef.current = true;
+            setReview2InView(true);
+          }
+        } else if (r2Rect.left >= window.innerWidth && review2ActiveRef.current) {
+          review2ActiveRef.current = false;
+          setReview2InView(false);
+        }
+      }
 
       // ===================================================================
       // Phase 1: Horizontal scroll of reviews & headline (progress: 0.0 -> 0.32)
@@ -268,10 +302,38 @@ export default function ReviewsSection() {
                 className="w-[85vw] sm:w-[560px] lg:w-[640px] xl:w-[700px] shrink-0 pointer-events-auto"
               >
                 <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
-                  {REVIEWS[0].quote}
+                  {REVIEWS[0].quote.split(' ').map((word, wIdx) => (
+                    <span
+                      key={wIdx}
+                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{
+                        opacity: review1InView ? 1 : 0,
+                        filter: review1InView ? 'blur(0px)' : 'blur(12px)',
+                        transform: review1InView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0)',
+                        transitionDelay: review1InView ? `${wIdx * 28}ms` : '0ms',
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </p>
                 <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
-                  {REVIEWS[0].author}
+                  {REVIEWS[0].author.split(' ').map((word, wIdx) => (
+                    <span
+                      key={wIdx}
+                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{
+                        opacity: review1InView ? 1 : 0,
+                        filter: review1InView ? 'blur(0px)' : 'blur(10px)',
+                        transform: review1InView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
+                        transitionDelay: review1InView
+                          ? `${REVIEWS[0].quote.split(' ').length * 28 + 80 + wIdx * 35}ms`
+                          : '0ms',
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </p>
               </div>
 
@@ -280,10 +342,38 @@ export default function ReviewsSection() {
                 className="w-[85vw] sm:w-[560px] lg:w-[640px] xl:w-[700px] shrink-0 pointer-events-auto ml-[36vw]"
               >
                 <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
-                  {REVIEWS[1].quote}
+                  {REVIEWS[1].quote.split(' ').map((word, wIdx) => (
+                    <span
+                      key={wIdx}
+                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{
+                        opacity: review2InView ? 1 : 0,
+                        filter: review2InView ? 'blur(0px)' : 'blur(12px)',
+                        transform: review2InView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0)',
+                        transitionDelay: review2InView ? `${wIdx * 28}ms` : '0ms',
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </p>
                 <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
-                  {REVIEWS[1].author}
+                  {REVIEWS[1].author.split(' ').map((word, wIdx) => (
+                    <span
+                      key={wIdx}
+                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{
+                        opacity: review2InView ? 1 : 0,
+                        filter: review2InView ? 'blur(0px)' : 'blur(10px)',
+                        transform: review2InView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
+                        transitionDelay: review2InView
+                          ? `${REVIEWS[1].quote.split(' ').length * 28 + 80 + wIdx * 35}ms`
+                          : '0ms',
+                      }}
+                    >
+                      {word}
+                    </span>
+                  ))}
                 </p>
               </div>
             </div>

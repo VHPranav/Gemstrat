@@ -375,9 +375,9 @@ export default function GemstratAdvantage() {
           {/* ========================================================= */}
           <div className="w-screen h-full shrink-0 relative flex items-center justify-center overflow-hidden px-6 sm:px-12 lg:px-16 pointer-events-none select-none">
             
-            {/* Giant Editorial Headline */}
+            {/* Editorial Headline */}
             <div className="relative z-10 text-center pointer-events-none select-none max-w-[1440px] mx-auto">
-              <h2 className="font-archivo-expanded text-[clamp(4.6rem,12vw,165px)] font-medium text-[#090909] leading-[0.96] tracking-[-0.04em] m-0">
+              <h2 className="font-archivo-expanded text-[clamp(3.2rem,8.5vw,118px)] font-medium text-[#090909] leading-[0.98] tracking-[-0.035em] m-0">
                 {ADVANTAGE_LINES.map((line, lIdx) => (
                   <span key={lIdx} className="block">
                     {line.map((word) => {

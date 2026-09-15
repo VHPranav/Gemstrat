@@ -52,6 +52,29 @@ const FOCUS_ITEMS = [
   },
 ];
 
+// Scattered images that fly outward from center and exit the viewport, each on
+// its own direction/timing — the transition after the last Focus Item
+const FLYTHROUGH_IMAGES = [
+  { src: '/images/1010565603896276505.jpeg', dirX: -1.3, dirY: -0.8, stagger: 0.0, startX: -3, startY: -2 },
+  { src: '/images/246572148347325364.jpeg', dirX: 1.4, dirY: -0.6, stagger: 0.04, startX: 4, startY: -2 },
+  { src: '/images/933511829023645883.jpeg', dirX: -1.5, dirY: 0.5, stagger: 0.08, startX: -4, startY: 2 },
+  { src: '/images/844284261438464223.jpeg', dirX: 1.2, dirY: 0.9, stagger: 0.03, startX: 3, startY: 3 },
+  { src: '/images/Dream Big, Act Bigger — Motion Running Phone Wallpaper.jpeg', dirX: -0.7, dirY: -1.3, stagger: 0.07, startX: -2, startY: -4 },
+  { src: '/images/Graphic Designer Job Opening at 134 Agency _ Creative Careers.jpeg', dirX: 0.8, dirY: 1.4, stagger: 0.11, startX: 2, startY: 4 },
+  { src: '/images/Dynamic Typography Poster Inspired by Motion and Deadlines.jpeg', dirX: -1.4, dirY: 1.0, stagger: 0.14, startX: -4, startY: 3 },
+  { src: '/images/984599537320872120.jpeg', dirX: 1.5, dirY: -1.0, stagger: 0.02, startX: 4, startY: -3 },
+  { src: '/images/618189486392349653.jpeg', dirX: 0.4, dirY: -1.5, stagger: 0.18, startX: 1, startY: -4 },
+  { src: '/images/@maxross_design.jpeg', dirX: -0.3, dirY: 1.5, stagger: 0.21, startX: -1, startY: 4 },
+  { src: '/images/Creative_people_need_creative_people.jpeg_202609071623.jpeg', dirX: 1.5, dirY: 0.2, stagger: 0.25, startX: 4, startY: 1 },
+  { src: '/images/Instagram.jpeg', dirX: -1.5, dirY: -0.2, stagger: 0.28, startX: -4, startY: -1 },
+  { src: '/images/Instagram (1).jpeg', dirX: 0.2, dirY: 1.5, stagger: 0.32, startX: 1, startY: 4 },
+  { src: '/images/Labs for Inflammation & Stress _ Hims.jpeg', dirX: -0.2, dirY: -1.5, stagger: 0.35, startX: -1, startY: -4 },
+];
+
+// The one image that blur-fades in and settles at a fixed size in the center —
+// carries straight into the Clarity section, which uses this same photo
+const FLYTHROUGH_CENTER_IMAGE = '/images/Discipline 🔥_ Lifestyle ✨.jpeg';
+
 const CLARITY_HEADLINE_LINES = [
   ['Clarity,'],
   ['execution,'],
@@ -108,13 +131,15 @@ export default function AboutIntro() {
   const leftQuoteRefs = useRef<(HTMLDivElement | null)[]>([]);
   const focusWordRefs = useRef<(HTMLSpanElement | null)[][]>([]);
 
-  const themeCircleRef = useRef<HTMLDivElement>(null);
-  const nextSectionRef = useRef<HTMLElement>(null);
+  const flyItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const flyCenterRef = useRef<HTMLDivElement>(null);
 
   const clarityTrackRef = useRef<HTMLDivElement>(null);
+  const clarityStickyRef = useRef<HTMLDivElement>(null);
   const clarityTextWrapRef = useRef<HTMLDivElement>(null);
   const clarityWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const horizontalTrackRef = useRef<HTMLDivElement>(null);
+  const cardDescWordRefs = useRef<(HTMLSpanElement | null)[][]>([]);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -135,9 +160,27 @@ export default function AboutIntro() {
           w.style.transform = 'none';
         }
       });
+      flyItemRefs.current.forEach((el) => {
+        if (el) el.style.display = 'none';
+      });
+      if (flyCenterRef.current) {
+        flyCenterRef.current.style.display = 'none';
+      }
       if (horizontalTrackRef.current) {
         horizontalTrackRef.current.style.opacity = '1';
         horizontalTrackRef.current.style.transform = 'none';
+      }
+      cardDescWordRefs.current.forEach((words) => {
+        words?.forEach((w) => {
+          if (w) {
+            w.style.opacity = '1';
+            w.style.filter = 'none';
+            w.style.transform = 'none';
+          }
+        });
+      });
+      if (clarityStickyRef.current) {
+        clarityStickyRef.current.style.backgroundColor = '#090909';
       }
       return;
     }
@@ -198,14 +241,12 @@ export default function AboutIntro() {
         const words = focusWordRefs.current[idx] || [];
         const totalWords = words.length;
 
-        const isLast = idx === FOCUS_ITEMS.length - 1;
-
         // Enter window: as the corresponding right content scrolls into view
         const enterStart = viewportH * 0.88;
         const enterEnd = viewportH * 0.38;
 
         // Exit window: as the right content finishes and scrolls above
-        const exitStart = isLast ? 99999 : -rect.height * 0.12;
+        const exitStart = -rect.height * 0.12;
         const exitEnd = -rect.height * 0.65;
 
         if (rect.top > enterStart) {
@@ -245,22 +286,6 @@ export default function AboutIntro() {
             span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
             span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
           });
-        } else if (idx === FOCUS_ITEMS.length - 1) {
-          // For the LAST item (Item 5), once entered, it NEVER exits or blurs out!
-          // It stays 100% visible and sharp while pinned centered and while circle appears/expands above it!
-          if (quoteEl) {
-            quoteEl.style.opacity = '1';
-            quoteEl.style.filter = 'none';
-            quoteEl.style.transform = 'none';
-            quoteEl.style.pointerEvents = 'auto';
-          }
-          words.forEach((span) => {
-            if (span) {
-              span.style.opacity = '1';
-              span.style.filter = 'none';
-              span.style.transform = 'none';
-            }
-          });
         } else if (rect.top <= enterEnd && rect.top > exitStart) {
           // Fully active phase: 100% visible and crisp
           if (quoteEl) {
@@ -299,193 +324,238 @@ export default function AboutIntro() {
       });
 
       // ----------------------------------------------------
-      // 3. Theme Transition Over Item 5 ("Advertising"):
-      // True rounded-full circle, razor-sharp high-res 2600px base, zero glow.
-      // The instant the circle fills the viewport, the next section fades in immediately!
-      // ----------------------------------------------------
-      const lastItemEl = rightItemRefs.current[FOCUS_ITEMS.length - 1];
-      if (lastItemEl && themeCircleRef.current) {
-        const rect = lastItemEl.getBoundingClientRect();
-        const totalScrollable = rect.height - viewportH;
-
-        if (totalScrollable > 0) {
-          // Radius from viewport center to furthest corner (with 6% buffer to guarantee full bleed)
-          const distToCorner = Math.hypot(viewportW / 2, viewportH / 2);
-          const baseSize = 2600; // 2600px base circle diameter: renders at ultra-crisp Retina quality without stretching
-          const targetScale = (distToCorner * 2 * 1.06) / baseSize;
-
-          if (rect.top > 0) {
-            // Still scrolling towards center: circle remains dormant
-            themeCircleRef.current.style.opacity = '0';
-            themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
-            if (nextSectionRef.current) {
-              nextSectionRef.current.style.opacity = '0';
-              nextSectionRef.current.style.transform = 'translate3d(0, 0, 0)';
-              nextSectionRef.current.style.pointerEvents = 'none';
-            }
-          } else if (rect.bottom <= viewportH) {
-            // Scrolled past the pin track: Sequence 3 scrolls up in exact 1:1 lockstep with Sequence 4!
-            const exitOffset = Math.max(viewportH - rect.bottom, 0);
-
-            if (exitOffset >= viewportH) {
-              // Completely scrolled past Sequence 3 into Sequence 4:
-              // Hide fixed overlay elements so Sequence 4 is 100% visible and interactive!
-              themeCircleRef.current.style.opacity = '0';
-              themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
-              if (nextSectionRef.current) {
-                nextSectionRef.current.style.opacity = '0';
-                nextSectionRef.current.style.transform = `translate3d(0, ${-exitOffset}px, 0)`;
-                nextSectionRef.current.style.pointerEvents = 'none';
-              }
-            } else {
-              // During the 1:1 scroll transition between Sequence 3 and Sequence 4:
-              themeCircleRef.current.style.opacity = '1';
-              themeCircleRef.current.style.transform = `translate3d(-50%, -50%, 0) scale(${targetScale.toFixed(5)})`;
-              if (nextSectionRef.current) {
-                nextSectionRef.current.style.opacity = '1';
-                nextSectionRef.current.style.transform = `translate3d(0, ${-exitOffset}px, 0)`;
-                nextSectionRef.current.style.pointerEvents = 'auto';
-              }
-            }
-          } else {
-            // Locked centered! Progress runs from 0 (centered) to 1 (end of track)
-            const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
-
-            // Normalized circle progress u:
-            // 0 to 0.04: Settles cleanly at center (matches user screenshot)
-            // 0.04 to 0.60: Continuous, buttery smooth expansion to full screen pure white
-            const startU = 0.04;
-            const endU = 0.60;
-            const u = Math.min(Math.max((progress - startU) / (endU - startU), 0), 1);
-
-            if (u <= 0) {
-              themeCircleRef.current.style.opacity = '0';
-              themeCircleRef.current.style.transform = 'translate3d(-50%, -50%, 0) scale(0)';
-              if (nextSectionRef.current) {
-                nextSectionRef.current.style.opacity = '0';
-                nextSectionRef.current.style.transform = 'translate3d(0, 0, 0)';
-                nextSectionRef.current.style.pointerEvents = 'none';
-              }
-            } else {
-              // Smooth S-curve opacity over initial 6% of motion
-              const opT = Math.min(u / 0.06, 1);
-              const opacity = (1 - Math.cos(opT * Math.PI)) / 2;
-
-              // Pure continuous expansion from scale 0 to targetScale (~0.95 - 1.05)
-              const scale = Math.pow(u, 2.05) * targetScale;
-
-              themeCircleRef.current.style.opacity = opacity.toFixed(4);
-              themeCircleRef.current.style.transform = `translate3d(-50%, -50%, 0) scale(${scale.toFixed(5)})`;
-
-              // Once the circle fills the entire viewport, next section fades in immediately!
-              // No scrolling needed after the transition!
-              if (nextSectionRef.current) {
-                nextSectionRef.current.style.transform = 'translate3d(0, 0, 0)';
-                if (u >= 0.94) {
-                  nextSectionRef.current.style.opacity = '1';
-                  nextSectionRef.current.style.pointerEvents = 'auto';
-                } else {
-                  nextSectionRef.current.style.opacity = '0';
-                  nextSectionRef.current.style.pointerEvents = 'none';
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // ----------------------------------------------------
-      // 4. Clarity Section: Random Word-by-Word Blur-Out on scroll
+      // 4. Clarity Section — ONE combined pinned track:
+      //    Intro (0 -> INTRO_END): scattered images fly in near-center and exit,
+      //    one settles centered at a fixed size, then the headline (left) and
+      //    paragraph (right) blur-fade in flanking it.
+      //    Then (INTRO_END -> 1): the existing word-blur-out + horizontal
+      //    3-card sequence + theme crossfade, remapped onto the remaining range.
       // ----------------------------------------------------
       if (clarityTrackRef.current) {
         const rect = clarityTrackRef.current.getBoundingClientRect();
         const totalScrollable = rect.height - viewportH;
 
         if (totalScrollable > 0) {
-          // Progress: 0 when clarity section locks sticky at top (rect.top <= 0), 1 when track finishes
           const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+          const INTRO_END = 0.32;
 
-          // Phase 1: Words blur out randomly between progress 0.02 and 0.18
-          const totalWords = CLARITY_ALL_WORDS.length;
-          const startBuffer = 0.02;
-          const endBuffer = 0.18;
-          const windowSize = 0.05;
-          const activeRange = endBuffer - startBuffer - windowSize;
+          if (progress < INTRO_END) {
+            const introP = progress / INTRO_END;
 
-          clarityWordRefs.current.forEach((span, index) => {
-            if (!span) return;
-            const rank = CLARITY_RANDOM_ORDER[index] ?? index;
-            const wordStart = startBuffer + (rank / (totalWords - 1 || 1)) * activeRange;
-            const wordEnd = wordStart + windowSize;
-
-            // Word progress: 0 (fully sharp & visible) -> 1 (fully blurred out)
-            const wordP = Math.min(Math.max((progress - wordStart) / (wordEnd - wordStart), 0), 1);
-
-            const opacity = 1 - wordP;
-            const blur = wordP * 16;
-            const translateY = -wordP * 10;
-
-            span.style.opacity = opacity.toFixed(3);
-            span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-            span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
-          });
-
-          // Container for initial text fades out completely once words are gone
-          if (clarityTextWrapRef.current) {
-            if (progress >= 0.20) {
-              clarityTextWrapRef.current.style.opacity = '0';
-            } else {
+            // Keep the text container itself visible; individual words below
+            // control their own hidden -> fade-in state during the intro.
+            if (clarityTextWrapRef.current) {
               clarityTextWrapRef.current.style.opacity = '1';
+              clarityTextWrapRef.current.style.pointerEvents = 'none';
             }
-            clarityTextWrapRef.current.style.pointerEvents = 'none';
-          }
 
-          // Phase 2: Horizontal Scroll Track across 3 cards
-          if (horizontalTrackRef.current) {
+            // Scattered images blur-fade in near center, then fly outward and exit
+            flyItemRefs.current.forEach((el, i) => {
+              if (!el) return;
+              const cfg = FLYTHROUGH_IMAGES[i];
+              const start = 0.1 + cfg.stagger;
+              const end = Math.min(start + 0.3, 0.85);
+              const t = Math.min(Math.max((introP - start) / (end - start), 0), 1);
+              const ease = t * t; // accelerate outward, like warp speed
+
+              const curX = cfg.startX + ease * cfg.dirX * 90; // vw
+              const curY = cfg.startY + ease * cfg.dirY * 90; // vh
+              const scale = 0.25 + ease * 3.2;
+              const fadeInT = Math.min(t / 0.18, 1); // blur-fade-in window at the start
+              const opacity =
+                t <= 0.18 ? fadeInT : t >= 0.8 ? Math.max(1 - (t - 0.8) / 0.2, 0) : 1;
+              const blur = (1 - fadeInT) * 16;
+
+              el.style.opacity = opacity.toFixed(3);
+              el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+              el.style.transform = `translate3d(calc(-50% + ${curX.toFixed(1)}vw), calc(-50% + ${curY.toFixed(1)}vh), 0) scale(${scale.toFixed(3)})`;
+            });
+
+            // The center image blur-fades in near center, then settles at its
+            // fixed size dead-center and holds there.
+            if (flyCenterRef.current) {
+              const start = 0.58;
+              const end = 0.85;
+              const t = Math.min(Math.max((introP - start) / (end - start), 0), 1);
+              const ease = t * t * (3 - 2 * t);
+              const fadeInT = Math.min(t / 0.3, 1);
+
+              const centerStartX = 3;
+              const centerStartY = -3;
+              const curX = centerStartX * (1 - ease);
+              const curY = centerStartY * (1 - ease);
+              const scale = 0.3 + ease * 0.7;
+              const blur = (1 - fadeInT) * 16;
+
+              flyCenterRef.current.style.opacity = fadeInT.toFixed(3);
+              flyCenterRef.current.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+              flyCenterRef.current.style.transform = `translate3d(calc(-50% + ${curX.toFixed(1)}vw), calc(-50% + ${curY.toFixed(1)}vh), 0) scale(${scale.toFixed(3)})`;
+            }
+
+            // Once the center image has settled, the headline + paragraph words
+            // blur-fade in flanking it (reusing the same scatter order the
+            // word-blur-out below uses, just running in the fade-in direction).
+            {
+              const dStart = 0.85;
+              const totalWords = CLARITY_ALL_WORDS.length;
+              const windowSize = 0.4;
+              const activeRange = 1 - windowSize;
+              const dProgress = Math.min(Math.max((introP - dStart) / (1 - dStart), 0), 1);
+
+              clarityWordRefs.current.forEach((span, index) => {
+                if (!span) return;
+                const rank = CLARITY_RANDOM_ORDER[index] ?? index;
+                const wordStart = (rank / (totalWords - 1 || 1)) * activeRange;
+                const wordEnd = wordStart + windowSize;
+                const wordP = Math.min(Math.max((dProgress - wordStart) / (wordEnd - wordStart), 0), 1);
+
+                const opacity = wordP;
+                const blur = (1 - wordP) * 16;
+                const translateY = (1 - wordP) * 10;
+
+                span.style.opacity = opacity.toFixed(3);
+                span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+                span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+              });
+            }
+          } else {
+            const oldP = Math.min(Math.max((progress - INTRO_END) / (1 - INTRO_END), 0), 1);
+
+            // Intro is done — peripheral images have already self-faded to 0;
+            // the center image rests as-is (opacity 1, settled), its visibility
+            // from here on is carried entirely by clarityTextWrapRef's opacity below.
+            flyItemRefs.current.forEach((el) => {
+              if (el) el.style.opacity = '0';
+            });
+
+            // Background theme: stays black through the headline/paragraph and the
+            // first two horizontal cards, then crosses to white exactly as Card 3
+            // ("Momentum at every stage") arrives — matching hStart/hEnd/pHoriz
+            // thresholds used by Phase 2 below (card 2->3 transition = pHoriz 0.60-0.80)
             const hStart = 0.19;
             const hEnd = 0.95;
+            if (clarityStickyRef.current) {
+              const colorStart = hStart + 0.6 * (hEnd - hStart);
+              const colorEnd = hStart + 0.8 * (hEnd - hStart);
+              const ct = Math.min(Math.max((oldP - colorStart) / (colorEnd - colorStart), 0), 1);
+              const channel = Math.round(9 + ct * (255 - 9));
+              clarityStickyRef.current.style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+            }
 
-            if (progress < hStart) {
-              // Before words fade out: parked offscreen to the right
-              horizontalTrackRef.current.style.opacity = '0';
-              horizontalTrackRef.current.style.transform = `translate3d(${viewportW}px, 0, 0)`;
-              horizontalTrackRef.current.style.pointerEvents = 'none';
-            } else {
-              const pHoriz = Math.min(Math.max((progress - hStart) / (hEnd - hStart), 0), 1);
-              const opacity = Math.min(pHoriz / 0.04, 1);
+            // Phase 1: Words (and the settled image via container opacity) blur
+            // out randomly between oldP 0.02 and 0.18
+            const totalWords = CLARITY_ALL_WORDS.length;
+            const startBuffer = 0.02;
+            const endBuffer = 0.18;
+            const windowSize = 0.05;
+            const activeRange = endBuffer - startBuffer - windowSize;
 
-              // Calculate translation across 3 cards with smooth dwell per card
-              let targetXOffset = 1.0; // in units of viewportW
-              if (pHoriz <= 0.16) {
-                // Card 1 enters from right (1.0 -> 0.0)
-                const t = pHoriz / 0.16;
-                const ease = 1 - Math.pow(1 - t, 2.2);
-                targetXOffset = 1.0 - ease * 1.0;
-              } else if (pHoriz <= 0.28) {
-                // Card 1 dwells centered
-                targetXOffset = 0.0;
-              } else if (pHoriz <= 0.48) {
-                // Smooth transition: Card 1 -> Card 2 (0.0 -> -1.0)
-                const t = (pHoriz - 0.28) / (0.48 - 0.28);
-                const ease = t * t * (3 - 2 * t);
-                targetXOffset = 0.0 - ease * 1.0;
-              } else if (pHoriz <= 0.60) {
-                // Card 2 dwells centered
-                targetXOffset = -1.0;
-              } else if (pHoriz <= 0.80) {
-                // Smooth transition: Card 2 -> Card 3 (-1.0 -> -2.0)
-                const t = (pHoriz - 0.60) / (0.80 - 0.60);
-                const ease = t * t * (3 - 2 * t);
-                targetXOffset = -1.0 - ease * 1.0;
+            clarityWordRefs.current.forEach((span, index) => {
+              if (!span) return;
+              const rank = CLARITY_RANDOM_ORDER[index] ?? index;
+              const wordStart = startBuffer + (rank / (totalWords - 1 || 1)) * activeRange;
+              const wordEnd = wordStart + windowSize;
+
+              // Word progress: 0 (fully sharp & visible) -> 1 (fully blurred out)
+              const wordP = Math.min(Math.max((oldP - wordStart) / (wordEnd - wordStart), 0), 1);
+
+              const opacity = 1 - wordP;
+              const blur = wordP * 16;
+              const translateY = -wordP * 10;
+
+              span.style.opacity = opacity.toFixed(3);
+              span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+              span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+            });
+
+            // Container (headline + paragraph + settled image) fades out completely
+            // once words are gone — this is what finally hides the center image too.
+            if (clarityTextWrapRef.current) {
+              clarityTextWrapRef.current.style.opacity = oldP >= 0.2 ? '0' : '1';
+              clarityTextWrapRef.current.style.pointerEvents = 'none';
+            }
+
+            // Phase 2: Horizontal Scroll Track across 3 cards
+            if (horizontalTrackRef.current) {
+              if (oldP < hStart) {
+                // Before words fade out: parked offscreen to the right
+                horizontalTrackRef.current.style.opacity = '0';
+                horizontalTrackRef.current.style.transform = `translate3d(${viewportW}px, 0, 0)`;
+                horizontalTrackRef.current.style.pointerEvents = 'none';
+                cardDescWordRefs.current.forEach((words) => {
+                  words?.forEach((span) => {
+                    if (span) {
+                      span.style.opacity = '0';
+                      span.style.filter = 'blur(12px)';
+                      span.style.transform = 'translate3d(0, 14px, 0)';
+                    }
+                  });
+                });
               } else {
-                // Card 3 dwells centered
-                targetXOffset = -2.0;
-              }
+                const pHoriz = Math.min(Math.max((oldP - hStart) / (hEnd - hStart), 0), 1);
+                const opacity = Math.min(pHoriz / 0.04, 1);
 
-              const currentX = targetXOffset * viewportW;
-              horizontalTrackRef.current.style.opacity = opacity.toFixed(3);
-              horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
-              horizontalTrackRef.current.style.pointerEvents = 'none';
+                // Calculate translation across 3 cards with smooth dwell per card
+                let targetXOffset = 1.0; // in units of viewportW
+                if (pHoriz <= 0.16) {
+                  // Card 1 enters from right (1.0 -> 0.0)
+                  const t = pHoriz / 0.16;
+                  const ease = 1 - Math.pow(1 - t, 2.2);
+                  targetXOffset = 1.0 - ease * 1.0;
+                } else if (pHoriz <= 0.28) {
+                  // Card 1 dwells centered
+                  targetXOffset = 0.0;
+                } else if (pHoriz <= 0.48) {
+                  // Smooth transition: Card 1 -> Card 2 (0.0 -> -1.0)
+                  const t = (pHoriz - 0.28) / (0.48 - 0.28);
+                  const ease = t * t * (3 - 2 * t);
+                  targetXOffset = 0.0 - ease * 1.0;
+                } else if (pHoriz <= 0.60) {
+                  // Card 2 dwells centered
+                  targetXOffset = -1.0;
+                } else if (pHoriz <= 0.80) {
+                  // Smooth transition: Card 2 -> Card 3 (-1.0 -> -2.0)
+                  const t = (pHoriz - 0.60) / (0.80 - 0.60);
+                  const ease = t * t * (3 - 2 * t);
+                  targetXOffset = -1.0 - ease * 1.0;
+                } else {
+                  // Card 3 dwells centered
+                  targetXOffset = -2.0;
+                }
+
+                const currentX = targetXOffset * viewportW;
+                horizontalTrackRef.current.style.opacity = opacity.toFixed(3);
+                horizontalTrackRef.current.style.transform = `translate3d(${currentX.toFixed(1)}px, 0, 0)`;
+                horizontalTrackRef.current.style.pointerEvents = 'none';
+
+                // Blur-in-up animation for horizontal card descriptions
+                const cardDwellRanges = [
+                  { enterStart: 0.02, enterEnd: 0.16 }, // Card 1
+                  { enterStart: 0.32, enterEnd: 0.46 }, // Card 2
+                  { enterStart: 0.64, enterEnd: 0.78 }, // Card 3
+                ];
+
+                cardDwellRanges.forEach((range, cIdx) => {
+                  const words = cardDescWordRefs.current[cIdx] || [];
+                  const totalWords = words.length;
+                  const pCard = Math.min(Math.max((pHoriz - range.enterStart) / (range.enterEnd - range.enterStart), 0), 1);
+
+                  words.forEach((span, wIdx) => {
+                    if (!span) return;
+                    const wStart = (wIdx / (totalWords || 1)) * 0.65;
+                    const wEnd = Math.min(wStart + 0.35, 1);
+                    const wProgress = Math.min(Math.max((pCard - wStart) / (wEnd - wStart), 0), 1);
+
+                    const op = wProgress;
+                    const blur = (1 - wProgress) * 12;
+                    const translateY = (1 - wProgress) * 14;
+
+                    span.style.opacity = op.toFixed(3);
+                    span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+                    span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+                  });
+                });
+              }
             }
           }
         }
@@ -615,13 +685,13 @@ export default function AboutIntro() {
         </div>
       </div>
 
-      {/* Sequence 2: 5 Focus Areas with In-Place Dynamic Left Text & Theme Transition Over Item 5 */}
+      {/* Sequence 2: 5 Focus Areas with In-Place Dynamic Left Text */}
       <div className="relative w-full bg-[#090909] text-white">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 box-border">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 lg:gap-20 xl:gap-24 items-start relative">
 
             {/* Pinned Left Column: Stays fixed at eye level; content changes dynamically in place! */}
-            <div className="lg:col-span-5 w-full hidden lg:block lg:sticky lg:top-[34vh] self-start z-20">
+            <div className="lg:col-span-5 min-w-0 w-full hidden lg:block lg:sticky lg:top-[34vh] self-start z-20">
               <div className="relative w-full max-w-[440px] min-h-[160px]">
                 {FOCUS_ITEMS.map((item, idx) => {
                   const words = item.quote.split(' ');
@@ -658,50 +728,8 @@ export default function AboutIntro() {
             </div>
 
             {/* Right Column: 5 items */}
-            <div className="lg:col-span-7 w-full flex flex-col items-start space-y-36 sm:space-y-48 lg:space-y-64 pt-16 sm:pt-24 lg:pt-32 pb-0">
+            <div className="lg:col-span-7 min-w-0 w-full flex flex-col items-start space-y-36 sm:space-y-48 lg:space-y-64 pt-16 sm:pt-24 lg:pt-32 pb-0">
               {FOCUS_ITEMS.map((item, idx) => {
-                const isLast = idx === FOCUS_ITEMS.length - 1;
-
-                if (isLast) {
-                  // Item 5 (Advertising): Pins sticky in the center, then white circle scales above it!
-                  return (
-                    <div
-                      key={idx}
-                      ref={(el) => {
-                        rightItemRefs.current[idx] = el;
-                      }}
-                      className="relative h-[220vh] w-full"
-                    >
-                      <div className="sticky top-0 h-screen h-[100svh] w-full flex flex-col items-start justify-center">
-                        {/* Mobile-only quote */}
-                        <div className="block lg:hidden mb-8">
-                          <p className="font-archivo text-white/80 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
-                            {item.quote}
-                          </p>
-                        </div>
-
-                        <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
-                          {item.titleLines.map((line, lIdx) => (
-                            <span key={lIdx} className="block whitespace-nowrap">
-                              {line}
-                            </span>
-                          ))}
-                        </h2>
-
-                        <div className="relative w-full max-w-[580px] aspect-[16/10] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
-                          <Image
-                            src={item.image}
-                            alt={item.alt}
-                            fill
-                            sizes="(max-width: 1024px) 100vw, 580px"
-                            className="object-cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-
                 return (
                   <div
                     key={idx}
@@ -719,7 +747,7 @@ export default function AboutIntro() {
 
                     <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                       {item.titleLines.map((line, lIdx) => (
-                        <span key={lIdx} className="block whitespace-nowrap">
+                        <span key={lIdx} className="block">
                           {line}
                         </span>
                       ))}
@@ -743,12 +771,18 @@ export default function AboutIntro() {
         </div>
       </div>
 
-      {/* Sequence 4: Clarity, execution, momentum + Horizontal Scroll */}
+      {/* Sequence 3: Clarity, execution, momentum + Horizontal Scroll — opens
+          with the scattered-image flythrough: images fly in and out, one
+          settles centered, then the headline/paragraph fade in flanking it */}
       <section
         ref={clarityTrackRef}
-        className="relative w-full h-[520vh] bg-white text-[#090909] z-50 -mt-[2px] overflow-visible"
+        className="relative w-full h-[900vh] bg-[#090909] z-50 -mt-[2px] overflow-visible"
       >
-        <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center px-6 sm:px-12 lg:px-20 box-border overflow-hidden">
+        <div
+          ref={clarityStickyRef}
+          className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center px-6 sm:px-12 lg:px-20 box-border overflow-hidden"
+          style={{ backgroundColor: '#090909' }}
+        >
           {/* Interactive GSAP Image Trail Layer */}
           <div className="absolute inset-0 z-10 pointer-events-auto overflow-hidden">
             <ImageTrail
@@ -757,17 +791,45 @@ export default function AboutIntro() {
             />
           </div>
 
-          {/* Layer 1: Initial "Clarity, execution, momentum" Text (Words blur out randomly on scroll) */}
+          {/* Scattered flythrough images: blur-fade in near center, fly outward, exit.
+              A single instance of the center photo is nested in Layer 1 below —
+              no separate/duplicate image element. */}
+          <div className="absolute inset-0 z-15 pointer-events-none">
+            {FLYTHROUGH_IMAGES.map((img, i) => (
+              <div
+                key={img.src}
+                ref={(el) => {
+                  flyItemRefs.current[i] = el;
+                }}
+                className="absolute left-1/2 top-1/2 w-[140px] sm:w-[180px] aspect-[4/5] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 opacity-0 will-change-[transform,opacity,filter]"
+                style={{
+                  transform: `translate3d(calc(-50% + ${img.startX}vw), calc(-50% + ${img.startY}vh), 0) scale(0.2)`,
+                  filter: 'blur(16px)',
+                }}
+              >
+                <Image
+                  src={img.src}
+                  alt=""
+                  fill
+                  sizes="180px"
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Layer 1: Initial "Clarity, execution, momentum" Text + the flythrough's
+              settled image, centered — (words blur out randomly on scroll) */}
           <div
             ref={clarityTextWrapRef}
             className="absolute inset-0 flex items-center justify-center z-20 px-6 sm:px-12 lg:px-20 pointer-events-none select-none transition-opacity duration-150"
           >
-            <div className="w-full max-w-[1440px] mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 lg:gap-20 xl:gap-24 items-center">
+            <div className="w-full max-w-[1600px] mx-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 lg:gap-16 items-center">
 
                 {/* Left Column: 3-line Heading */}
-                <div className="lg:col-span-7">
-                  <h2 className="font-archivo-expanded text-[clamp(3.2rem,6.8vw,92px)] font-medium text-[#090909] leading-[1.03] tracking-[-0.038em] m-0 text-left">
+                <div className="lg:col-span-5">
+                  <h2 className="font-archivo-expanded text-[clamp(2.5rem,5.2vw,72px)] font-medium text-white leading-[1.04] tracking-[-0.03em] m-0 text-left">
                     {CLARITY_HEADLINE_LINES.map((line, lIdx) => (
                       <span key={lIdx} className="block">
                         {line.map((word) => {
@@ -789,9 +851,13 @@ export default function AboutIntro() {
                   </h2>
                 </div>
 
+                {/* Center: empty spacer reserving visual space for the
+                    absolutely-positioned settle image below */}
+                <div className="hidden lg:block lg:col-span-3" />
+
                 {/* Right Column: Editorial Paragraph */}
-                <div className="lg:col-span-5 flex justify-start lg:justify-end">
-                  <p className="font-archivo text-[clamp(1.18rem,1.6vw,23px)] font-normal text-[#1a1a1a] leading-[1.56] tracking-[-0.015em] max-w-[520px] m-0 text-left">
+                <div className="lg:col-span-4 flex justify-start lg:justify-end">
+                  <p className="font-archivo text-[clamp(1.18rem,1.6vw,23px)] font-normal text-[#d4d4d8] leading-[1.56] tracking-[-0.015em] max-w-[420px] m-0 text-left">
                     {CLARITY_BODY_WORDS.map((word) => {
                       const idx = clarityWordCounter++;
                       return (
@@ -811,6 +877,26 @@ export default function AboutIntro() {
 
               </div>
             </div>
+
+            {/* The one settle image — a direct child of this container so its
+                visibility is carried by clarityTextWrapRef's opacity once the
+                intro is over (fades out together with the text, no duplicate). */}
+            <div
+              ref={flyCenterRef}
+              className="absolute left-1/2 top-1/2 w-[220px] sm:w-[260px] lg:w-[300px] aspect-[9/16] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 opacity-0 will-change-[transform,opacity,filter]"
+              style={{
+                transform: 'translate3d(calc(-50% + 3vw), calc(-50% - 3vh), 0) scale(0.3)',
+                filter: 'blur(16px)',
+              }}
+            >
+              <Image
+                src={FLYTHROUGH_CENTER_IMAGE}
+                alt="Gemstrat in motion"
+                fill
+                sizes="300px"
+                className="object-cover"
+              />
+            </div>
           </div>
 
           {/* Layer 2: Horizontal Scroll Track (3 Cards) */}
@@ -819,7 +905,11 @@ export default function AboutIntro() {
             className="absolute top-0 left-0 h-full flex flex-row flex-nowrap items-center z-30 will-change-[transform,opacity] pointer-events-none select-none"
             style={{ width: '300vw', transform: 'translate3d(100vw, 0, 0)', opacity: 0 }}
           >
-            {HORIZONTAL_CARDS.map((card, idx) => (
+            {HORIZONTAL_CARDS.map((card, idx) => {
+              // Cards 1 & 2 stay in the dark theme; Card 3 ("Momentum") arrives
+              // once the section background has already crossed to white.
+              const isDark = idx < 2;
+              return (
               <div
                 key={idx}
                 className="w-screen h-full flex items-center justify-center shrink-0 px-6 sm:px-12 lg:px-20 box-border pointer-events-none"
@@ -828,13 +918,13 @@ export default function AboutIntro() {
 
                   {/* Left Title */}
                   <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
-                    <h3 className="font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-medium text-[#090909] leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none">
+                    <h3 className={`font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-medium leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none ${isDark ? 'text-white' : 'text-[#090909]'}`}>
                       {card.number}{card.titleLine1}<br />{card.titleLine2}
                     </h3>
                   </div>
 
                   {/* Center Image from public/images */}
-                  <div className="relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shadow-2xl bg-[#eaeaea] shrink-0 border border-black/5 pointer-events-none">
+                  <div className={`relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shadow-2xl shrink-0 pointer-events-none ${isDark ? 'bg-[#141414] border border-white/10' : 'bg-[#eaeaea] border border-black/5'}`}>
                     <Image
                       src={card.image}
                       alt={card.alt}
@@ -846,63 +936,37 @@ export default function AboutIntro() {
 
                   {/* Right Description: Aligned to bottom right */}
                   <div className="lg:self-end max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] pb-2 sm:pb-4 shrink-0 pointer-events-none">
-                    <p className="font-archivo text-[clamp(1.05rem,1.35vw,19px)] font-normal text-[#1a1a1a] leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none">
-                      {card.description}
+                    <p className={`font-archivo text-[clamp(1.05rem,1.35vw,19px)] font-normal leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none ${isDark ? 'text-[#d4d4d8]' : 'text-[#1a1a1a]'}`}>
+                      {card.description.split(' ').map((word, wIdx) => (
+                        <span
+                          key={wIdx}
+                          ref={(el) => {
+                            if (!cardDescWordRefs.current[idx]) {
+                              cardDescWordRefs.current[idx] = [];
+                            }
+                            cardDescWordRefs.current[idx][wIdx] = el;
+                          }}
+                          className="inline-block mr-[0.25em] last:mr-0 opacity-0 will-change-[opacity,filter,transform]"
+                          style={{
+                            filter: 'blur(12px)',
+                            transform: 'translate3d(0, 14px, 0)',
+                          }}
+                        >
+                          {word}
+                        </span>
+                      ))}
                     </p>
                   </div>
 
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
 
         </div>
       </section>
 
-      {/* Sequence 3: Enterprise Architecture & Mapping (Fades in immediately once circle fills viewport) */}
-      <section
-        ref={nextSectionRef}
-        className="fixed inset-0 z-40 bg-white text-[#090909] overflow-hidden flex items-center transition-[opacity] duration-700 ease-out pointer-events-none will-change-[transform,opacity] h-[calc(100vh+4px)]"
-        style={{ opacity: 0 }}
-      >
-        {/* Background Image: last.jpeg */}
-        <div className="absolute inset-0 z-0 pointer-events-none select-none">
-          <Image
-            src="/images/last.jpeg"
-            alt="Enterprise Architecture & Mapping"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-[78%_center] sm:object-[82%_center] lg:object-right"
-          />
-          {/* Subtle mobile readability gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/70 to-transparent sm:via-white/40 sm:to-transparent lg:hidden" />
-        </div>
-
-        {/* Editorial Text Content on Left */}
-        <div className="relative z-10 w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 py-24 sm:py-32 lg:py-36 box-border">
-          <div className="max-w-[580px] lg:max-w-[660px]">
-            <h2 className="font-archivo-expanded text-[clamp(2.8rem,5.4vw,76px)] font-medium text-[#090909] leading-[1.05] tracking-[-0.035em] m-0 mb-8 sm:mb-10 text-left">
-              Enterprise architecture<br />& mapping
-            </h2>
-            <p className="font-archivo text-[clamp(1.15rem,1.5vw,22px)] font-normal text-[#1a1a1a] leading-[1.58] tracking-[-0.015em] m-0 text-left">
-              We help you structure your business to scale, aligning people, processes, and platforms — because big moves need solid foundations. It isn&#39;t a buzzword at Gemstrat, it&#39;s a core discipline; we break down complex operations into clear, visual structures that highlight friction points, streamline systems, and identify areas of growth.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* White Circle Scaling Transition (True rounded-full circle, high-res 2600px base, zero glow) */}
-      <div
-        ref={themeCircleRef}
-        className="fixed left-1/2 top-1/2 rounded-full bg-white will-change-transform pointer-events-none z-30"
-        style={{
-          width: '2600px',
-          height: '2600px',
-          transform: 'translate3d(-50%, -50%, 0) scale(0)',
-          opacity: 0,
-        }}
-      />
     </>
   );
 }

@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 
 const PARAGRAPH_TEXT =
-  "With over two decades of experience in enterprise architecture, marketing, and technology, Deepak has built and scaled businesses across continents. As the creator of Webzgo and the Convergence Suite, he brings a rare blend of systems thinking, brand strategy, and tech innovation — driving transformation at Gemstrat with hands-on leadership and expert teams assembled for each client's needs.";
+  "Two decades scaling businesses across enterprise architecture, marketing, and technology. Creator of Webzgo and the Convergence Suite, Deepak leads Gemstrat with hands-on expertise and expert teams built for every client.";
 
 const PARAGRAPH_WORDS = PARAGRAPH_TEXT.split(' ');
 
@@ -85,7 +85,8 @@ export default function ScalingExpertise() {
 
       const targetStartWidth = viewportW * 0.50;
       const startScale = Math.max(targetStartWidth / naturalWidth, 1.25);
-      const currentScale = startScale - ease * (startScale - 1.0);
+      const endScale = 1.18; // settle a bit larger than native size, not exactly 1:1
+      const currentScale = startScale - ease * (startScale - endScale);
 
       const startOffsetX = -naturalLeft;
       const currentOffsetX = startOffsetX * (1 - ease);
@@ -149,19 +150,19 @@ export default function ScalingExpertise() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[230vh] bg-[#090909] text-white z-30 overflow-visible"
+      className="relative w-full min-h-screen md:h-[230vh] bg-[#090909] text-white z-30 overflow-visible"
     >
-      <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-[#090909] box-border">
-        <div className="relative z-10 w-full max-w-[1720px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex flex-col justify-center">
+      <div className="relative md:sticky top-0 min-h-screen md:h-screen md:h-[100svh] w-full flex items-center overflow-visible md:overflow-hidden bg-[#090909] box-border py-12 md:py-0">
+        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex flex-col justify-center">
 
           {/* Reference Grid: Row 1 = Photo + Heading (Bottom-aligned), Row 2 = Paragraph */}
-          <div className="w-full grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-6 sm:gap-y-8 lg:gap-y-10 items-end">
+          <div className="w-full grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-4 sm:gap-y-6 lg:gap-7 items-end">
 
             {/* Row 1, Col 1: Photo (Aspect 12/13, matching reference) */}
             <div className="shrink-0 flex justify-start">
               <div
                 ref={imageBoxRef}
-                className="relative w-[280px] sm:w-[360px] md:w-[420px] lg:w-[470px] xl:w-[510px] aspect-[12/13] overflow-hidden shadow-2xl bg-black border border-white/10 will-change-transform"
+                className="relative w-[220px] sm:w-[280px] md:w-[320px] lg:w-[360px] xl:w-[390px] aspect-[12/13] overflow-hidden shadow-2xl bg-black border border-white/10 will-change-transform"
                 style={{
                   transformOrigin: 'top left',
                 }}
@@ -170,7 +171,7 @@ export default function ScalingExpertise() {
                   src="/images/698128379778759116.jpeg"
                   alt="What a privilege it is to be exhausted by a challenge you chose for yourself"
                   fill
-                  sizes="(max-width: 768px) 340px, (max-width: 1200px) 480px, 560px"
+                  sizes="(max-width: 768px) 280px, (max-width: 1200px) 360px, 420px"
                   className="object-cover pointer-events-none select-none"
                   priority
                 />
@@ -182,7 +183,7 @@ export default function ScalingExpertise() {
               ref={headingRef}
               className="flex flex-col justify-end items-end text-right will-change-[transform,opacity]"
             >
-              <h2 className="font-archivo-expanded text-[clamp(4.5rem,13vw,230px)] font-normal text-white leading-[0.86] tracking-[-0.04em] text-right m-0 w-full">
+              <h2 className="font-archivo-expanded text-[clamp(2.6rem,7vw,115px)] font-normal text-white leading-[0.92] tracking-[-0.035em] text-right m-0 w-full">
                 <span className="block">Scaling</span>
                 <span className="block">Expertise</span>
               </h2>
@@ -196,7 +197,7 @@ export default function ScalingExpertise() {
               ref={paraRef}
               className="flex flex-col items-end w-full"
             >
-              <p className="font-archivo text-[clamp(1.15rem,1.75vw,24px)] font-normal text-[#d4d4d8] leading-[1.42] tracking-[-0.02em] max-w-[920px] text-left m-0 w-full">
+              <p className="font-archivo text-[clamp(1.2rem,1.7vw,24px)] font-normal text-[#d4d4d8] leading-[1.45] tracking-[-0.01em] max-w-[620px] text-right m-0 w-full">
                 {PARAGRAPH_WORDS.map((word, wIdx) => (
                   <span
                     key={wIdx}
