@@ -22,11 +22,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400;100,500;100,600;100,700;100,800;100,900;125,400;125,500;125,600;125,700;125,800&family=JetBrains+Mono:wght@400;500;600&family=Work+Sans:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="font-archivo">
+      <body className="font-mono">
         <ScrollToTop />
         <Loader />
         <Navbar />

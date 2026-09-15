@@ -749,7 +749,7 @@ export default function AboutIntro() {
                       </p>
                     </div>
 
-                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,90px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
+                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,82px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                       {item.titleLines.map((line, lIdx) => (
                         <span key={lIdx} className="block">
                           {line}

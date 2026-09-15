@@ -12,16 +12,14 @@
   --color-bronze-soft: #c9ad7e;
   --color-hero-bg: #090909;
 
-  --font-archivo: 'Archivo', sans-serif;
+  --font-sans: 'JetBrains Mono', monospace;
+  --font-archivo: 'JetBrains Mono', monospace;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-work: 'Work Sans', sans-serif;
+  --font-work: 'JetBrains Mono', monospace;
 }
 
-/* Archivo is a variable font; "Expanded" is its wide-width axis instance
-   (font-stretch: 125%), not a separate Google Fonts family. */
 .font-archivo-expanded {
-  font-family: 'Archivo', sans-serif;
-  font-stretch: 125%;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 /* ---------- design tokens ---------- */
@@ -80,7 +78,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--text-on-paper);
-  font-family: 'Archivo', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
