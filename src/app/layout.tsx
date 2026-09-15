@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import SmoothScroll from '@/components/providers/SmoothScroll';
 import Loader from '@/components/ui/Loader';
+import Navbar from '@/components/navigation/Navbar';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
       </head>
       <body className="font-archivo">
         <Loader />
+        <Navbar />
         <SmoothScroll />
         {children}
       </body>

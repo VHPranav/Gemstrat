@@ -5,49 +5,53 @@ import Image from 'next/image';
 import ImageTrail from '@/components/ui/ImageTrail';
 
 const TRAIL_IMAGES = [
-  '/images/1010565603896276505.jpeg',
-  '/images/246572148347325364.jpeg',
-  '/images/618189486392349653.jpeg',
-  '/images/698128379778759116.jpeg',
-  '/images/844284261438464223.jpeg',
-  '/images/933511829023645883.jpeg',
-  '/images/984599537320872120.jpeg',
-  '/images/@maxross_design.jpeg',
-  '/images/Dynamic Typography Poster Inspired by Motion and Deadlines.jpeg',
-  '/images/Graphic Designer Job Opening at 134 Agency _ Creative Careers.jpeg',
-  '/images/Creative_people_need_creative_people.jpeg_202609071623.jpeg',
-  '/images/Dream Big, Act Bigger — Motion Running Phone Wallpaper.jpeg',
+  '/images/hooded-figure-techwear-blur.jpg',
+  '/images/athlete-sprint-motion-blur.jpg',
+  '/images/geometric-building-architecture-bw.jpg',
+  '/images/bearded-man-dark-studio-portrait.jpg',
+  '/images/man-side-lit-portrait-studio.jpg',
+  '/images/executive-crossed-arms-blue-hour.jpg',
+  '/images/man-writing-notebook-lamp.jpg',
+  '/images/sled-push-gym-motion-blur.jpg',
+  '/images/crosswalk-motion-blur-evening.jpg',
+  '/images/film-crew-studio-silhouettes.jpg',
+  '/images/man-reviewing-moodboard-wall.jpg',
+  '/images/man-walking-motion-blur-day.jpg',
+  '/images/blurred-grainy-portrait-archive.jpg',
+  '/images/man-portrait-confident-loft.jpg',
+  '/images/hands-pinning-notes-wall.jpg',
+  '/images/gallery-warehouse-meeting-bw.jpg',
 ];
 
 const FOCUS_ITEMS = [
   {
     quote: '“ Align goals, operations, and systems for future-ready growth,”',
     titleLines: ['Enterprise', 'Architecture &', 'Mapping'],
-    image: '/images/Pin by Stryke Wears on Sizin Pinleriniz in 2026 _ Fitness branding, Fitness.jpeg',
+    image: '/images/aerial-city-dark-rooftop.jpg',
     alt: 'Enterprise Architecture & Mapping',
   },
   {
     quote: '“ Integrate intelligence, streamline outcomes across the business.”',
     titleLines: ['AI &', 'Automation'],
-    image: '/images/Labs for Inflammation & Stress _ Hims.jpeg',
+    image: '/images/futuristic-ai-vr-glasses.jpg',
     alt: 'AI & Automation',
   },
   {
     quote: '“ Craft distinctive brand systems that evolve with your business.”',
     titleLines: ['360°', 'Branding'],
-    image: '/images/Graphic Designer Job Opening at 134 Agency _ Creative Careers.jpeg',
+    image: '/images/film-crew-studio-silhouettes.jpg',
     alt: '360° Branding',
   },
   {
     quote: '“ Websites, apps and digital-first marketing designed to deliver results.”',
     titleLines: ['Neo Marketing &', 'Digital'],
-    image: '/images/Dynamic Typography Poster Inspired by Motion and Deadlines.jpeg',
+    image: '/images/crosswalk-motion-blur-evening.jpg',
     alt: 'Neo Marketing & Digital',
   },
   {
     quote: '“ Build identities and campaigns that move markets.”',
     titleLines: ['Advertising'],
-    image: '/images/Creative_people_need_creative_people.jpeg_202609071623.jpeg',
+    image: '/images/man-reviewing-moodboard-wall.jpg',
     alt: 'Advertising',
   },
 ];
@@ -55,25 +59,25 @@ const FOCUS_ITEMS = [
 // Scattered images that fly outward from center and exit the viewport, each on
 // its own direction/timing — the transition after the last Focus Item
 const FLYTHROUGH_IMAGES = [
-  { src: '/images/1010565603896276505.jpeg', dirX: -1.3, dirY: -0.8, stagger: 0.0, startX: -3, startY: -2 },
-  { src: '/images/246572148347325364.jpeg', dirX: 1.4, dirY: -0.6, stagger: 0.04, startX: 4, startY: -2 },
-  { src: '/images/933511829023645883.jpeg', dirX: -1.5, dirY: 0.5, stagger: 0.08, startX: -4, startY: 2 },
-  { src: '/images/844284261438464223.jpeg', dirX: 1.2, dirY: 0.9, stagger: 0.03, startX: 3, startY: 3 },
-  { src: '/images/Dream Big, Act Bigger — Motion Running Phone Wallpaper.jpeg', dirX: -0.7, dirY: -1.3, stagger: 0.07, startX: -2, startY: -4 },
-  { src: '/images/Graphic Designer Job Opening at 134 Agency _ Creative Careers.jpeg', dirX: 0.8, dirY: 1.4, stagger: 0.11, startX: 2, startY: 4 },
-  { src: '/images/Dynamic Typography Poster Inspired by Motion and Deadlines.jpeg', dirX: -1.4, dirY: 1.0, stagger: 0.14, startX: -4, startY: 3 },
-  { src: '/images/984599537320872120.jpeg', dirX: 1.5, dirY: -1.0, stagger: 0.02, startX: 4, startY: -3 },
-  { src: '/images/618189486392349653.jpeg', dirX: 0.4, dirY: -1.5, stagger: 0.18, startX: 1, startY: -4 },
-  { src: '/images/@maxross_design.jpeg', dirX: -0.3, dirY: 1.5, stagger: 0.21, startX: -1, startY: 4 },
-  { src: '/images/Creative_people_need_creative_people.jpeg_202609071623.jpeg', dirX: 1.5, dirY: 0.2, stagger: 0.25, startX: 4, startY: 1 },
-  { src: '/images/Instagram.jpeg', dirX: -1.5, dirY: -0.2, stagger: 0.28, startX: -4, startY: -1 },
-  { src: '/images/Instagram (1).jpeg', dirX: 0.2, dirY: 1.5, stagger: 0.32, startX: 1, startY: 4 },
-  { src: '/images/Labs for Inflammation & Stress _ Hims.jpeg', dirX: -0.2, dirY: -1.5, stagger: 0.35, startX: -1, startY: -4 },
+  { src: '/images/hooded-figure-techwear-blur.jpg', dirX: -1.3, dirY: -0.8, stagger: 0.0, startX: -3, startY: -2 },
+  { src: '/images/athlete-sprint-motion-blur.jpg', dirX: 1.4, dirY: -0.6, stagger: 0.04, startX: 4, startY: -2 },
+  { src: '/images/boxer-motion-blur-abstract.jpg', dirX: -1.5, dirY: 0.5, stagger: 0.08, startX: -4, startY: 2 },
+  { src: '/images/cyberpunk-visor-silhouette.jpg', dirX: 1.2, dirY: 0.9, stagger: 0.03, startX: 3, startY: 3 },
+  { src: '/images/man-walking-phone-blur-night.jpg', dirX: -0.7, dirY: -1.3, stagger: 0.07, startX: -2, startY: -4 },
+  { src: '/images/glitch-portrait-dissolve-2.jpg', dirX: 0.8, dirY: 1.4, stagger: 0.11, startX: 2, startY: 4 },
+  { src: '/images/man-writing-desk-dark-office.jpg', dirX: -1.4, dirY: 1.0, stagger: 0.14, startX: -4, startY: 3 },
+  { src: '/images/ghostly-minimal-head-blur.jpg', dirX: 1.5, dirY: -1.0, stagger: 0.02, startX: 4, startY: -3 },
+  { src: '/images/man-suit-coffee-cup-dark.jpg', dirX: 0.4, dirY: -1.5, stagger: 0.18, startX: 1, startY: -4 },
+  { src: '/images/sled-push-gym-motion-blur.jpg', dirX: -0.3, dirY: 1.5, stagger: 0.21, startX: -1, startY: 4 },
+  { src: '/images/office-meeting-glass-window-dark.jpg', dirX: 1.5, dirY: 0.2, stagger: 0.25, startX: 4, startY: 1 },
+  { src: '/images/glowing-skyscrapers-night.jpg', dirX: -1.5, dirY: -0.2, stagger: 0.28, startX: -4, startY: -1 },
+  { src: '/images/glitch-portrait-dissolve-1.jpg', dirX: 0.2, dirY: 1.5, stagger: 0.32, startX: 1, startY: 4 },
+  { src: '/images/astronaut-visor-ghostly-blur.jpg', dirX: -0.2, dirY: -1.5, stagger: 0.35, startX: -1, startY: -4 },
 ];
 
 // The one image that blur-fades in and settles at a fixed size in the center —
 // carries straight into the Clarity section, which uses this same photo
-const FLYTHROUGH_CENTER_IMAGE = '/images/Discipline 🔥_ Lifestyle ✨.jpeg';
+const FLYTHROUGH_CENTER_IMAGE = '/images/man-cap-thoughtful-couch.jpg';
 
 const CLARITY_HEADLINE_LINES = [
   ['Clarity,'],
@@ -100,7 +104,7 @@ const HORIZONTAL_CARDS = [
     number: '1.',
     titleLine1: 'Clarity in',
     titleLine2: 'complexity',
-    image: '/images/618189486392349653.jpeg',
+    image: '/images/geometric-building-architecture-bw.jpg',
     alt: 'Clarity in complexity',
     description: 'We decode tangled operations and markets into clear roadmaps.',
   },
@@ -108,7 +112,7 @@ const HORIZONTAL_CARDS = [
     number: '2.',
     titleLine1: 'Scalable',
     titleLine2: 'execution',
-    image: '/images/Dream Big, Act Bigger — Motion Running Phone Wallpaper.jpeg',
+    image: '/images/man-walking-motion-blur-day.jpg',
     alt: 'Scalable execution',
     description: 'Every framework we build is tied to practical action.',
   },
@@ -116,7 +120,7 @@ const HORIZONTAL_CARDS = [
     number: '3.',
     titleLine1: 'Momentum',
     titleLine2: 'at every stage',
-    image: '/images/Instagram.jpeg',
+    image: '/images/team-huddle-hands-gym.jpg',
     alt: 'Momentum at every stage',
     description: 'Early-stage founder or multinational — we deliver solutions that create traction.',
   },
@@ -602,7 +606,7 @@ export default function AboutIntro() {
                 <div className="hidden lg:flex items-center justify-start relative h-[380px]">
                   <div className="relative w-[170px] aspect-[3/4] shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-10">
                     <Image
-                      src="/images/698128379778759116.jpeg"
+                      src="/images/bearded-man-dark-studio-portrait.jpg"
                       alt="Inside Gemstrat"
                       fill
                       sizes="170px"
@@ -611,7 +615,7 @@ export default function AboutIntro() {
                   </div>
                   <div className="relative w-[190px] aspect-[3/4] -ml-10 mt-20 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-20">
                     <Image
-                      src="/images/844284261438464223.jpeg"
+                      src="/images/man-side-lit-portrait-studio.jpg"
                       alt="Inside Gemstrat"
                       fill
                       sizes="190px"
@@ -636,7 +640,7 @@ export default function AboutIntro() {
                 <div className="hidden lg:flex items-center justify-end relative h-[380px]">
                   <div className="relative w-[160px] aspect-[3/4] mt-24 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-10">
                     <Image
-                      src="/images/984599537320872120.jpeg"
+                      src="/images/man-writing-notebook-lamp.jpg"
                       alt="Inside Gemstrat"
                       fill
                       sizes="160px"
@@ -645,7 +649,7 @@ export default function AboutIntro() {
                   </div>
                   <div className="relative w-[190px] aspect-[3/4] -ml-10 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-20 overflow-hidden">
                     <Image
-                      src="/images/933511829023645883.jpeg"
+                      src="/images/executive-crossed-arms-blue-hour.jpg"
                       alt="Inside Gemstrat"
                       fill
                       sizes="190px"
@@ -745,7 +749,7 @@ export default function AboutIntro() {
                       </p>
                     </div>
 
-                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,96px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
+                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,90px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                       {item.titleLines.map((line, lIdx) => (
                         <span key={lIdx} className="block">
                           {line}
@@ -776,7 +780,7 @@ export default function AboutIntro() {
           settles centered, then the headline/paragraph fade in flanking it */}
       <section
         ref={clarityTrackRef}
-        className="relative w-full h-[900vh] bg-[#090909] z-50 -mt-[2px] overflow-visible"
+        className="relative w-full h-[900vh] bg-[#090909] z-30 -mt-[2px] overflow-visible"
       >
         <div
           ref={clarityStickyRef}
@@ -910,56 +914,56 @@ export default function AboutIntro() {
               // once the section background has already crossed to white.
               const isDark = idx < 2;
               return (
-              <div
-                key={idx}
-                className="w-screen h-full flex items-center justify-center shrink-0 px-6 sm:px-12 lg:px-20 box-border pointer-events-none"
-              >
-                <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-8 sm:gap-12 lg:gap-16 xl:gap-24 w-full max-w-[1440px] mx-auto px-6 sm:px-12 box-border pointer-events-none">
+                <div
+                  key={idx}
+                  className="w-screen h-full flex items-center justify-center shrink-0 px-6 sm:px-12 lg:px-20 box-border pointer-events-none"
+                >
+                  <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-8 sm:gap-12 lg:gap-16 xl:gap-24 w-full max-w-[1440px] mx-auto px-6 sm:px-12 box-border pointer-events-none">
 
-                  {/* Left Title */}
-                  <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
-                    <h3 className={`font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-medium leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none ${isDark ? 'text-white' : 'text-[#090909]'}`}>
-                      {card.number}{card.titleLine1}<br />{card.titleLine2}
-                    </h3>
+                    {/* Left Title */}
+                    <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
+                      <h3 className={`font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-medium leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none ${isDark ? 'text-white' : 'text-[#090909]'}`}>
+                        {card.number}{card.titleLine1}<br />{card.titleLine2}
+                      </h3>
+                    </div>
+
+                    {/* Center Image from public/images */}
+                    <div className={`relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shadow-2xl shrink-0 pointer-events-none ${isDark ? 'bg-[#141414] border border-white/10' : 'bg-[#eaeaea] border border-black/5'}`}>
+                      <Image
+                        src={card.image}
+                        alt={card.alt}
+                        fill
+                        sizes="(max-width: 1024px) 340px, 420px"
+                        className="object-cover pointer-events-none"
+                      />
+                    </div>
+
+                    {/* Right Description: Aligned to bottom right */}
+                    <div className="lg:self-end max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] pb-2 sm:pb-4 shrink-0 pointer-events-none">
+                      <p className={`font-archivo text-[clamp(1.05rem,1.35vw,19px)] font-normal leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none ${isDark ? 'text-[#d4d4d8]' : 'text-[#1a1a1a]'}`}>
+                        {card.description.split(' ').map((word, wIdx) => (
+                          <span
+                            key={wIdx}
+                            ref={(el) => {
+                              if (!cardDescWordRefs.current[idx]) {
+                                cardDescWordRefs.current[idx] = [];
+                              }
+                              cardDescWordRefs.current[idx][wIdx] = el;
+                            }}
+                            className="inline-block mr-[0.25em] last:mr-0 opacity-0 will-change-[opacity,filter,transform]"
+                            style={{
+                              filter: 'blur(12px)',
+                              transform: 'translate3d(0, 14px, 0)',
+                            }}
+                          >
+                            {word}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+
                   </div>
-
-                  {/* Center Image from public/images */}
-                  <div className={`relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shadow-2xl shrink-0 pointer-events-none ${isDark ? 'bg-[#141414] border border-white/10' : 'bg-[#eaeaea] border border-black/5'}`}>
-                    <Image
-                      src={card.image}
-                      alt={card.alt}
-                      fill
-                      sizes="(max-width: 1024px) 340px, 420px"
-                      className="object-cover pointer-events-none"
-                    />
-                  </div>
-
-                  {/* Right Description: Aligned to bottom right */}
-                  <div className="lg:self-end max-w-[280px] sm:max-w-[320px] lg:max-w-[340px] pb-2 sm:pb-4 shrink-0 pointer-events-none">
-                    <p className={`font-archivo text-[clamp(1.05rem,1.35vw,19px)] font-normal leading-[1.5] tracking-[-0.015em] m-0 text-left pointer-events-none ${isDark ? 'text-[#d4d4d8]' : 'text-[#1a1a1a]'}`}>
-                      {card.description.split(' ').map((word, wIdx) => (
-                        <span
-                          key={wIdx}
-                          ref={(el) => {
-                            if (!cardDescWordRefs.current[idx]) {
-                              cardDescWordRefs.current[idx] = [];
-                            }
-                            cardDescWordRefs.current[idx][wIdx] = el;
-                          }}
-                          className="inline-block mr-[0.25em] last:mr-0 opacity-0 will-change-[opacity,filter,transform]"
-                          style={{
-                            filter: 'blur(12px)',
-                            transform: 'translate3d(0, 14px, 0)',
-                          }}
-                        >
-                          {word}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
-
                 </div>
-              </div>
               );
             })}
           </div>

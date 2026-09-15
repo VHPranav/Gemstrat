@@ -25,12 +25,12 @@ const REVIEWS: ReviewItem[] = [
 ];
 
 const DIRECTORY_LINKS = [
-  { num: '01', title: 'About us', href: '#about', image: '/images/698128379778759116.jpeg' },
-  { num: '02', title: 'What we enable', href: '#enable', image: '/images/933511829023645883.jpeg' },
-  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/844284261438464223.jpeg' },
-  { num: '04', title: 'Work', href: '#work', image: '/images/984599537320872120.jpeg' },
-  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/246572148347325364.jpeg' },
-  { num: '06', title: 'Contact', href: '#contact', image: '/images/618189486392349653.jpeg' },
+  { num: '01', title: 'About us', href: '#about', image: '/images/bearded-man-dark-studio-portrait.jpg' },
+  { num: '02', title: 'What we enable', href: '#enable', image: '/images/futuristic-ai-vr-glasses.jpg' },
+  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/aerial-city-dark-rooftop.jpg' },
+  { num: '04', title: 'Work', href: '#work', image: '/images/man-writing-desk-dark-office.jpg' },
+  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/hands-pinning-notes-wall.jpg' },
+  { num: '06', title: 'Contact', href: '#contact', image: '/images/office-meeting-glass-window-dark.jpg' },
 ];
 
 const SOCIAL_NETWORKS = [
@@ -45,8 +45,6 @@ export default function ReviewsSection() {
   const trackRef = useRef<HTMLDivElement>(null);
   const headlineRef = useRef<HTMLDivElement>(null);
   const curtainRef = useRef<HTMLDivElement>(null);
-  const bgImageRef = useRef<HTMLDivElement>(null);
-  const bgTextRef = useRef<HTMLDivElement>(null);
 
   const review1Ref = useRef<HTMLDivElement>(null);
   const review2Ref = useRef<HTMLDivElement>(null);
@@ -67,7 +65,6 @@ export default function ReviewsSection() {
       setReview2InView(true);
       if (trackRef.current) trackRef.current.style.transform = 'none';
       if (curtainRef.current) curtainRef.current.style.transform = 'none';
-      if (bgImageRef.current) bgImageRef.current.style.transform = 'none';
       if (footerCurtainRef.current) footerCurtainRef.current.style.transform = 'none';
       return;
     }
@@ -134,9 +131,9 @@ export default function ReviewsSection() {
       }
 
       // ===================================================================
-      // Phase 1: Horizontal scroll of reviews & headline (progress: 0.0 -> 0.32)
+      // Phase 1: Horizontal scroll of reviews & headline (progress: 0.0 -> 0.46)
       // ===================================================================
-      const p1 = Math.min(Math.max(progress / 0.32, 0), 1);
+      const p1 = Math.min(Math.max(progress / 0.46, 0), 1);
       const ease1 = p1 * p1 * p1 * (p1 * (p1 * 6 - 15) + 10);
 
       const scrollDistance = trackRef.current.scrollWidth - window.innerWidth;
@@ -145,46 +142,26 @@ export default function ReviewsSection() {
       trackRef.current.style.transform = `translate3d(${currentTrackX.toFixed(1)}px, 0, 0)`;
 
       // ===================================================================
-      // Phase 2: Review Curtain Slides Left to Reveal BG Image (progress: 0.30 -> 0.62)
+      // Phase 2: Footer Curtain Slides from Right Directly Over Reviews (progress: 0.44 -> 1.0)
       // ===================================================================
-      const p2 = Math.min(Math.max((progress - 0.30) / 0.32, 0), 1);
+      const p2 = Math.min(Math.max((progress - 0.44) / 0.56, 0), 1);
       const ease2 = p2 * p2 * (3 - 2 * p2);
 
-      // The Review Curtain moves to the left: 0% -> -100%
+      // Reviews curtain does a smooth leftward counter-glide: 0% -> -30%
       if (curtainRef.current) {
-        const curtainX = -ease2 * 100;
+        const curtainX = -ease2 * 30;
         curtainRef.current.style.transform = `translate3d(${curtainX.toFixed(2)}%, 0, 0)`;
       }
 
-      // Background image counter-parallax and scale depth
-      if (bgImageRef.current) {
-        const bgParallaxX = (1 - ease2) * 6;
-        const bgScale = 1.06 - ease2 * 0.06;
-        bgImageRef.current.style.transform = `translate3d(${bgParallaxX.toFixed(2)}%, 0, 0) scale(${bgScale.toFixed(3)})`;
-      }
-
-      // Background editorial text fades in as the curtain opens
-      if (bgTextRef.current) {
-        const textFadeIn = Math.min(Math.max((ease2 - 0.2) / 0.8, 0), 1);
-        bgTextRef.current.style.opacity = `${textFadeIn.toFixed(2)}`;
-        bgTextRef.current.style.transform = `translate3d(0, ${((1 - textFadeIn) * 16).toFixed(1)}px, 0)`;
-      }
-
-      // ===================================================================
-      // Phase 3: Footer Curtain Slides from Right Over BG Image (progress: 0.60 -> 1.0)
-      // ===================================================================
-      const p3 = Math.min(Math.max((progress - 0.60) / 0.40, 0), 1);
-      const ease3 = p3 * p3 * (3 - 2 * p3);
-
       if (footerCurtainRef.current) {
         // Footer curtain slides horizontally from 100% (offscreen right) to 0% (fully covering)
-        const footerCurtainX = (1 - ease3) * 100;
+        const footerCurtainX = (1 - ease2) * 100;
         footerCurtainRef.current.style.transform = `translate3d(${footerCurtainX.toFixed(2)}%, 0, 0)`;
       }
 
       // Internal horizontal glide on footer content for layered parallax feel
       if (footerTrackRef.current) {
-        const footerInternalShift = (1 - ease3) * 10; // subtle 10vw counter glide
+        const footerInternalShift = (1 - ease2) * 8; // subtle 8vw counter glide
         footerTrackRef.current.style.transform = `translate3d(${footerInternalShift.toFixed(2)}vw, 0, 0)`;
       }
     };
@@ -222,65 +199,10 @@ export default function ReviewsSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[580vh] bg-[#090909] text-white z-40 overflow-visible"
+      id="reviews"
+      className="relative w-full h-[340vh] bg-[#090909] text-white z-40 overflow-visible"
     >
       <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-[#090909] box-border">
-
-        {/* ========================================================= */}
-        {/* Layer 0: Background Image (Stationed Underneath)           */}
-        {/* ========================================================= */}
-        <div className="absolute inset-0 w-full h-full z-0 overflow-hidden bg-[#090909]">
-          <div
-            ref={bgImageRef}
-            className="relative w-full h-full will-change-transform"
-            style={{ transform: 'translate3d(6%, 0, 0) scale(1.06)' }}
-          >
-            <Image
-              src="/images/1010565603896276505.jpeg"
-              alt="Gemstrat Vision Portrait"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center filter grayscale contrast-[1.08] brightness-[0.92]"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/35 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent pointer-events-none" />
-
-            <div className="absolute top-8 sm:top-12 right-6 sm:right-12 z-10 flex items-center gap-3">
-              <span className="font-mono text-[11px] tracking-[0.2em] uppercase text-white/80 bg-black/40 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10">
-                Editorial
-              </span>
-            </div>
-
-            <div
-              ref={bgTextRef}
-              className="absolute bottom-10 sm:bottom-14 left-6 sm:left-12 right-6 sm:right-12 z-10 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 will-change-transform"
-              style={{ opacity: 0, transform: 'translate3d(0, 16px, 0)' }}
-            >
-              <div className="flex flex-col max-w-[650px]">
-                <span className="font-mono text-[11px] tracking-[0.25em] uppercase text-white/60 mb-2">
-                  03 // Architecture of Speed
-                </span>
-                <h3 className="font-archivo text-[clamp(1.75rem,3.2vw,48px)] font-normal text-white leading-tight tracking-[-0.03em] m-0">
-                  Interesting beats perfect.
-                </h3>
-                <p className="font-archivo text-[clamp(0.95rem,1.1vw,17px)] font-light text-[#a1a1aa] leading-[1.5] mt-2 m-0">
-                  We partner with founders and enterprise teams doing things no one else is doing.
-                </p>
-              </div>
-
-              <div className="sm:text-right">
-                <span className="font-mono text-[11px] tracking-[0.18em] text-white/50 uppercase block">
-                  Curtain Reveal
-                </span>
-                <span className="font-mono text-[11px] text-white/40 block mt-1">
-                  Gemstrat // 2026
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* ========================================================= */}
         {/* Layer 1: Reviews Curtain (Slides Off to Left)              */}

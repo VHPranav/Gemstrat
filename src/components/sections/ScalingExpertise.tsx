@@ -1,219 +1,216 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
-const PARAGRAPH_TEXT =
-  "Two decades scaling businesses across enterprise architecture, marketing, and technology. Creator of Webzgo and the Convergence Suite, Deepak leads Gemstrat with hands-on expertise and expert teams built for every client.";
+const TITLE_LINES = [
+  [
+    { text: 'Scaling', highlight: false },
+    { text: 'expertise,', highlight: true },
+  ],
+  [
+    { text: 'building', highlight: false },
+    { text: 'what', highlight: false },
+    { text: 'lasts.', highlight: false },
+  ],
+];
 
-const PARAGRAPH_WORDS = PARAGRAPH_TEXT.split(' ');
+const DESC_P1_WORDS =
+  'Two decades scaling businesses across enterprise architecture, marketing, and technology.'.split(
+    ' '
+  );
+
+const DESC_P2_WORDS =
+  'Creator of Webzgo and the Convergence Suite, leading Gemstrat with hands-on expertise and expert teams assembled for every client.'.split(
+    ' '
+  );
 
 export default function ScalingExpertise() {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const imageBoxRef = useRef<HTMLDivElement>(null);
-  const headingRef = useRef<HTMLDivElement>(null);
-  const paraRef = useRef<HTMLDivElement>(null);
-  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
-      if (imageBoxRef.current) {
-        imageBoxRef.current.style.transform = 'none';
-      }
-      if (headingRef.current) {
-        headingRef.current.style.opacity = '1';
-        headingRef.current.style.transform = 'none';
-      }
-      if (paraRef.current) {
-        paraRef.current.style.opacity = '1';
-        paraRef.current.style.transform = 'none';
-      }
-      wordRefs.current.forEach((span) => {
-        if (span) {
-          span.style.opacity = '1';
-          span.style.filter = 'none';
-          span.style.transform = 'none';
-        }
-      });
+      setInView(true);
       return;
     }
 
-    let rafId: number;
-
-    const updateAnimation = () => {
-      if (!sectionRef.current || !imageBoxRef.current) return;
-      const rect = sectionRef.current.getBoundingClientRect();
-      const viewportH = window.innerHeight;
-      const viewportW = window.innerWidth;
-
-      // Distance scrolled since section top first enters the bottom of the viewport
-      // (scrolledIntoView = 0 at moment of entry, starts scaling down immediately)
-      const scrolledIntoView = viewportH - rect.top;
-
-      // On mobile screens (< 768px), keep layout natural
-      if (viewportW < 768) {
-        imageBoxRef.current.style.transform = 'none';
-        if (headingRef.current) {
-          headingRef.current.style.opacity = '1';
-          headingRef.current.style.transform = 'none';
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
         }
-        wordRefs.current.forEach((span) => {
-          if (span) {
-            span.style.opacity = '1';
-            span.style.filter = 'none';
-            span.style.transform = 'none';
-          }
-        });
-        return;
+      },
+      {
+        threshold: 0.15,
       }
+    );
 
-      // ==========================================================
-      // Immediate Scroll-Dependent Scaling & Entrance:
-      // Starts scaling down the instant the image enters the viewport!
-      // Everything is directly tied to scroll position without waiting.
-      // ==========================================================
-      const transitionDistance = viewportH * 1.45;
-      const p = Math.min(Math.max(scrolledIntoView / transitionDistance, 0), 1);
-
-      // Silky smootherstep ease
-      const ease = p * p * p * (p * (p * 6 - 15) + 10);
-
-      // Photo: 50vw wide on left, scaling down to reference grid size
-      const naturalWidth = imageBoxRef.current.offsetWidth || 470;
-      const naturalLeft = imageBoxRef.current.getBoundingClientRect().left;
-
-      const targetStartWidth = viewportW * 0.50;
-      const startScale = Math.max(targetStartWidth / naturalWidth, 1.25);
-      const endScale = 1.18; // settle a bit larger than native size, not exactly 1:1
-      const currentScale = startScale - ease * (startScale - endScale);
-
-      const startOffsetX = -naturalLeft;
-      const currentOffsetX = startOffsetX * (1 - ease);
-
-      imageBoxRef.current.style.transform = `translate3d(${currentOffsetX.toFixed(1)}px, 0, 0) scale(${currentScale.toFixed(4)})`;
-
-      // Heading: Rises UPWARD from bottom-right (Frame 1 peeking tips -> Frame 3 docked)
-      if (headingRef.current) {
-        const startHeadingY = Math.min(viewportH * 0.65, 480);
-        const currentHeadingY = (1 - ease) * startHeadingY;
-        const headingOpacity = 0.70 + ease * 0.30;
-
-        headingRef.current.style.opacity = headingOpacity.toFixed(3);
-        headingRef.current.style.transform = `translate3d(0, ${currentHeadingY.toFixed(1)}px, 0)`;
-      }
-
-      // ==========================================================
-      // Paragraph: Word-by-Word Blur-Up In (Strictly Sequential / Non-Random)
-      // Words blur up in order from 0 to N as the user scrolls
-      // ==========================================================
-      const totalWords = PARAGRAPH_WORDS.length;
-      const startPhase = 0.35;
-      const endPhase = 0.92;
-      const windowSize = 0.08;
-      const activeSpread = endPhase - startPhase - windowSize;
-
-      wordRefs.current.forEach((span, i) => {
-        if (!span) return;
-        // Strictly sequential index (not random)
-        const wordStart = startPhase + (i / (totalWords - 1 || 1)) * activeSpread;
-        const wordEnd = wordStart + windowSize;
-
-        const wordP = Math.min(Math.max((p - wordStart) / (wordEnd - wordStart), 0), 1);
-
-        const opacity = wordP;
-        const blur = (1 - wordP) * 16;
-        const translateY = (1 - wordP) * 20;
-
-        span.style.opacity = opacity.toFixed(3);
-        span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-        span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
-      });
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateAnimation);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    updateAnimation();
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      cancelAnimationFrame(rafId);
+      observer.disconnect();
     };
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-screen md:h-[230vh] bg-[#090909] text-white z-30 overflow-visible"
+      id="leadership"
+      className="relative w-full min-h-screen lg:h-screen lg:min-h-[720px] xl:min-h-[760px] bg-white text-black py-16 sm:py-20 lg:py-12 px-6 sm:px-10 lg:px-16 xl:px-20 flex items-center justify-center overflow-hidden z-30"
+      aria-label="Leadership & Scaling Expertise"
     >
-      <div className="relative md:sticky top-0 min-h-screen md:h-screen md:h-[100svh] w-full flex items-center overflow-visible md:overflow-hidden bg-[#090909] box-border py-12 md:py-0">
-        <div className="relative z-10 w-full max-w-[1600px] mx-auto px-6 sm:px-10 lg:px-14 xl:px-16 flex flex-col justify-center">
+      <div className="w-full max-w-[1560px] mx-auto h-full flex flex-col justify-between">
 
-          {/* Reference Grid: Row 1 = Photo + Heading (Bottom-aligned), Row 2 = Paragraph */}
-          <div className="w-full grid grid-cols-1 md:grid-cols-[auto_1fr] gap-x-8 lg:gap-x-12 xl:gap-x-16 gap-y-4 sm:gap-y-6 lg:gap-7 items-end">
+        {/* Desktop 3-Column Asymmetric Layout Matching Reference */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 xl:gap-12 w-full h-full items-center">
 
-            {/* Row 1, Col 1: Photo (Aspect 12/13, matching reference) */}
-            <div className="shrink-0 flex justify-start">
-              <div
-                ref={imageBoxRef}
-                className="relative w-[220px] sm:w-[280px] md:w-[320px] lg:w-[360px] xl:w-[390px] aspect-[12/13] overflow-hidden shadow-2xl bg-black border border-white/10 will-change-transform"
-                style={{
-                  transformOrigin: 'top left',
-                }}
-              >
-                <Image
-                  src="/images/698128379778759116.jpeg"
-                  alt="What a privilege it is to be exhausted by a challenge you chose for yourself"
-                  fill
-                  sizes="(max-width: 768px) 280px, (max-width: 1200px) 360px, 420px"
-                  className="object-cover pointer-events-none select-none"
-                  priority
-                />
-              </div>
+          {/* ========================================================= */}
+          {/* Column 1 (Left): Top Image + Bottom Title                 */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-4 flex flex-col justify-between items-start h-full gap-10 sm:gap-12 lg:gap-14 xl:gap-18">
+
+            {/* Image 1 (Top-Left) */}
+            <div
+              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.06)] border border-black/5 will-change-[transform,opacity,filter] transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              style={{
+                opacity: inView ? 1 : 0,
+                transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)',
+                filter: inView ? 'blur(0px)' : 'blur(10px)',
+                transitionDelay: '80ms',
+              }}
+            >
+              <Image
+                src="/images/athlete-sprint-motion-blur.jpg"
+                alt="Motion Blur - Dynamic Speed & Focus"
+                fill
+                priority
+                sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 340px"
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              />
             </div>
 
-            {/* Row 1, Col 2: Heading (Bottom-aligned with photo, Right-aligned text) */}
-            <div
-              ref={headingRef}
-              className="flex flex-col justify-end items-end text-right will-change-[transform,opacity]"
-            >
-              <h2 className="font-archivo-expanded text-[clamp(2.6rem,7vw,115px)] font-normal text-white leading-[0.92] tracking-[-0.035em] text-right m-0 w-full">
-                <span className="block">Scaling</span>
-                <span className="block">Expertise</span>
+            {/* Bottom-Left: Title with Blur-In-Up Stagger Animation */}
+            <div className="flex flex-col items-start gap-3 sm:gap-3.5 max-w-[440px]">
+              <h2 className="font-archivo text-[clamp(2.2rem,3.4vw,50px)] font-medium tracking-[-0.035em] leading-[1.08] text-black m-0">
+                {TITLE_LINES.map((line, lIdx) => (
+                  <span key={lIdx} className="block">
+                    {line.map((item, wIdx) => (
+                      <span
+                        key={wIdx}
+                        style={{
+                          opacity: inView ? 1 : 0,
+                          transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 16px, 0)',
+                          filter: inView ? 'blur(0px)' : 'blur(10px)',
+                          transitionDelay: inView
+                            ? `${100 + (lIdx * 3 + wIdx) * 50}ms`
+                            : '0ms',
+                        }}
+                        className={`inline-block mr-[0.24em] will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] ${item.highlight
+                          ? 'text-neutral-400 font-normal'
+                          : 'text-black font-medium'
+                          }`}
+                      >
+                        {item.text}
+                      </span>
+                    ))}
+                  </span>
+                ))}
               </h2>
             </div>
 
-            {/* Row 2, Col 1: Empty space under photo */}
-            <div className="hidden md:block" />
+          </div>
 
-            {/* Row 2, Col 2: Paragraph directly under 'Expertise' (Word-by-word blur-up in) */}
+          {/* ========================================================= */}
+          {/* Column 2 (Center): Vertically Centered Portrait Image     */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-4 flex justify-center items-center h-full my-auto">
             <div
-              ref={paraRef}
-              className="flex flex-col items-end w-full"
+              className="relative w-[230px] sm:w-[270px] lg:w-[295px] xl:w-[325px] aspect-[3/4] bg-neutral-100 overflow-hidden shadow-[0_16px_44px_rgba(0,0,0,0.08)] border border-black/5 will-change-[transform,opacity,filter] transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              style={{
+                opacity: inView ? 1 : 0,
+                transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 24px, 0)',
+                filter: inView ? 'blur(0px)' : 'blur(12px)',
+                transitionDelay: '140ms',
+              }}
             >
-              <p className="font-archivo text-[clamp(1.2rem,1.7vw,24px)] font-normal text-[#d4d4d8] leading-[1.45] tracking-[-0.01em] max-w-[620px] text-right m-0 w-full">
-                {PARAGRAPH_WORDS.map((word, wIdx) => (
+              <Image
+                src="/images/deepak.jpeg"
+                alt="Deepak - Founder of Gemstrat"
+                fill
+                priority
+                sizes="(max-width: 640px) 270px, (max-width: 1024px) 300px, 330px"
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              />
+            </div>
+          </div>
+
+          {/* ========================================================= */}
+          {/* Column 3 (Right): Top Description + Bottom-Right Image    */}
+          {/* ========================================================= */}
+          <div className="lg:col-span-4 flex flex-col justify-between items-start lg:items-end h-full gap-8 sm:gap-10">
+
+            {/* Top-Right Corner: Bigger Description with Blur-In-Up Stagger */}
+            <div className="w-full max-w-[460px] xl:max-w-[500px] text-left flex flex-col gap-3.5 sm:gap-4 pt-2 lg:pt-0">
+              {/* Paragraph 1 */}
+              <p className="font-archivo text-[clamp(1.15rem,1.55vw,23px)] xl:text-[24px] font-normal text-black leading-[1.45] tracking-[-0.015em] m-0">
+                {DESC_P1_WORDS.map((word, wIdx) => (
                   <span
                     key={wIdx}
-                    ref={(el) => {
-                      wordRefs.current[wIdx] = el;
-                    }}
-                    className="inline-block mr-[0.28em] last:mr-0 will-change-[opacity,filter,transform] opacity-0"
                     style={{
-                      transform: 'translate3d(0, 20px, 0)',
-                      filter: 'blur(16px)',
+                      opacity: inView ? 1 : 0,
+                      transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
+                      filter: inView ? 'blur(0px)' : 'blur(8px)',
+                      transitionDelay: inView ? `${140 + wIdx * 25}ms` : '0ms',
                     }}
+                    className="inline-block mr-[0.25em] last:mr-0 will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   >
                     {word}
                   </span>
                 ))}
               </p>
+
+              {/* Paragraph 2 */}
+              <p className="font-archivo text-[clamp(1.05rem,1.35vw,20px)] xl:text-[21px] font-normal text-neutral-500 leading-[1.5] tracking-[-0.012em] m-0">
+                {DESC_P2_WORDS.map((word, wIdx) => (
+                  <span
+                    key={wIdx}
+                    style={{
+                      opacity: inView ? 1 : 0,
+                      transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
+                      filter: inView ? 'blur(0px)' : 'blur(8px)',
+                      transitionDelay: inView
+                        ? `${140 + (DESC_P1_WORDS.length + wIdx) * 18}ms`
+                        : '0ms',
+                    }}
+                    className="inline-block mr-[0.25em] last:mr-0 will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  >
+                    {word}
+                  </span>
+                ))}
+              </p>
+            </div>
+
+            {/* Bottom-Right Corner: Image 3 */}
+            <div
+              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.06)] border border-black/5 will-change-[transform,opacity,filter] transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              style={{
+                opacity: inView ? 1 : 0,
+                transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)',
+                filter: inView ? 'blur(0px)' : 'blur(10px)',
+                transitionDelay: '220ms',
+              }}
+            >
+              <Image
+                src="/images/hooded-figure-techwear-blur.jpg"
+                alt="Techwear Motion Blur - Execution & Momentum"
+                fill
+                sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 340px"
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              />
             </div>
 
           </div>

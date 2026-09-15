@@ -288,7 +288,7 @@ export default function Loader() {
       </noscript>
       <div
         ref={overlayRef}
-        className="gemstrat-loader fixed inset-0 z-[100] bg-[#090909] flex items-center justify-center will-change-[opacity,transform]"
+        className="gemstrat-loader fixed inset-0 z-[1000] bg-[#090909] flex items-center justify-center will-change-[opacity,transform]"
         aria-hidden="true"
       >
         <canvas ref={canvasRef} className="absolute inset-0" />

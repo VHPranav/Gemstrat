@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 
 interface DispersalItem {
@@ -18,7 +18,7 @@ interface DispersalItem {
 const DISPERSAL_ITEMS: DispersalItem[] = [
   {
     id: 'top-left',
-    src: '/images/698128379778759116.jpeg',
+    src: '/images/bearded-man-dark-studio-portrait.jpg',
     alt: 'What a privilege it is to be exhausted by a challenge you chose for yourself',
     targetX: -38, // Floating top-left of "The"
     targetY: -30,
@@ -28,7 +28,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'top-right',
-    src: '/images/933511829023645883.jpeg',
+    src: '/images/athlete-sprint-motion-blur.jpg',
     alt: 'Run at your own pace motion poster',
     targetX: 28, // Floating top-right of "Advantage"
     targetY: -30,
@@ -38,7 +38,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'bottom-left',
-    src: '/images/844284261438464223.jpeg',
+    src: '/images/cyberpunk-visor-silhouette.jpg',
     alt: 'Noise off Focus on eyewear portrait',
     targetX: -36, // Floating bottom-left under "The"
     targetY: 28,
@@ -48,7 +48,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'bottom-center',
-    src: '/images/984599537320872120.jpeg',
+    src: '/images/man-writing-desk-dark-office.jpg',
     alt: 'The next batch will arrive desk visual',
     targetX: 4, // Floating below center
     targetY: 33,
@@ -58,7 +58,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'bottom-right',
-    src: '/images/246572148347325364.jpeg',
+    src: '/images/crosswalk-motion-blur-evening.jpg',
     alt: 'Homie delivery vehicle motion shot',
     targetX: 38, // Floating right of "Advantage"
     targetY: 16,
@@ -78,55 +78,90 @@ const ALL_WORDS = ADVANTAGE_LINES.flat();
 // Random order for word-by-word blur-up in: "Gemstrat" (1) -> "The" (0) -> "Advantage" (2)
 const WORD_RANDOM_ORDER = [1, 0, 2];
 
-// 4 advantage rows: start staggered diagonally (Ref 1), then slide left to align together (Ref 2)
-const ADVANTAGE_PILLARS = [
+interface PillarItem {
+  id: string;
+  title: string;
+  subtext: string;
+  image: string;
+  widthClass: string;
+  aspectClass: string;
+  rotation: string;
+}
+
+// 8 advantage boxes: 2 in one row, 4 rows total
+// Each has unique image, custom dimensions (different sizes), sharp corners, and custom tilt angle
+const ADVANTAGE_PILLARS: PillarItem[] = [
   {
     id: 'pillar-1',
     title: 'Client-Centric, Always',
     subtext: 'We listen deeply and co-create solutions.',
-    initialStaggerVw: 0, // Starts aligned at base left
+    image: '/images/hands-pinning-notes-wall.jpg',
+    widthClass: 'w-[175px] sm:w-[205px]',
+    aspectClass: 'aspect-[3/4]',
+    rotation: '-4.5deg',
   },
   {
     id: 'pillar-2',
     title: 'Industry Fluency',
     subtext: 'We listen deeply and co-create solutions.',
-    initialStaggerVw: 12, // Starts indented +12vw, slides left to 0
+    image: '/images/geometric-building-architecture-bw.jpg',
+    widthClass: 'w-[230px] sm:w-[270px]',
+    aspectClass: 'aspect-[16/10]',
+    rotation: '3.5deg',
   },
   {
     id: 'pillar-3',
     title: 'Global Reach, Local Pulse',
     subtext: 'We listen deeply and co-create solutions.',
-    initialStaggerVw: 24, // Starts indented +24vw, slides left to 0
+    image: '/images/glowing-skyscrapers-night.jpg',
+    widthClass: 'w-[185px] sm:w-[220px]',
+    aspectClass: 'aspect-square',
+    rotation: '-6deg',
   },
   {
     id: 'pillar-4',
     title: 'Creative Meets Commercial',
     subtext: 'We listen deeply and co-create solutions.',
-    initialStaggerVw: 38, // Starts indented +38vw, slides left to 0
+    image: '/images/glitch-portrait-dissolve-2.jpg',
+    widthClass: 'w-[180px] sm:w-[215px]',
+    aspectClass: 'aspect-[4/5]',
+    rotation: '5.5deg',
   },
-];
-
-// 4 new dummy content items revealed by the black blinds transition
-const DARK_ADVANTAGE_PILLARS = [
   {
-    id: 'dark-pillar-1',
+    id: 'pillar-5',
     title: 'Bespoke Strategy, Zero Template',
     subtext: 'Tailored roadmaps engineered specifically for your market edge.',
+    image: '/images/aerial-city-dark-rooftop.jpg',
+    widthClass: 'w-[245px] sm:w-[290px]',
+    aspectClass: 'aspect-[16/11]',
+    rotation: '-3deg',
   },
   {
-    id: 'dark-pillar-2',
+    id: 'pillar-6',
     title: 'High-Velocity Execution',
     subtext: 'Turning strategic clarity into deployed assets in record time.',
+    image: '/images/sled-push-gym-motion-blur.jpg',
+    widthClass: 'w-[160px] sm:w-[195px]',
+    aspectClass: 'aspect-[9/14]',
+    rotation: '7deg',
   },
   {
-    id: 'dark-pillar-3',
+    id: 'pillar-7',
     title: 'Engineering & Design Synergy',
     subtext: 'Where technical rigor empowers world-class brand experiences.',
+    image: '/images/futuristic-ai-vr-glasses.jpg',
+    widthClass: 'w-[195px] sm:w-[235px]',
+    aspectClass: 'aspect-[4/5]',
+    rotation: '-5deg',
   },
   {
-    id: 'dark-pillar-4',
+    id: 'pillar-8',
     title: 'Measurable Commercial Impact',
     subtext: 'Every deliverable calibrated directly against your growth metrics.',
+    image: '/images/executive-crossed-arms-blue-hour.jpg',
+    widthClass: 'w-[225px] sm:w-[265px]',
+    aspectClass: 'aspect-[16/10]',
+    rotation: '4.5deg',
   },
 ];
 
@@ -135,12 +170,10 @@ export default function GemstratAdvantage() {
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const mainTrackRef = useRef<HTMLDivElement>(null);
-  const pillarContentRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const blindRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const blindEdgeRefs = useRef<(HTMLDivElement | null)[]>([]);
   const stickyRef = useRef<HTMLDivElement>(null);
 
-  const isAlignedRef = useRef(false);
+  const [hoveredPillar, setHoveredPillar] = useState<PillarItem | null>(null);
+  const [cursorPos, setCursorPos] = useState({ x: -1000, y: -1000 });
 
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -158,9 +191,9 @@ export default function GemstratAdvantage() {
         el.style.transform = `translate3d(${item.targetX}vw, ${item.targetY}vh, 0) scale(1)`;
         el.style.opacity = '1';
       });
-      pillarContentRefs.current.forEach((el) => {
-        if (el) el.style.transform = 'translate3d(0, 0, 0)';
-      });
+      if (mainTrackRef.current) {
+        mainTrackRef.current.style.transform = 'translate3d(0, 0, 0)';
+      }
       return;
     }
 
@@ -171,19 +204,19 @@ export default function GemstratAdvantage() {
       const rect = sectionRef.current.getBoundingClientRect();
       const viewportH = window.innerHeight;
       const viewportW = window.innerWidth;
-      const totalScrollable = rect.height - viewportH;
+      const totalDist = rect.height - viewportH;
 
-      if (totalScrollable <= 0) return;
+      if (totalDist <= 0) return;
 
-      // Progress: 0 when sticky locks, 1 when section completes
-      const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+      const scrolled = -rect.top;
+      const progress = Math.min(Math.max(scrolled / totalDist, 0), 1);
 
       // ==========================================================
-      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.13)
+      // Phase 1: Random Word-by-Word Blur-Up In (progress 0.02 -> 0.16)
       // ==========================================================
       const totalWords = ALL_WORDS.length;
       const startWord = 0.02;
-      const endWord = 0.13;
+      const endWord = 0.16;
       const windowSize = 0.045;
       const activeRange = endWord - startWord - windowSize;
 
@@ -205,12 +238,12 @@ export default function GemstratAdvantage() {
       });
 
       // ==========================================================
-      // Phase 2: Images Emerge One by One on Scrolling (progress 0.135 -> 0.35)
+      // Phase 2: Images Emerge One by One on Scrolling (progress 0.16 -> 0.44)
       // Each image launches sequentially with distinct start and arrival points
       // ==========================================================
-      const imgPhaseStart = 0.135;
-      const stepDuration = 0.048; // duration of individual image journey
-      const stepInterval = 0.038; // interval between successive launches
+      const imgPhaseStart = 0.16;
+      const stepDuration = 0.052; // duration of individual image journey
+      const stepInterval = 0.042; // interval between successive launches
 
       const startX = 0;
       const startY = 46;
@@ -231,7 +264,6 @@ export default function GemstratAdvantage() {
             1
           );
 
-          // Silky cubic ease-out
           const ease = 1 - Math.pow(1 - localP, 2.5);
 
           const curX = startX + ease * (item.targetX - startX);
@@ -245,11 +277,11 @@ export default function GemstratAdvantage() {
       });
 
       // ==========================================================
-      // Phase 3: Screen 1 slides left while Screen 2 (all 4 rows) slides in!
-      // (NO FADING: buttery smootherstep physical slide across progress 0.38 -> 0.56)
+      // Phase 3: Screen 1 slides left while Screen 2 (8 boxes) slides in!
+      // (progress 0.48 -> 0.72)
       // ==========================================================
-      const slideStart = 0.38;
-      const slideEnd = 0.56;
+      const slideStart = 0.48;
+      const slideEnd = 0.72;
 
       if (mainTrackRef.current) {
         if (progress < slideStart) {
@@ -264,74 +296,6 @@ export default function GemstratAdvantage() {
           // Screen 2 is locked fully centered in viewport
           mainTrackRef.current.style.transform = `translate3d(${-viewportW}px, 0, 0)`;
         }
-      }
-
-      // ==========================================================
-      // Phase 4: Buttery Automatic Slide into Left Alignment!
-      // Once Screen 2 arrives in viewport (progress >= 0.55),
-      // the rows glide gracefully into left alignment via smooth quintic transition.
-      // If scrolling back up (progress < 0.45), smoothly reset to staggered state.
-      // ==========================================================
-      if (progress >= 0.55 && !isAlignedRef.current) {
-        isAlignedRef.current = true;
-        pillarContentRefs.current.forEach((el) => {
-          if (el) el.style.transform = 'translate3d(0vw, 0, 0)';
-        });
-      } else if (progress < 0.45 && isAlignedRef.current) {
-        isAlignedRef.current = false;
-        pillarContentRefs.current.forEach((el, idx) => {
-          if (el) {
-            const initialStagger = ADVANTAGE_PILLARS[idx].initialStaggerVw;
-            el.style.transform = `translate3d(${initialStagger}vw, 0, 0)`;
-          }
-        });
-      }
-
-      // ==========================================================
-      // Phase 5: The 4 Blinds Transition (motion.dev curtains blinds)
-      // 4 black blinds expand down from each divider line,
-      // changing each row into black and revealing the new 4 contents!
-      // (progress 0.66 -> 0.88)
-      // ==========================================================
-      const blindsStart = 0.66;
-      const blindsEnd = 0.88;
-
-      blindRefs.current.forEach((el, idx) => {
-        if (!el) return;
-        const edgeEl = blindEdgeRefs.current[idx];
-
-        if (progress < blindsStart) {
-          el.style.clipPath = 'inset(0 0 100% 0)';
-          if (edgeEl) {
-            edgeEl.style.opacity = '0';
-            edgeEl.style.top = '0%';
-          }
-        } else if (progress <= blindsEnd) {
-          const pBlinds = (progress - blindsStart) / (blindsEnd - blindsStart);
-          const stagger = idx * 0.035;
-          const localT = Math.min(Math.max((pBlinds - stagger) / (1 - 3 * 0.035), 0), 1);
-          // Smootherstep for clean, mechanical yet organic blinds wipe
-          const easeBlind = localT * localT * (3 - 2 * localT);
-          const bottomInset = (1 - easeBlind) * 100;
-          el.style.clipPath = `inset(0 0 ${bottomInset.toFixed(2)}% 0)`;
-          if (edgeEl) {
-            edgeEl.style.top = `${(easeBlind * 100).toFixed(2)}%`;
-            edgeEl.style.opacity = easeBlind > 0.01 && easeBlind < 0.99 ? '1' : '0';
-          }
-        } else {
-          el.style.clipPath = 'inset(0 0 0% 0)';
-          if (edgeEl) {
-            edgeEl.style.opacity = '0';
-            edgeEl.style.top = '100%';
-          }
-        }
-      });
-
-      if (sectionRef.current) {
-        sectionRef.current.style.backgroundColor = progress >= 0.86 ? '#090909' : '#ffffff';
-      }
-      if (stickyRef.current) {
-        stickyRef.current.style.backgroundColor = progress >= 0.86 ? '#090909' : '#ffffff';
       }
     };
 
@@ -356,11 +320,12 @@ export default function GemstratAdvantage() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[460vh] bg-white text-[#090909] z-40 overflow-visible transition-colors duration-300"
+      id="advantage"
+      className="relative w-full h-[320vh] bg-white text-[#090909] z-40 overflow-visible"
     >
       <div
         ref={stickyRef}
-        className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-white box-border transition-colors duration-300"
+        className="sticky top-0 h-screen h-[100svh] w-full flex items-center overflow-hidden bg-white box-border"
       >
         
         {/* Continuous Horizontal Track (Screen 1 + Screen 2 side-by-side) */}
@@ -431,76 +396,81 @@ export default function GemstratAdvantage() {
           </div>
 
           {/* ========================================================= */}
-          {/* Screen 2: All 4 Advantage Rows Together (Single Viewport) */}
-          {/* 1. Staggered -> Auto-slides left into alignment           */}
-          {/* 2. 4 Blinds Transition wipes down from lines into black!  */}
+          {/* Screen 2: 8 Advantage Boxes (2 in one row, 4 rows total)  */}
           {/* ========================================================= */}
-          <div className="w-screen h-full shrink-0 flex flex-col justify-between relative pointer-events-none select-none">
-            {ADVANTAGE_PILLARS.map((pillar, pIdx) => (
-              <div
-                key={pillar.id}
-                className={`flex-1 relative flex flex-col justify-center border-b border-black/[0.12] ${
-                  pIdx === 0 ? 'border-t border-black/[0.12]' : ''
-                } pointer-events-none select-none px-6 overflow-hidden`}
-              >
-                {/* 1. White Content Block: starts staggered, auto-slides left */}
+          <div
+            onMouseMove={(e) => setCursorPos({ x: e.clientX, y: e.clientY })}
+            onMouseLeave={() => setHoveredPillar(null)}
+            className="w-screen h-full shrink-0 grid grid-cols-2 grid-rows-4 pointer-events-auto select-none bg-white relative"
+          >
+            {ADVANTAGE_PILLARS.map((pillar, pIdx) => {
+              const isLeftCol = pIdx % 2 === 0;
+              const isTopRow = pIdx < 2;
+              const isHovered = hoveredPillar?.id === pillar.id;
+
+              return (
                 <div
-                  ref={(el) => {
-                    pillarContentRefs.current[pIdx] = el;
-                  }}
-                  className="absolute top-1/2 -translate-y-1/2 left-[6vw] sm:left-[8vw] lg:left-[10vw] max-w-[90vw] sm:max-w-[700px] lg:max-w-[950px] transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform pointer-events-none select-none"
-                  style={{
-                    transitionDelay: `${pIdx * 110}ms`,
-                    transform: `translate3d(${pillar.initialStaggerVw}vw, 0, 0)`,
-                  }}
+                  key={pillar.id}
+                  onMouseEnter={() => setHoveredPillar(pillar)}
+                  className={`relative flex flex-col justify-center px-6 sm:px-10 lg:px-14 xl:px-16 border-b border-black/[0.12] ${
+                    isTopRow ? 'border-t border-black/[0.12]' : ''
+                  } ${isLeftCol ? 'border-r border-black/[0.12]' : ''} overflow-hidden cursor-pointer transition-colors duration-250 ${
+                    isHovered ? 'bg-[#090909]' : 'bg-white'
+                  }`}
                 >
-                  <h3 className="font-archivo-expanded text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#090909] leading-[1.08] tracking-[-0.035em] m-0 text-left">
+                  <h3
+                    className={`font-archivo-expanded text-[clamp(1.3rem,2.1vw,34px)] font-medium leading-[1.12] tracking-[-0.03em] m-0 text-left transition-colors duration-250 ${
+                      isHovered ? 'text-white' : 'text-[#090909]'
+                    }`}
+                  >
                     {pillar.title}
                   </h3>
-                  <p className="font-archivo text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#555555] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
+                  <p
+                    className={`font-archivo text-[clamp(0.88rem,1.05vw,16px)] font-normal leading-[1.45] tracking-[-0.015em] mt-2 sm:mt-2.5 m-0 text-left transition-colors duration-250 ${
+                      isHovered ? 'text-zinc-400' : 'text-[#555555]'
+                    }`}
+                  >
                     {pillar.subtext}
                   </p>
                 </div>
-
-                {/* 2. Black Blind Slat (Wipes down from divider line, revealing new dark dummy content) */}
-                <div
-                  ref={(el) => {
-                    blindRefs.current[pIdx] = el;
-                  }}
-                  className="absolute inset-0 bg-[#090909] z-20 pointer-events-none select-none will-change-[clip-path]"
-                  style={{
-                    clipPath: 'inset(0 0 100% 0)',
-                  }}
-                >
-                  {/* Dark Content Block inside blind */}
-                  <div className="absolute top-1/2 -translate-y-1/2 left-[6vw] sm:left-[8vw] lg:left-[10vw] max-w-[90vw] sm:max-w-[700px] lg:max-w-[950px] pointer-events-none select-none">
-                    <h3 className="font-archivo-expanded text-[clamp(2.4rem,4.4vw,66px)] font-medium text-[#f5f5f7] leading-[1.08] tracking-[-0.035em] m-0 text-left">
-                      {DARK_ADVANTAGE_PILLARS[pIdx].title}
-                    </h3>
-                    <p className="font-archivo text-[clamp(1.1rem,1.4vw,22px)] font-normal text-[#9a9a9f] leading-[1.5] tracking-[-0.015em] mt-2.5 sm:mt-3.5 m-0 text-left">
-                      {DARK_ADVANTAGE_PILLARS[pIdx].subtext}
-                    </p>
-                  </div>
-
-                  {/* Ultra-fine whisper-thin hairline white divider after transition */}
-                  <div className="absolute inset-x-0 bottom-0 h-[1px] scale-y-[0.35] origin-bottom bg-white/[0.05] pointer-events-none" />
-                  {pIdx === 0 && (
-                    <div className="absolute inset-x-0 top-0 h-[1px] scale-y-[0.35] origin-top bg-white/[0.05] pointer-events-none" />
-                  )}
-                </div>
-
-                {/* 3. Moving bottom slat edge line during the blinds transition */}
-                <div
-                  ref={(el) => {
-                    blindEdgeRefs.current[pIdx] = el;
-                  }}
-                  className="absolute inset-x-0 h-[1px] scale-y-[0.35] bg-white/12 pointer-events-none select-none z-30 opacity-0 will-change-[top,opacity]"
-                  style={{ top: '0%' }}
-                />
-              </div>
-            ))}
+              );
+            })}
           </div>
 
+        </div>
+
+        {/* Floating Cursor Image Badge (Tracks mouse with distinct angles, sizes, and sharp corners) */}
+        <div
+          className="fixed pointer-events-none z-50 will-change-transform rounded-none"
+          style={{
+            left: cursorPos.x,
+            top: cursorPos.y,
+            transform: hoveredPillar
+              ? `translate(-50%, -50%) scale(1) rotate(${hoveredPillar.rotation})`
+              : 'translate(-50%, -50%) scale(0.6) rotate(0deg)',
+            opacity: hoveredPillar ? 1 : 0,
+            transition: 'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease',
+          }}
+        >
+          <div
+            className={`relative ${hoveredPillar?.widthClass || 'w-[200px] sm:w-[240px]'} ${
+              hoveredPillar?.aspectClass || 'aspect-[16/11]'
+            } rounded-none overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.92)] border border-white/35 bg-black`}
+          >
+            {hoveredPillar && (
+              <Image
+                src={hoveredPillar.image}
+                alt={hoveredPillar.title}
+                fill
+                sizes="300px"
+                className="object-cover object-center rounded-none"
+              />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
+            <span className="absolute bottom-2.5 left-3 right-3 text-[10px] font-mono tracking-wider text-white/90 uppercase truncate drop-shadow-md">
+              {hoveredPillar?.title}
+            </span>
+          </div>
         </div>
 
       </div>

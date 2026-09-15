@@ -18,17 +18,17 @@ const RANDOM_DISSOLVE_SEQUENCE = [7, 2, 11, 4, 9, 1, 8, 5, 12, 3, 10, 0, 6];
 // 4 items with same height but different widths, last one is video
 const GALLERY_IMAGES = [
   {
-    src: '/images/618189486392349653.jpeg',
+    src: '/images/office-meeting-glass-window-dark.jpg',
     alt: 'Gallery showcase image 1',
     widthClass: 'w-[clamp(280px,32vw,440px)]',
   },
   {
-    src: '/images/933511829023645883.jpeg',
+    src: '/images/glowing-skyscrapers-night.jpg',
     alt: 'Gallery showcase image 2',
     widthClass: 'w-[clamp(420px,48vw,680px)]', // Wide card
   },
   {
-    src: '/images/1010565603896276505.jpeg',
+    src: '/images/man-portrait-confident-loft.jpg',
     alt: 'Gallery showcase image 3',
     widthClass: 'w-[clamp(260px,28vw,390px)]', // Slim card
   },
