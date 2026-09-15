@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import SmoothScroll from '@/components/providers/SmoothScroll';
+import ScrollToTop from '@/components/providers/ScrollToTop';
 import Loader from '@/components/ui/Loader';
 import Navbar from '@/components/navigation/Navbar';
 import './globals.css';
@@ -26,6 +27,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-archivo">
+        <ScrollToTop />
         <Loader />
         <Navbar />
         <SmoothScroll />
