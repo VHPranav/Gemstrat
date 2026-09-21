@@ -18,7 +18,7 @@ interface DispersalItem {
 const DISPERSAL_ITEMS: DispersalItem[] = [
   {
     id: 'top-left',
-    src: '/images/bearded-man-dark-studio-portrait.jpg',
+    src: '/images/ref%20images/1.webp',
     alt: 'What a privilege it is to be exhausted by a challenge you chose for yourself',
     targetX: -38, // Floating top-left of "The"
     targetY: -30,
@@ -28,7 +28,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'top-right',
-    src: '/images/athlete-sprint-motion-blur.jpg',
+    src: '/images/ref%20images/2.webp',
     alt: 'Run at your own pace motion poster',
     targetX: 28, // Floating top-right of "Advantage"
     targetY: -30,
@@ -38,7 +38,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'bottom-left',
-    src: '/images/cyberpunk-visor-silhouette.jpg',
+    src: '/images/ref%20images/3.webp',
     alt: 'Noise off Focus on eyewear portrait',
     targetX: -36, // Floating bottom-left under "The"
     targetY: 28,
@@ -48,7 +48,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'bottom-center',
-    src: '/images/man-writing-desk-dark-office.jpg',
+    src: '/images/ref%20images/4.webp',
     alt: 'The next batch will arrive desk visual',
     targetX: 4, // Floating below center
     targetY: 33,
@@ -58,7 +58,7 @@ const DISPERSAL_ITEMS: DispersalItem[] = [
   },
   {
     id: 'bottom-right',
-    src: '/images/crosswalk-motion-blur-evening.jpg',
+    src: '/images/ref%20images/5.webp',
     alt: 'Homie delivery vehicle motion shot',
     targetX: 38, // Floating right of "Advantage"
     targetY: 16,
@@ -95,7 +95,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-1',
     title: 'Client-Centric, Always',
     subtext: 'We listen deeply and co-create solutions.',
-    image: '/images/hands-pinning-notes-wall.jpg',
+    image: '/images/ref%20images/6.webp',
     widthClass: 'w-[175px] sm:w-[205px]',
     aspectClass: 'aspect-[3/4]',
     rotation: '-4.5deg',
@@ -104,7 +104,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-2',
     title: 'Industry Fluency',
     subtext: 'We listen deeply and co-create solutions.',
-    image: '/images/geometric-building-architecture-bw.jpg',
+    image: '/images/ref%20images/7.webp',
     widthClass: 'w-[230px] sm:w-[270px]',
     aspectClass: 'aspect-[16/10]',
     rotation: '3.5deg',
@@ -113,7 +113,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-3',
     title: 'Global Reach, Local Pulse',
     subtext: 'We listen deeply and co-create solutions.',
-    image: '/images/glowing-skyscrapers-night.jpg',
+    image: '/images/ref%20images/8.webp',
     widthClass: 'w-[185px] sm:w-[220px]',
     aspectClass: 'aspect-square',
     rotation: '-6deg',
@@ -122,7 +122,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-4',
     title: 'Creative Meets Commercial',
     subtext: 'We listen deeply and co-create solutions.',
-    image: '/images/glitch-portrait-dissolve-2.jpg',
+    image: '/images/ref%20images/9.webp',
     widthClass: 'w-[180px] sm:w-[215px]',
     aspectClass: 'aspect-[4/5]',
     rotation: '5.5deg',
@@ -131,7 +131,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-5',
     title: 'Bespoke Strategy, Zero Template',
     subtext: 'Tailored roadmaps engineered specifically for your market edge.',
-    image: '/images/aerial-city-dark-rooftop.jpg',
+    image: '/images/ref%20images/10.webp',
     widthClass: 'w-[245px] sm:w-[290px]',
     aspectClass: 'aspect-[16/11]',
     rotation: '-3deg',
@@ -140,7 +140,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-6',
     title: 'High-Velocity Execution',
     subtext: 'Turning strategic clarity into deployed assets in record time.',
-    image: '/images/sled-push-gym-motion-blur.jpg',
+    image: '/images/ref%20images/11.webp',
     widthClass: 'w-[160px] sm:w-[195px]',
     aspectClass: 'aspect-[9/14]',
     rotation: '7deg',
@@ -149,7 +149,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-7',
     title: 'Engineering & Design Synergy',
     subtext: 'Where technical rigor empowers world-class brand experiences.',
-    image: '/images/futuristic-ai-vr-glasses.jpg',
+    image: '/images/ref%20images/12.webp',
     widthClass: 'w-[195px] sm:w-[235px]',
     aspectClass: 'aspect-[4/5]',
     rotation: '-5deg',
@@ -158,7 +158,7 @@ const ADVANTAGE_PILLARS: PillarItem[] = [
     id: 'pillar-8',
     title: 'Measurable Commercial Impact',
     subtext: 'Every deliverable calibrated directly against your growth metrics.',
-    image: '/images/executive-crossed-arms-blue-hour.jpg',
+    image: '/images/ref%20images/13.webp',
     widthClass: 'w-[225px] sm:w-[265px]',
     aspectClass: 'aspect-[16/10]',
     rotation: '4.5deg',
@@ -376,7 +376,7 @@ export default function GemstratAdvantage() {
                   ref={(el) => {
                     itemRefs.current[idx] = el;
                   }}
-                  className={`absolute ${item.widthClass} ${item.aspectClass} overflow-hidden shadow-2xl bg-[#eaeaea] border border-black/5 will-change-[transform,opacity] pointer-events-none select-none`}
+                  className={`absolute ${item.widthClass} ${item.aspectClass} overflow-hidden bg-[#eaeaea] border border-black/5 will-change-[transform,opacity] pointer-events-none select-none`}
                   style={{
                     transform: 'translate3d(0, 46vh, 0) scale(0.2)',
                     opacity: 0,
@@ -387,7 +387,7 @@ export default function GemstratAdvantage() {
                     alt={item.alt}
                     fill
                     sizes="(max-width: 768px) 160px, 225px"
-                    className="object-cover pointer-events-none"
+                    className="object-cover pointer-events-none grayscale"
                   />
                 </div>
               ))}
@@ -455,7 +455,7 @@ export default function GemstratAdvantage() {
           <div
             className={`relative ${hoveredPillar?.widthClass || 'w-[200px] sm:w-[240px]'} ${
               hoveredPillar?.aspectClass || 'aspect-[16/11]'
-            } rounded-none overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.92)] border border-white/35 bg-black`}
+            } rounded-none overflow-hidden border border-white/35 bg-black`}
           >
             {hoveredPillar && (
               <Image
@@ -463,11 +463,11 @@ export default function GemstratAdvantage() {
                 alt={hoveredPillar.title}
                 fill
                 sizes="300px"
-                className="object-cover object-center rounded-none"
+                className="object-cover object-center rounded-none grayscale"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent pointer-events-none" />
-            <span className="absolute bottom-2.5 left-3 right-3 text-[10px] font-mono tracking-wider text-white/90 uppercase truncate drop-shadow-md">
+            <span className="absolute bottom-2.5 left-3 right-3 text-[10px] font-mono tracking-wider text-white/90 uppercase truncate">
               {hoveredPillar?.title}
             </span>
           </div>

@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import SmoothScroll from '@/components/providers/SmoothScroll';
 import ScrollToTop from '@/components/providers/ScrollToTop';
-import Loader from '@/components/ui/Loader';
 import Navbar from '@/components/navigation/Navbar';
 import './globals.css';
 
@@ -19,17 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="preconnect" href="https://use.typekit.net" crossOrigin="anonymous" />
+        <link rel="stylesheet" href="https://use.typekit.net/tas3jji.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
-          rel="stylesheet"
-        />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Besley:ital,wght@0,400..900;1,400..900&display=swap" />
       </head>
-      <body className="font-mono">
+      <body className="font-sans">
         <ScrollToTop />
-        <Loader />
-        <Navbar />
+        {/* <Navbar /> */}
         <SmoothScroll />
         {children}
       </body>

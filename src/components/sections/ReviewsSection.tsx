@@ -25,12 +25,12 @@ const REVIEWS: ReviewItem[] = [
 ];
 
 const DIRECTORY_LINKS = [
-  { num: '01', title: 'About us', href: '#about', image: '/images/bearded-man-dark-studio-portrait.jpg' },
-  { num: '02', title: 'What we enable', href: '#enable', image: '/images/futuristic-ai-vr-glasses.jpg' },
-  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/aerial-city-dark-rooftop.jpg' },
-  { num: '04', title: 'Work', href: '#work', image: '/images/man-writing-desk-dark-office.jpg' },
-  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/hands-pinning-notes-wall.jpg' },
-  { num: '06', title: 'Contact', href: '#contact', image: '/images/office-meeting-glass-window-dark.jpg' },
+  { num: '01', title: 'About us', href: '#about', image: '/images/ref%20images/1.webp' },
+  { num: '02', title: 'What we enable', href: '#enable', image: '/images/ref%20images/2.webp' },
+  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/ref%20images/3.webp' },
+  { num: '04', title: 'Work', href: '#work', image: '/images/ref%20images/4.webp' },
+  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/ref%20images/5.webp' },
+  { num: '06', title: 'Contact', href: '#contact', image: '/images/ref%20images/6.webp' },
 ];
 
 const SOCIAL_NETWORKS = [
@@ -469,7 +469,7 @@ export default function ReviewsSection() {
                               alt={link.title}
                               fill
                               sizes="(max-width: 1024px) 50vw, 25vw"
-                              className="object-cover scale-110 group-hover:scale-100 transition-transform duration-700 ease-out"
+                              className="object-cover scale-110 group-hover:scale-100 transition-transform duration-700 ease-out grayscale"
                             />
                             {/* Cinematic Contrast Overlay to keep text perfectly legible */}
                             <div className="absolute inset-0 bg-[#070708]/65 backdrop-blur-[0.5px]" />

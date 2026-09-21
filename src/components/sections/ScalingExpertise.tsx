@@ -75,21 +75,21 @@ export default function ScalingExpertise() {
 
             {/* Image 1 (Top-Left) */}
             <div
-              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.06)] border border-black/5 will-change-[transform,opacity,filter] transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden border border-black/5 transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
               style={{
                 opacity: inView ? 1 : 0,
-                transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)',
-                filter: inView ? 'blur(0px)' : 'blur(10px)',
+                transform: inView ? 'none' : 'translate3d(0, 20px, 0)',
+                filter: inView ? 'none' : 'blur(10px)',
                 transitionDelay: '80ms',
               }}
             >
               <Image
-                src="/images/athlete-sprint-motion-blur.jpg"
+                src="/images/ref%20images/14.webp"
                 alt="Motion Blur - Dynamic Speed & Focus"
                 fill
                 priority
-                sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 340px"
-                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                unoptimized
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] grayscale"
               />
             </div>
 
@@ -104,7 +104,7 @@ export default function ScalingExpertise() {
                         style={{
                           opacity: inView ? 1 : 0,
                           transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 16px, 0)',
-                          filter: inView ? 'blur(0px)' : 'blur(10px)',
+                          filter: inView ? 'none' : 'blur(10px)',
                           transitionDelay: inView
                             ? `${100 + (lIdx * 3 + wIdx) * 50}ms`
                             : '0ms',
@@ -129,21 +129,21 @@ export default function ScalingExpertise() {
           {/* ========================================================= */}
           <div className="lg:col-span-4 flex justify-center items-center h-full my-auto">
             <div
-              className="relative w-[230px] sm:w-[270px] lg:w-[295px] xl:w-[325px] aspect-[3/4] bg-neutral-100 overflow-hidden shadow-[0_16px_44px_rgba(0,0,0,0.08)] border border-black/5 will-change-[transform,opacity,filter] transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              className="relative w-[230px] sm:w-[270px] lg:w-[295px] xl:w-[325px] aspect-[3/4] bg-neutral-100 overflow-hidden border border-black/5 transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
               style={{
                 opacity: inView ? 1 : 0,
-                transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 24px, 0)',
-                filter: inView ? 'blur(0px)' : 'blur(12px)',
+                transform: inView ? 'none' : 'translate3d(0, 24px, 0)',
+                filter: inView ? 'none' : 'blur(12px)',
                 transitionDelay: '140ms',
               }}
             >
               <Image
-                src="/images/deepak.jpeg"
+                src="/images/ref%20images/15.webp"
                 alt="Deepak - Founder of Gemstrat"
                 fill
                 priority
-                sizes="(max-width: 640px) 270px, (max-width: 1024px) 300px, 330px"
-                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                unoptimized
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] grayscale"
               />
             </div>
           </div>
@@ -163,7 +163,7 @@ export default function ScalingExpertise() {
                     style={{
                       opacity: inView ? 1 : 0,
                       transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
-                      filter: inView ? 'blur(0px)' : 'blur(8px)',
+                      filter: inView ? 'none' : 'blur(8px)',
                       transitionDelay: inView ? `${140 + wIdx * 25}ms` : '0ms',
                     }}
                     className="inline-block mr-[0.25em] last:mr-0 will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
@@ -181,7 +181,7 @@ export default function ScalingExpertise() {
                     style={{
                       opacity: inView ? 1 : 0,
                       transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 14px, 0)',
-                      filter: inView ? 'blur(0px)' : 'blur(8px)',
+                      filter: inView ? 'none' : 'blur(8px)',
                       transitionDelay: inView
                         ? `${140 + (DESC_P1_WORDS.length + wIdx) * 18}ms`
                         : '0ms',
@@ -196,20 +196,20 @@ export default function ScalingExpertise() {
 
             {/* Bottom-Right Corner: Image 3 */}
             <div
-              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden shadow-[0_12px_36px_rgba(0,0,0,0.06)] border border-black/5 will-change-[transform,opacity,filter] transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden border border-black/5 transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
               style={{
                 opacity: inView ? 1 : 0,
-                transform: inView ? 'translate3d(0, 0, 0)' : 'translate3d(0, 20px, 0)',
-                filter: inView ? 'blur(0px)' : 'blur(10px)',
+                transform: inView ? 'none' : 'translate3d(0, 20px, 0)',
+                filter: inView ? 'none' : 'blur(10px)',
                 transitionDelay: '220ms',
               }}
             >
               <Image
-                src="/images/hooded-figure-techwear-blur.jpg"
+                src="/images/ref%20images/16.webp"
                 alt="Techwear Motion Blur - Execution & Momentum"
                 fill
-                sizes="(max-width: 640px) 280px, (max-width: 1024px) 320px, 340px"
-                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                unoptimized
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] grayscale"
               />
             </div>
 

@@ -11,7 +11,7 @@ export default function Hero() {
 
       {/* Center: brand video, framed */}
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
-        <div className="pointer-events-auto relative w-[clamp(200px,26vw,420px)] aspect-square overflow-hidden bg-black border border-white/10 shadow-2xl shadow-black/80 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105">
+        <div className="pointer-events-auto relative w-[clamp(200px,26vw,420px)] aspect-square overflow-hidden bg-black border border-white/10 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:scale-105">
           <video
             src="/videos/magnific_do-a-360deg-x-axis-rotati_gO2VDZASXO.mp4"
             autoPlay

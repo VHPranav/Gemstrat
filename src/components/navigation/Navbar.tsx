@@ -26,6 +26,17 @@ export default function Navbar() {
   // Checks if the top navbar (viewport top ~40px) overlaps white sections (#advantage, #leadership)
   useEffect(() => {
     const handleScroll = () => {
+      const focusAreasEl = document.getElementById('focus-areas');
+      if (focusAreasEl) {
+        const rect = focusAreasEl.getBoundingClientRect();
+        const advEl = document.getElementById('focus-item-4');
+        const isPastAdv = advEl ? advEl.getBoundingClientRect().bottom < 80 : false;
+        if (rect.top <= 60 && rect.bottom >= 60 && !isPastAdv) {
+          setIsLight(true);
+          return;
+        }
+      }
+
       const advantageEl = document.getElementById('advantage');
       if (advantageEl) {
         const rect = advantageEl.getBoundingClientRect();

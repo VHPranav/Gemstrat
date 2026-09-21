@@ -3,55 +3,56 @@
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import ImageTrail from '@/components/ui/ImageTrail';
+import FragmentedImageGrid from '@/components/ui/FragmentedImageGrid';
 
 const TRAIL_IMAGES = [
-  '/images/hooded-figure-techwear-blur.jpg',
-  '/images/athlete-sprint-motion-blur.jpg',
-  '/images/geometric-building-architecture-bw.jpg',
-  '/images/bearded-man-dark-studio-portrait.jpg',
-  '/images/man-side-lit-portrait-studio.jpg',
-  '/images/executive-crossed-arms-blue-hour.jpg',
-  '/images/man-writing-notebook-lamp.jpg',
-  '/images/sled-push-gym-motion-blur.jpg',
-  '/images/crosswalk-motion-blur-evening.jpg',
-  '/images/film-crew-studio-silhouettes.jpg',
-  '/images/man-reviewing-moodboard-wall.jpg',
-  '/images/man-walking-motion-blur-day.jpg',
-  '/images/blurred-grainy-portrait-archive.jpg',
-  '/images/man-portrait-confident-loft.jpg',
-  '/images/hands-pinning-notes-wall.jpg',
-  '/images/gallery-warehouse-meeting-bw.jpg',
+  '/images/ref%20images/1.webp',
+  '/images/ref%20images/2.webp',
+  '/images/ref%20images/3.webp',
+  '/images/ref%20images/4.webp',
+  '/images/ref%20images/5.webp',
+  '/images/ref%20images/6.webp',
+  '/images/ref%20images/7.webp',
+  '/images/ref%20images/8.webp',
+  '/images/ref%20images/9.webp',
+  '/images/ref%20images/10.webp',
+  '/images/ref%20images/11.webp',
+  '/images/ref%20images/12.webp',
+  '/images/ref%20images/13.webp',
+  '/images/ref%20images/14.webp',
+  '/images/ref%20images/15.webp',
+  '/images/ref%20images/16.webp',
 ];
 
 const FOCUS_ITEMS = [
   {
     quote: '“ Align goals, operations, and systems for future-ready growth,”',
     titleLines: ['Enterprise', 'Architecture &', 'Mapping'],
-    image: '/images/aerial-city-dark-rooftop.jpg',
+    image: '/images/ref%20images/17.webp',
     alt: 'Enterprise Architecture & Mapping',
   },
   {
     quote: '“ Integrate intelligence, streamline outcomes across the business.”',
     titleLines: ['AI &', 'Automation'],
-    image: '/images/futuristic-ai-vr-glasses.jpg',
+    image: '/images/ref%20images/18.webp',
     alt: 'AI & Automation',
   },
   {
     quote: '“ Craft distinctive brand systems that evolve with your business.”',
     titleLines: ['360°', 'Branding'],
-    image: '/images/film-crew-studio-silhouettes.jpg',
+    image: '/images/ref%20images/19.webp',
     alt: '360° Branding',
   },
   {
     quote: '“ Websites, apps and digital-first marketing designed to deliver results.”',
     titleLines: ['Neo Marketing &', 'Digital'],
-    image: '/images/crosswalk-motion-blur-evening.jpg',
+    image: '/images/ref%20images/20.webp',
     alt: 'Neo Marketing & Digital',
   },
   {
     quote: '“ Build identities and campaigns that move markets.”',
     titleLines: ['Advertising'],
-    image: '/images/man-reviewing-moodboard-wall.jpg',
+    image: '/images/ref%20images/21.webp',
     alt: 'Advertising',
   },
 ];
@@ -59,25 +60,25 @@ const FOCUS_ITEMS = [
 // Scattered images that fly outward from center and exit the viewport, each on
 // its own direction/timing — the transition after the last Focus Item
 const FLYTHROUGH_IMAGES = [
-  { src: '/images/hooded-figure-techwear-blur.jpg', dirX: -1.3, dirY: -0.8, stagger: 0.0, startX: -3, startY: -2 },
-  { src: '/images/athlete-sprint-motion-blur.jpg', dirX: 1.4, dirY: -0.6, stagger: 0.04, startX: 4, startY: -2 },
-  { src: '/images/boxer-motion-blur-abstract.jpg', dirX: -1.5, dirY: 0.5, stagger: 0.08, startX: -4, startY: 2 },
-  { src: '/images/cyberpunk-visor-silhouette.jpg', dirX: 1.2, dirY: 0.9, stagger: 0.03, startX: 3, startY: 3 },
-  { src: '/images/man-walking-phone-blur-night.jpg', dirX: -0.7, dirY: -1.3, stagger: 0.07, startX: -2, startY: -4 },
-  { src: '/images/glitch-portrait-dissolve-2.jpg', dirX: 0.8, dirY: 1.4, stagger: 0.11, startX: 2, startY: 4 },
-  { src: '/images/man-writing-desk-dark-office.jpg', dirX: -1.4, dirY: 1.0, stagger: 0.14, startX: -4, startY: 3 },
-  { src: '/images/ghostly-minimal-head-blur.jpg', dirX: 1.5, dirY: -1.0, stagger: 0.02, startX: 4, startY: -3 },
-  { src: '/images/man-suit-coffee-cup-dark.jpg', dirX: 0.4, dirY: -1.5, stagger: 0.18, startX: 1, startY: -4 },
-  { src: '/images/sled-push-gym-motion-blur.jpg', dirX: -0.3, dirY: 1.5, stagger: 0.21, startX: -1, startY: 4 },
-  { src: '/images/office-meeting-glass-window-dark.jpg', dirX: 1.5, dirY: 0.2, stagger: 0.25, startX: 4, startY: 1 },
-  { src: '/images/glowing-skyscrapers-night.jpg', dirX: -1.5, dirY: -0.2, stagger: 0.28, startX: -4, startY: -1 },
-  { src: '/images/glitch-portrait-dissolve-1.jpg', dirX: 0.2, dirY: 1.5, stagger: 0.32, startX: 1, startY: 4 },
-  { src: '/images/astronaut-visor-ghostly-blur.jpg', dirX: -0.2, dirY: -1.5, stagger: 0.35, startX: -1, startY: -4 },
+  { src: '/images/ref%20images/1.webp', dirX: -1.3, dirY: -0.8, stagger: 0.0, startX: -3, startY: -2 },
+  { src: '/images/ref%20images/2.webp', dirX: 1.4, dirY: -0.6, stagger: 0.04, startX: 4, startY: -2 },
+  { src: '/images/ref%20images/3.webp', dirX: -1.5, dirY: 0.5, stagger: 0.08, startX: -4, startY: 2 },
+  { src: '/images/ref%20images/4.webp', dirX: 1.2, dirY: 0.9, stagger: 0.03, startX: 3, startY: 3 },
+  { src: '/images/ref%20images/5.webp', dirX: -0.7, dirY: -1.3, stagger: 0.07, startX: -2, startY: -4 },
+  { src: '/images/ref%20images/6.webp', dirX: 0.8, dirY: 1.4, stagger: 0.11, startX: 2, startY: 4 },
+  { src: '/images/ref%20images/7.webp', dirX: -1.4, dirY: 1.0, stagger: 0.14, startX: -4, startY: 3 },
+  { src: '/images/ref%20images/8.webp', dirX: 1.5, dirY: -1.0, stagger: 0.02, startX: 4, startY: -3 },
+  { src: '/images/ref%20images/9.webp', dirX: 0.4, dirY: -1.5, stagger: 0.18, startX: 1, startY: -4 },
+  { src: '/images/ref%20images/10.webp', dirX: -0.3, dirY: 1.5, stagger: 0.21, startX: -1, startY: 4 },
+  { src: '/images/ref%20images/11.webp', dirX: 1.5, dirY: 0.2, stagger: 0.25, startX: 4, startY: 1 },
+  { src: '/images/ref%20images/12.webp', dirX: -1.5, dirY: -0.2, stagger: 0.28, startX: -4, startY: -1 },
+  { src: '/images/ref%20images/13.webp', dirX: 0.2, dirY: 1.5, stagger: 0.32, startX: 1, startY: 4 },
+  { src: '/images/ref%20images/14.webp', dirX: -0.2, dirY: -1.5, stagger: 0.35, startX: -1, startY: -4 },
 ];
 
 // The one image that blur-fades in and settles at a fixed size in the center —
 // carries straight into the Clarity section, which uses this same photo
-const FLYTHROUGH_CENTER_IMAGE = '/images/man-cap-thoughtful-couch.jpg';
+const FLYTHROUGH_CENTER_IMAGE = '/images/ref%20images/22.webp';
 
 const CLARITY_HEADLINE_LINES = [
   ['Clarity,'],
@@ -104,7 +105,7 @@ const HORIZONTAL_CARDS = [
     number: '1.',
     titleLine1: 'Clarity in',
     titleLine2: 'complexity',
-    image: '/images/geometric-building-architecture-bw.jpg',
+    image: '/images/ref%20images/23.webp',
     alt: 'Clarity in complexity',
     description: 'We decode tangled operations and markets into clear roadmaps.',
   },
@@ -112,7 +113,7 @@ const HORIZONTAL_CARDS = [
     number: '2.',
     titleLine1: 'Scalable',
     titleLine2: 'execution',
-    image: '/images/man-walking-motion-blur-day.jpg',
+    image: '/images/ref%20images/24.webp',
     alt: 'Scalable execution',
     description: 'Every framework we build is tied to practical action.',
   },
@@ -120,7 +121,7 @@ const HORIZONTAL_CARDS = [
     number: '3.',
     titleLine1: 'Momentum',
     titleLine2: 'at every stage',
-    image: '/images/team-huddle-hands-gym.jpg',
+    image: '/images/ref%20images/25.webp',
     alt: 'Momentum at every stage',
     description: 'Early-stage founder or multinational — we deliver solutions that create traction.',
   },
@@ -128,6 +129,7 @@ const HORIZONTAL_CARDS = [
 
 export default function AboutIntro() {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const introStickyRef = useRef<HTMLDivElement>(null);
   const introWrapRef = useRef<HTMLDivElement>(null);
   const textTrackRef = useRef<HTMLDivElement>(null);
 
@@ -183,8 +185,11 @@ export default function AboutIntro() {
           }
         });
       });
+      if (introStickyRef.current) {
+        introStickyRef.current.style.backgroundColor = '#090909';
+      }
       if (clarityStickyRef.current) {
-        clarityStickyRef.current.style.backgroundColor = '#090909';
+        clarityStickyRef.current.style.backgroundColor = '#ffffff';
       }
       return;
     }
@@ -204,6 +209,19 @@ export default function AboutIntro() {
 
         if (totalScrollable > 0) {
           const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
+
+          // Crossfade sticky background to pure white as "Who we are" fades out
+          if (introStickyRef.current) {
+            if (progress <= 0.20) {
+              introStickyRef.current.style.backgroundColor = '#090909';
+            } else if (progress >= 0.42) {
+              introStickyRef.current.style.backgroundColor = '#ffffff';
+            } else {
+              const t = (progress - 0.20) / (0.42 - 0.20);
+              const channel = Math.round(9 + t * (255 - 9));
+              introStickyRef.current.style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+            }
+          }
 
           // Intro content holds fully visible (progress 0.00 -> 0.15),
           // then fades out gradually (0.15 -> 0.40) — more scroll time to read it
@@ -329,11 +347,12 @@ export default function AboutIntro() {
 
       // ----------------------------------------------------
       // 4. Clarity Section — ONE combined pinned track:
-      //    Intro (0 -> INTRO_END): scattered images fly in near-center and exit,
-      //    one settles centered at a fixed size, then the headline (left) and
-      //    paragraph (right) blur-fade in flanking it.
-      //    Then (INTRO_END -> 1): the existing word-blur-out + horizontal
-      //    3-card sequence + theme crossfade, remapped onto the remaining range.
+      //    Intro (0 -> INTRO_END):
+      //    - 0 -> 0.16: Screen-wide pinned background smoothly dims from
+      //      white (#ffffff) to black (#090909) with ZERO seam or horizontal cut!
+      //    - 0.16 -> INTRO_END: scattered images fly in near-center and exit,
+      //      one settles centered at a fixed size, then headline/paragraph fade in.
+      //    Then (INTRO_END -> 1): word-blur-out + horizontal 3-card sequence.
       // ----------------------------------------------------
       if (clarityTrackRef.current) {
         const rect = clarityTrackRef.current.getBoundingClientRect();
@@ -346,6 +365,22 @@ export default function AboutIntro() {
           if (progress < INTRO_END) {
             const introP = progress / INTRO_END;
 
+            // Seamless screen-wide crossfade from white (#ffffff) to black (#090909)
+            // across the entire 100vw x 100vh pinned sticky canvas
+            if (clarityStickyRef.current) {
+              const fadeWindow = 0.16; // from introP 0.00 to 0.16
+              if (introP <= 0) {
+                clarityStickyRef.current.style.backgroundColor = '#ffffff';
+              } else if (introP >= fadeWindow) {
+                clarityStickyRef.current.style.backgroundColor = '#090909';
+              } else {
+                const ft = introP / fadeWindow;
+                const ease = ft * ft * (3 - 2 * ft);
+                const channel = Math.round(255 - ease * (255 - 9));
+                clarityStickyRef.current.style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
+              }
+            }
+
             // Keep the text container itself visible; individual words below
             // control their own hidden -> fade-in state during the intro.
             if (clarityTextWrapRef.current) {
@@ -353,12 +388,12 @@ export default function AboutIntro() {
               clarityTextWrapRef.current.style.pointerEvents = 'none';
             }
 
-            // Scattered images blur-fade in near center, then fly outward and exit
+            // Scattered images blur-fade in near center, then fly outward and exit (starts once canvas is black)
             flyItemRefs.current.forEach((el, i) => {
               if (!el) return;
               const cfg = FLYTHROUGH_IMAGES[i];
-              const start = 0.1 + cfg.stagger;
-              const end = Math.min(start + 0.3, 0.85);
+              const start = 0.16 + cfg.stagger;
+              const end = Math.min(start + 0.3, 0.88);
               const t = Math.min(Math.max((introP - start) / (end - start), 0), 1);
               const ease = t * t; // accelerate outward, like warp speed
 
@@ -593,83 +628,38 @@ export default function AboutIntro() {
         className="relative h-[340vh] bg-[#090909] m-0 p-0 border-none overflow-visible"
         aria-label="About Gemstrat & Focus Areas"
       >
-        <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center bg-[#090909] overflow-hidden">
+        <div
+          ref={introStickyRef}
+          className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center bg-[#090909] overflow-hidden"
+        >
           {/* Layer 1: Intro Content (Fades out completely on scroll) */}
           <div
             ref={introWrapRef}
             className="absolute inset-0 flex items-center justify-center will-change-[opacity,transform] transition-opacity duration-75"
           >
-            <div className="w-full max-w-[1600px] mx-auto px-6 sm:px-12 lg:px-16 box-border">
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,600px)_1fr] items-center gap-10 lg:gap-6">
+            <div className="w-full max-w-[1500px] mx-auto px-6 sm:px-12 lg:px-16 xl:px-20 box-border">
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-12 lg:gap-14 xl:gap-20">
 
-                {/* Left: two overlapping candid photos */}
-                <div className="hidden lg:flex items-center justify-start relative h-[380px]">
-                  <div className="relative w-[170px] aspect-[3/4] shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-10">
-                    <Image
-                      src="/images/bearded-man-dark-studio-portrait.jpg"
-                      alt="Inside Gemstrat"
-                      fill
-                      sizes="170px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="relative w-[190px] aspect-[3/4] -ml-10 mt-20 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-20">
-                    <Image
-                      src="/images/man-side-lit-portrait-studio.jpg"
-                      alt="Inside Gemstrat"
-                      fill
-                      sizes="190px"
-                      className="object-cover"
-                    />
-                  </div>
-                </div>
-
-                {/* Center: bracketed label + two short paragraphs */}
-                <div className="flex flex-col items-center text-center gap-8 sm:gap-10">
-                  <span className="font-mono text-[11px] sm:text-[12px] tracking-[0.25em] uppercase text-white/40">
-                    [ who we are ]
-                  </span>
-                  <div className="max-w-[640px]">
-                    <p className="font-archivo text-white/85 text-[clamp(1.5rem,2.4vw,32px)] leading-[1.35] tracking-[-0.015em] font-normal m-0">
+                {/* Left: Editorial Statement */}
+                <div className="lg:col-span-6 flex flex-col items-start justify-center text-left">
+                  <div className="max-w-[580px] xl:max-w-[620px]">
+                    <p className="font-archivo text-white/90 text-[clamp(1.65rem,2.6vw,38px)] leading-[1.32] tracking-[-0.02em] font-normal m-0">
                       A boutique strategic consultancy for ambitious businesses ready to scale and transform — we don&apos;t stop at advice, we execute.
                     </p>
                   </div>
                 </div>
 
-                {/* Right: two more photos, one styled as a floating-tag card */}
-                <div className="hidden lg:flex items-center justify-end relative h-[380px]">
-                  <div className="relative w-[160px] aspect-[3/4] mt-24 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-10">
-                    <Image
-                      src="/images/man-writing-notebook-lamp.jpg"
-                      alt="Inside Gemstrat"
-                      fill
-                      sizes="160px"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="relative w-[190px] aspect-[3/4] -ml-10 shadow-2xl shadow-black/60 border border-white/10 bg-[#141414] z-20 overflow-hidden">
-                    <Image
-                      src="/images/executive-crossed-arms-blue-hour.jpg"
-                      alt="Inside Gemstrat"
-                      fill
-                      sizes="190px"
-                      className="object-cover"
-                    />
-                    <span className="absolute top-4 right-4 font-mono text-[9px] tracking-[0.1em] text-white bg-black/50 backdrop-blur-md px-2 py-1 border border-white/10">
-                      clarity
-                    </span>
-                    <span className="absolute top-16 left-4 font-mono text-[9px] tracking-[0.1em] text-white bg-black/50 backdrop-blur-md px-2 py-1 border border-white/10">
-                      momentum
-                    </span>
-                    <div className="absolute bottom-0 inset-x-0 bg-black/60 backdrop-blur-md px-3 py-2 flex items-center gap-2.5 border-t border-white/10">
-                      <span className="text-white/60 text-[10px] leading-none">⏮</span>
-                      <span className="text-white text-[11px] leading-none">⏸</span>
-                      <span className="text-white/60 text-[10px] leading-none">⏭</span>
-                      <div className="flex-1 h-[2px] bg-white/20 relative">
-                        <div className="absolute inset-y-0 left-0 w-2/3 bg-white" />
-                      </div>
-                    </div>
-                  </div>
+                {/* Right: Fragmented Image Grid (Sliced Image Layout) */}
+                <div className="lg:col-span-6 flex items-center justify-center lg:justify-end w-full">
+                  <FragmentedImageGrid
+                    images={[
+                      { src: '/images/ref%20images/1.webp', alt: 'Gemstrat Strategic Advisory' },
+                      { src: '/images/ref%20images/7.webp', alt: 'Enterprise Architecture & Mapping' },
+                      { src: '/images/ref%20images/24.webp', alt: 'Scalable Execution & Systems' },
+                      { src: '/images/ref%20images/14.webp', alt: 'Momentum at Scale' },
+                      { src: '/images/ref%20images/27.webp', alt: 'Strategic Consultancy' },
+                    ]}
+                  />
                 </div>
 
               </div>
@@ -680,7 +670,7 @@ export default function AboutIntro() {
           <div className="absolute inset-0 flex items-center overflow-hidden pointer-events-none select-none">
             <div
               ref={textTrackRef}
-              className="whitespace-nowrap font-archivo-expanded text-[clamp(120px,22vw,350px)] font-medium tracking-[-0.04em] text-white leading-none will-change-transform"
+              className="whitespace-nowrap font-archivo-expanded text-[clamp(120px,22vw,350px)] font-medium tracking-[-0.04em] text-[#090909] leading-none will-change-transform"
               style={{ transform: 'translate3d(100vw, 0, 0)' }}
             >
               Focus areas
@@ -690,7 +680,7 @@ export default function AboutIntro() {
       </div>
 
       {/* Sequence 2: 5 Focus Areas with In-Place Dynamic Left Text */}
-      <div className="relative w-full bg-[#090909] text-white">
+      <div id="focus-areas" className="relative w-full bg-white text-[#090909]">
         <div className="w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-20 box-border">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 lg:gap-20 xl:gap-24 items-start relative">
 
@@ -712,7 +702,7 @@ export default function AboutIntro() {
                       className="absolute inset-0 flex flex-col justify-start will-change-[opacity,filter,transform] pointer-events-none"
                       style={{ opacity: idx === 0 ? 1 : 0 }}
                     >
-                      <p className="font-archivo text-white text-[clamp(1.15rem,1.7vw,24px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
+                      <p className="font-archivo text-[#090909] text-[clamp(1.15rem,1.7vw,24px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
                         {words.map((word, wIdx) => (
                           <span
                             key={wIdx}
@@ -732,11 +722,12 @@ export default function AboutIntro() {
             </div>
 
             {/* Right Column: 5 items */}
-            <div className="lg:col-span-7 min-w-0 w-full flex flex-col items-start space-y-36 sm:space-y-48 lg:space-y-64 pt-16 sm:pt-24 lg:pt-32 pb-0">
+            <div className="lg:col-span-7 min-w-0 w-full flex flex-col items-start space-y-36 sm:space-y-48 lg:space-y-64 pt-16 sm:pt-24 lg:pt-32 pb-24 sm:pb-32 lg:pb-36">
               {FOCUS_ITEMS.map((item, idx) => {
                 return (
                   <div
                     key={idx}
+                    id={idx === 4 ? 'focus-item-4' : undefined}
                     ref={(el) => {
                       rightItemRefs.current[idx] = el;
                     }}
@@ -744,12 +735,12 @@ export default function AboutIntro() {
                   >
                     {/* Mobile-only quote */}
                     <div className="block lg:hidden mb-8">
-                      <p className="font-archivo text-white/80 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
+                      <p className="font-archivo text-[#090909]/75 text-[clamp(1.1rem,4vw,18px)] leading-[1.5] tracking-[-0.015em] font-normal m-0 text-left">
                         {item.quote}
                       </p>
                     </div>
 
-                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,82px)] font-medium text-white leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
+                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,82px)] font-medium text-[#090909] leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                       {item.titleLines.map((line, lIdx) => (
                         <span key={lIdx} className="block">
                           {line}
@@ -757,13 +748,13 @@ export default function AboutIntro() {
                       ))}
                     </h2>
 
-                    <div className="relative w-full max-w-[580px] aspect-[16/10] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80">
+                    <div className="relative w-full max-w-[580px] aspect-[16/10] overflow-hidden border border-black/10 bg-[#f4f4f4]">
                       <Image
                         src={item.image}
                         alt={item.alt}
                         fill
-                        sizes="(max-width: 1024px) 100vw, 580px"
-                        className="object-cover"
+                        unoptimized
+                        className="object-cover grayscale"
                       />
                     </div>
                   </div>
@@ -780,12 +771,12 @@ export default function AboutIntro() {
           settles centered, then the headline/paragraph fade in flanking it */}
       <section
         ref={clarityTrackRef}
-        className="relative w-full h-[900vh] bg-[#090909] z-30 -mt-[2px] overflow-visible"
+        className="relative w-full h-[900vh] bg-white z-30 -mt-[2px] overflow-visible"
       >
         <div
           ref={clarityStickyRef}
           className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center px-6 sm:px-12 lg:px-20 box-border overflow-hidden"
-          style={{ backgroundColor: '#090909' }}
+          style={{ backgroundColor: '#ffffff' }}
         >
           {/* Interactive GSAP Image Trail Layer */}
           <div className="absolute inset-0 z-10 pointer-events-auto overflow-hidden">
@@ -805,7 +796,7 @@ export default function AboutIntro() {
                 ref={(el) => {
                   flyItemRefs.current[i] = el;
                 }}
-                className="absolute left-1/2 top-1/2 w-[140px] sm:w-[180px] aspect-[4/5] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 opacity-0 will-change-[transform,opacity,filter]"
+                className="absolute left-1/2 top-1/2 w-[140px] sm:w-[180px] aspect-[4/5] overflow-hidden border border-white/10 bg-[#141414] opacity-0 will-change-[transform,opacity,filter]"
                 style={{
                   transform: `translate3d(calc(-50% + ${img.startX}vw), calc(-50% + ${img.startY}vh), 0) scale(0.2)`,
                   filter: 'blur(16px)',
@@ -816,7 +807,7 @@ export default function AboutIntro() {
                   alt=""
                   fill
                   sizes="180px"
-                  className="object-cover"
+                  className="object-cover grayscale"
                 />
               </div>
             ))}
@@ -887,7 +878,7 @@ export default function AboutIntro() {
                 intro is over (fades out together with the text, no duplicate). */}
             <div
               ref={flyCenterRef}
-              className="absolute left-1/2 top-1/2 w-[220px] sm:w-[260px] lg:w-[300px] aspect-[9/16] overflow-hidden border border-white/10 bg-[#141414] shadow-2xl shadow-black/80 opacity-0 will-change-[transform,opacity,filter]"
+              className="absolute left-1/2 top-1/2 w-[220px] sm:w-[260px] lg:w-[300px] aspect-[9/16] overflow-hidden border border-white/10 bg-[#141414] opacity-0 will-change-[transform,opacity,filter]"
               style={{
                 transform: 'translate3d(calc(-50% + 3vw), calc(-50% - 3vh), 0) scale(0.3)',
                 filter: 'blur(16px)',
@@ -898,7 +889,7 @@ export default function AboutIntro() {
                 alt="Gemstrat in motion"
                 fill
                 sizes="300px"
-                className="object-cover"
+                className="object-cover grayscale"
               />
             </div>
           </div>
@@ -928,13 +919,13 @@ export default function AboutIntro() {
                     </div>
 
                     {/* Center Image from public/images */}
-                    <div className={`relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shadow-2xl shrink-0 pointer-events-none ${isDark ? 'bg-[#141414] border border-white/10' : 'bg-[#eaeaea] border border-black/5'}`}>
+                    <div className={`relative w-[280px] sm:w-[340px] lg:w-[420px] aspect-[4/5] overflow-hidden shrink-0 pointer-events-none ${isDark ? 'bg-[#141414] border border-white/10' : 'bg-[#eaeaea] border border-black/5'}`}>
                       <Image
                         src={card.image}
                         alt={card.alt}
                         fill
                         sizes="(max-width: 1024px) 340px, 420px"
-                        className="object-cover pointer-events-none"
+                        className="object-cover grayscale pointer-events-none"
                       />
                     </div>
 

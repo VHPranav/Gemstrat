@@ -1495,7 +1495,7 @@ export default function ImageTrail({
           key={i}
         >
           <div
-            className="content__img-inner bg-center bg-cover w-[calc(100%+20px)] h-[calc(100%+20px)] absolute top-[-10px] left-[-10px]"
+            className="content__img-inner bg-center bg-cover w-[calc(100%+20px)] h-[calc(100%+20px)] absolute top-[-10px] left-[-10px] grayscale"
             style={{ backgroundImage: `url("${encodeURI(url)}")` }}
           />
         </div>

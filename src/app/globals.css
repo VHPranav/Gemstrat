@@ -12,14 +12,17 @@
   --color-bronze-soft: #c9ad7e;
   --color-hero-bg: #090909;
 
-  --font-sans: 'JetBrains Mono', monospace;
-  --font-archivo: 'JetBrains Mono', monospace;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-work: 'JetBrains Mono', monospace;
+  --font-area: "Besley", serif;
+  --font-sans: "Besley", serif;
+  --font-serif: "Besley", serif;
+  --font-archivo: "Besley", serif;
+  --font-mono: "Besley", serif;
+  --font-work: "Besley", serif;
+  --font-space: "Besley", serif;
 }
 
 .font-archivo-expanded {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "Besley", serif;
 }
 
 /* ---------- design tokens ---------- */
@@ -78,7 +81,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--text-on-paper);
-  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-family: "Besley", serif;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
