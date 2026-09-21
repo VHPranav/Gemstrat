@@ -96,6 +96,13 @@ body {
   color: var(--paper);
 }
 
+/* ---------- halftone tactile texture ---------- */
+
+
+.bg-halftone-grid-dark {
+  background-color: #090909;
+}
+
 /* ---------- generative beam fields ---------- */
 .beam-host {
   position: absolute;

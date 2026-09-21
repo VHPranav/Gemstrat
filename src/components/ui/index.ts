@@ -3,3 +3,4 @@ export { default as ImageTrail } from './ImageTrail';
 export { default as Loader } from './Loader';
 export { default as ImageFormationGrid } from './ImageFormationGrid';
 export { default as FragmentedImageGrid } from './FragmentedImageGrid';
+export { default as ExplorationsGrid } from './ExplorationsGrid';

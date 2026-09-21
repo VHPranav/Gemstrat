@@ -36,7 +36,6 @@ export default function Navbar() {
           return;
         }
       }
-
       const advantageEl = document.getElementById('advantage');
       if (advantageEl) {
         const rect = advantageEl.getBoundingClientRect();
