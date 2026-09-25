@@ -39,11 +39,11 @@ const FORMATIONS: FormationSlice[][] = [
 ];
 
 const DEFAULT_IMAGES = [
-  { src: '/images/ref%20images/1.webp', alt: 'Gemstrat Strategic Advisory' },
-  { src: '/images/ref%20images/7.webp', alt: 'Gemstrat Architecture' },
-  { src: '/images/ref%20images/24.webp', alt: 'Gemstrat Scalable Execution' },
-  { src: '/images/ref%20images/14.webp', alt: 'Gemstrat Momentum' },
-  { src: '/images/ref%20images/27.webp', alt: 'Gemstrat Leadership' },
+  { src: '/images/about/boardroom.webp', alt: 'Gemstrat Strategic Advisory' },
+  { src: '/images/about/architect-drawing.webp', alt: 'Gemstrat Architecture' },
+  { src: '/images/about/tower-crane.webp', alt: 'Gemstrat Scalable Execution' },
+  { src: '/images/about/high-speed-train.webp', alt: 'Gemstrat Momentum' },
+  { src: '/images/about/strategy-notebook.webp', alt: 'Gemstrat Leadership' },
 ];
 
 interface FragmentedImageGridProps {

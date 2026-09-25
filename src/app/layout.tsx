@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import SmoothScroll from '@/components/providers/SmoothScroll';
 import ScrollToTop from '@/components/providers/ScrollToTop';
 import Navbar from '@/components/navigation/Navbar';
+import CookieNotice from '@/components/ui/CookieNotice';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -27,9 +28,10 @@ export default function RootLayout({
       </head>
       <body className="font-sans">
         <ScrollToTop />
-        {/* <Navbar /> */}
+        <Navbar />
         <SmoothScroll />
         {children}
+        <CookieNotice />
       </body>
     </html>
   );

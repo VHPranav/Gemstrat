@@ -100,13 +100,14 @@ export default function Statement() {
 
   return (
     <div
-      className="relative h-[220vh] bg-[#090909] m-0 p-0 border-none overflow-visible"
+      className="relative h-[220vh] bg-transparent m-0 p-0 border-none overflow-visible"
       ref={sectionRef}
       id="statement"
       role="region"
       aria-label="Company Statement"
     >
-      <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center bg-[#090909] z-10 overflow-hidden">
+      {/* Transparent: the shared HeroBackdrop sculpture shows through */}
+      <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center bg-transparent z-10 overflow-hidden">
         <div
           ref={quoteWrapRef}
           className="w-full max-w-[1500px] mx-auto px-6 sm:px-12 lg:px-16"

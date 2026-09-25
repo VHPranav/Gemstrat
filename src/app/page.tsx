@@ -8,12 +8,16 @@ import {
   ReviewsSection,
 } from '@/components/sections';
 import ImageFormationGrid from '@/components/ImageFormationGrid';
+import HeroBackdrop from '@/components/sections/HeroBackdrop';
 
 export default function HomePage() {
   return (
     <main className="bg-[#090909] min-h-screen">
-      <Hero />
-      <Statement />
+      {/* Hero + Statement share one sticky sculpture background */}
+      <HeroBackdrop>
+        <Hero />
+        <Statement />
+      </HeroBackdrop>
       <ImageFormationGrid />
       <AboutIntro />
       <GemstratAdvantage />

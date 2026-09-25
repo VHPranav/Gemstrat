@@ -222,11 +222,7 @@ body {
 }
 
 .formation-section .image-gen-root,
-.formation-section .image-gen-root canvas,
-.screen-1 .image-gen-root,
-.screen-1 .image-gen-root canvas,
-#advantage .image-gen-root,
-#advantage .image-gen-root canvas {
+.formation-section .image-gen-root canvas {
   filter: grayscale(100%) contrast(105%) !important;
   -webkit-filter: grayscale(100%) contrast(105%) !important;
 }
@@ -235,58 +231,6 @@ body {
   width: 100% !important;
   height: 100% !important;
   display: block !important;
-}
-
-/* ---------- GemstratAdvantage: Screen 1 layout ---------- */
-.screen-1 {
-  width: 100vw;
-  height: 100%;
-  flex-shrink: 0;
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  grid-template-areas: 'main';
-  grid-template-rows: 100%;
-  grid-template-columns: 100%;
-  background-color: #ffffff;
-}
-
-.explorations-grid {
-  grid-area: main;
-  display: grid;
-  width: 100%;
-  height: 100%;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  transform-style: preserve-3d;
-  position: relative;
-}
-
-.advantage-grid__img {
-  background-size: cover;
-  background-position: 50% 50%;
-  pointer-events: auto;
-  will-change: transform, opacity;
-  transform: translateZ(0.1px);
-  filter: grayscale(100%);
-  -webkit-filter: grayscale(100%);
-}
-
-.content__title {
-  grid-area: main;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 10;
-  pointer-events: none;
-  text-align: center;
-  padding: 0 1.5rem;
-  opacity: 1;
 }
 
 .content__title-main {
@@ -364,3 +308,40 @@ body {
 .formation-grid .pos-15 { grid-area: 3 / 7; }
 .formation-grid .pos-16 { grid-area: 3 / 8; }
 
+
+/* ---------- Hero intro (letters → sculpture → copy) ---------- */
+@keyframes heroLetterUp {
+  from { transform: translate3d(0, 110%, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+@keyframes heroSculptureIn {
+  from { opacity: 0; transform: scale(1.08); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes heroFadeUp {
+  from { opacity: 0; filter: blur(8px); transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
+}
+.hero-letter {
+  display: inline-block;
+  transform: translate3d(0, 110%, 0);
+  animation: heroLetterUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.hero-sculpture-in {
+  opacity: 0;
+  animation: heroSculptureIn 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.hero-fade-up {
+  opacity: 0;
+  animation: heroFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-letter,
+  .hero-sculpture-in,
+  .hero-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}

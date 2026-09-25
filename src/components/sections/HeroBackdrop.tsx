@@ -1,0 +1,81 @@
+'use client';
+
+import React, { useEffect, useRef } from 'react';
+import HeroSculpture from '@/components/ui/HeroSculpture';
+
+// ---------------------------------------------------------------------------
+// HeroBackdrop
+// Shared background for the Hero and the Statement section: the sculpture sits
+// in a sticky, full-screen layer (taking no space in the flow), so the hero's
+// content scrolls away and the Statement scrolls in over the same rotating
+// sculpture. It stays at full strength while any of the Statement's words are
+// still visible, and only fades out once the quote has fully dissolved.
+// ---------------------------------------------------------------------------
+
+// Intro timing matches the Hero's (sculpture fades in after the wordmark)
+const SCULPTURE_START = 1.1;
+// Fade window in the Statement's own scroll progress (0 = its sticky locks,
+// 1 = it ends). Its words finish dissolving at 0.82 (see Statement.tsx), so
+// the sculpture fades from there to the end of the section.
+const FADE_START = 0.82;
+const FADE_END = 1;
+
+export default function HeroBackdrop({ children }: { children: React.ReactNode }) {
+  const dimRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = dimRef.current;
+    if (!el) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      // The Statement is the last child; measure its scroll progress the same
+      // way Statement.tsx does
+      const statement = contentRef.current?.lastElementChild;
+      let opacity = 1;
+      if (statement) {
+        const rect = statement.getBoundingClientRect();
+        const total = rect.height - window.innerHeight;
+        const p = total > 0 ? Math.min(Math.max(-rect.top / total, 0), 1) : 0;
+        const t = Math.min(Math.max((p - FADE_START) / (FADE_END - FADE_START), 0), 1);
+        opacity = 1 - t * t * (3 - 2 * t);
+      }
+      el.style.opacity = opacity.toFixed(3);
+      // Fully faded: take it out of layout so the sculpture's own visibility
+      // check pauses rendering until the user scrolls back up
+      el.style.display = opacity <= 0.001 ? 'none' : '';
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+
+  return (
+    <div className="relative bg-[#090909]">
+      {/* Sticky full-screen layer; the negative margin removes it from the flow
+          so the sections start at the top and scroll over it */}
+      <div className="sticky top-0 h-screen h-[100svh] -mb-[100vh] -mb-[100svh] z-0 pointer-events-none overflow-hidden">
+        <div ref={dimRef} className="absolute inset-0">
+          <div
+            className="hero-sculpture-in absolute inset-0"
+            style={{ animationDelay: `${SCULPTURE_START}s` }}
+          >
+            <HeroSculpture className="absolute inset-0" />
+          </div>
+        </div>
+      </div>
+      <div ref={contentRef} className="relative z-10">
+        {children}
+      </div>
+    </div>
+  );
+}
