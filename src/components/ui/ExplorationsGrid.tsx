@@ -33,27 +33,29 @@ const DEFAULT_IMAGES = [
   '/images/ref%20images/1.webp',
 ];
 
-// Scattered tiles across 5x4 grid with random voids and breathing room around title
+// Scattered portrait tiles across 8-column x 3-row grid with voids around center title
 const SCATTERED_TILES = [
-  // Row 1 (void at col 3)
+  // Row 1 (voids at col 3, col 6)
   { row: 1, col: 1, img: 0 },
   { row: 1, col: 2, img: 1 },
   { row: 1, col: 4, img: 2 },
   { row: 1, col: 5, img: 3 },
+  { row: 1, col: 7, img: 4 },
+  { row: 1, col: 8, img: 5 },
 
-  // Row 2 (voids at cols 2, 3, 4 for title breathing space)
-  { row: 2, col: 1, img: 4 },
-  { row: 2, col: 5, img: 5 },
+  // Row 2 (voids at cols 3, 4, 5, 6 for center title)
+  { row: 2, col: 1, img: 6 },
+  { row: 2, col: 2, img: 7 },
+  { row: 2, col: 7, img: 8 },
+  { row: 2, col: 8, img: 9 },
 
-  // Row 3 (voids at cols 2, 3 for title breathing space)
-  { row: 3, col: 1, img: 6 },
-  { row: 3, col: 4, img: 7 },
-  { row: 3, col: 5, img: 8 },
-
-  // Row 4 (voids at cols 1, 4)
-  { row: 4, col: 2, img: 9 },
-  { row: 4, col: 3, img: 10 },
-  { row: 4, col: 5, img: 11 },
+  // Row 3 (voids at col 2, col 5)
+  { row: 3, col: 1, img: 10 },
+  { row: 3, col: 3, img: 11 },
+  { row: 3, col: 4, img: 12 },
+  { row: 3, col: 6, img: 13 },
+  { row: 3, col: 7, img: 14 },
+  { row: 3, col: 8, img: 15 },
 ];
 
 export default function ExplorationsGrid({
@@ -142,8 +144,8 @@ export default function ExplorationsGrid({
           width: 100%;
           height: 100%;
           gap: 0.5rem;
-          grid-template-columns: repeat(5, 1fr);
-          grid-template-rows: repeat(4, 1fr);
+          grid-template-columns: repeat(8, 1fr);
+          grid-template-rows: repeat(3, 1fr);
           transform-style: preserve-3d;
           position: relative;
         }
@@ -171,11 +173,11 @@ export default function ExplorationsGrid({
         }
 
         .content__title-main {
-          font-family: var(--font-sans), 'Besley', serif;
+          font-family: 'Frama', sans-serif;
           font-size: clamp(2.6rem, 7.5vw, 6.2rem);
           line-height: 0.95;
           margin: 0;
-          font-weight: 600;
+          font-weight: 400;
           letter-spacing: -0.035em;
           color: #0b0b0c;
           text-align: center;

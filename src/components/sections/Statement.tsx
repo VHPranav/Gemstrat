@@ -111,7 +111,7 @@ export default function Statement() {
           ref={quoteWrapRef}
           className="w-full max-w-[1500px] mx-auto px-6 sm:px-12 lg:px-16"
         >
-          <blockquote className="m-0 p-0 font-archivo-expanded text-[clamp(2.5rem,7vw,92px)] font-semibold leading-[1.12] tracking-[-0.03em] text-white text-left">
+          <blockquote className="m-0 p-0 font-archivo-expanded text-[clamp(2.5rem,7vw,92px)] font-normal leading-[1.12] tracking-[-0.03em] text-white text-left">
             {QUOTE_LINES.map((line, lineIdx) => (
               <span key={lineIdx} className="block">
                 {line.map((word) => {

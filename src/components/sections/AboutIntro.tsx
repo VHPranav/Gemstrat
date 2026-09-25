@@ -4,81 +4,68 @@ import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import ImageTrail from '@/components/ui/ImageTrail';
 import FragmentedImageGrid from '@/components/ui/FragmentedImageGrid';
+import UnwovenCarousel, { type UnwovenCarouselControl } from '@/components/ui/UnwovenCarousel';
 
 const TRAIL_IMAGES = [
-  '/images/ref%20images/1.webp',
-  '/images/ref%20images/2.webp',
-  '/images/ref%20images/3.webp',
-  '/images/ref%20images/4.webp',
-  '/images/ref%20images/5.webp',
-  '/images/ref%20images/6.webp',
-  '/images/ref%20images/7.webp',
-  '/images/ref%20images/8.webp',
-  '/images/ref%20images/9.webp',
-  '/images/ref%20images/10.webp',
-  '/images/ref%20images/11.webp',
-  '/images/ref%20images/12.webp',
-  '/images/ref%20images/13.webp',
-  '/images/ref%20images/14.webp',
-  '/images/ref%20images/15.webp',
-  '/images/ref%20images/16.webp',
+  '/images/motion/airport.webp',
+  '/images/motion/container-ship.webp',
+  '/images/motion/bridge-cables.webp',
+  '/images/motion/atrium.webp',
+  '/images/motion/train-platform.webp',
+  '/images/motion/interchange.webp',
+  '/images/motion/compass.webp',
+  '/images/motion/reflection.webp',
+  '/images/motion/escalators.webp',
+  '/images/motion/wind-turbines.webp',
+  '/images/motion/conference-hall.webp',
+  '/images/motion/harbour.webp',
+  '/images/motion/data-center.webp',
+  '/images/motion/glass-wall-strategy.webp',
+  '/images/motion/cyclist-bridge.webp',
+  '/images/motion/night-city.webp',
 ];
 
 const FOCUS_ITEMS = [
   {
     quote: '“ Align goals, operations, and systems for future-ready growth,”',
     titleLines: ['Enterprise', 'Architecture &', 'Mapping'],
-    image: '/images/ref%20images/17.webp',
+    image: '/images/about/enterprise-architecture.webp',
     alt: 'Enterprise Architecture & Mapping',
   },
   {
     quote: '“ Integrate intelligence, streamline outcomes across the business.”',
     titleLines: ['AI &', 'Automation'],
-    image: '/images/ref%20images/18.webp',
+    image: '/images/about/ai-automation.webp',
     alt: 'AI & Automation',
   },
   {
     quote: '“ Craft distinctive brand systems that evolve with your business.”',
     titleLines: ['360°', 'Branding'],
-    image: '/images/ref%20images/19.webp',
+    image: '/images/about/branding.webp',
     alt: '360° Branding',
   },
   {
     quote: '“ Websites, apps and digital-first marketing designed to deliver results.”',
     titleLines: ['Neo Marketing &', 'Digital'],
-    image: '/images/ref%20images/20.webp',
+    image: '/images/about/neo-marketing-digital.webp',
     alt: 'Neo Marketing & Digital',
   },
   {
     quote: '“ Build identities and campaigns that move markets.”',
     titleLines: ['Advertising'],
-    image: '/images/ref%20images/21.webp',
+    image: '/images/about/advertising.webp',
     alt: 'Advertising',
   },
 ];
 
-// Scattered images that fly outward from center and exit the viewport, each on
-// its own direction/timing — the transition after the last Focus Item
-const FLYTHROUGH_IMAGES = [
-  { src: '/images/ref%20images/1.webp', dirX: -1.3, dirY: -0.8, stagger: 0.0, startX: -3, startY: -2 },
-  { src: '/images/ref%20images/2.webp', dirX: 1.4, dirY: -0.6, stagger: 0.04, startX: 4, startY: -2 },
-  { src: '/images/ref%20images/3.webp', dirX: -1.5, dirY: 0.5, stagger: 0.08, startX: -4, startY: 2 },
-  { src: '/images/ref%20images/4.webp', dirX: 1.2, dirY: 0.9, stagger: 0.03, startX: 3, startY: 3 },
-  { src: '/images/ref%20images/5.webp', dirX: -0.7, dirY: -1.3, stagger: 0.07, startX: -2, startY: -4 },
-  { src: '/images/ref%20images/6.webp', dirX: 0.8, dirY: 1.4, stagger: 0.11, startX: 2, startY: 4 },
-  { src: '/images/ref%20images/7.webp', dirX: -1.4, dirY: 1.0, stagger: 0.14, startX: -4, startY: 3 },
-  { src: '/images/ref%20images/8.webp', dirX: 1.5, dirY: -1.0, stagger: 0.02, startX: 4, startY: -3 },
-  { src: '/images/ref%20images/9.webp', dirX: 0.4, dirY: -1.5, stagger: 0.18, startX: 1, startY: -4 },
-  { src: '/images/ref%20images/10.webp', dirX: -0.3, dirY: 1.5, stagger: 0.21, startX: -1, startY: 4 },
-  { src: '/images/ref%20images/11.webp', dirX: 1.5, dirY: 0.2, stagger: 0.25, startX: 4, startY: 1 },
-  { src: '/images/ref%20images/12.webp', dirX: -1.5, dirY: -0.2, stagger: 0.28, startX: -4, startY: -1 },
-  { src: '/images/ref%20images/13.webp', dirX: 0.2, dirY: 1.5, stagger: 0.32, startX: 1, startY: 4 },
-  { src: '/images/ref%20images/14.webp', dirX: -0.2, dirY: -1.5, stagger: 0.35, startX: -1, startY: -4 },
-];
+// Images for the scroll-driven unravelling carousel behind "Clarity, execution,
+// momentum". Module-level so the array identity is stable across renders.
+const CAROUSEL_IMAGES = [...TRAIL_IMAGES, '/images/about/clarity-lighthouse.webp'];
 
-// The one image that blur-fades in and settles at a fixed size in the center —
-// carries straight into the Clarity section, which uses this same photo
-const FLYTHROUGH_CENTER_IMAGE = '/images/ref%20images/22.webp';
+// Carousel motion: it always drifts at CAROUSEL_DRIFT px/s, and page scroll
+// pushes it further by CAROUSEL_SCROLL_RATIO px per px scrolled.
+const CAROUSEL_DRIFT = 60;
+const CAROUSEL_SCROLL_RATIO = 1.1;
 
 const CLARITY_HEADLINE_LINES = [
   ['Clarity,'],
@@ -105,7 +92,7 @@ const HORIZONTAL_CARDS = [
     number: '1.',
     titleLine1: 'Clarity in',
     titleLine2: 'complexity',
-    image: '/images/ref%20images/23.webp',
+    image: '/images/about/clarity-maze.webp',
     alt: 'Clarity in complexity',
     description: 'We decode tangled operations and markets into clear roadmaps.',
   },
@@ -113,7 +100,7 @@ const HORIZONTAL_CARDS = [
     number: '2.',
     titleLine1: 'Scalable',
     titleLine2: 'execution',
-    image: '/images/ref%20images/24.webp',
+    image: '/images/about/scalable-scaffolding.webp',
     alt: 'Scalable execution',
     description: 'Every framework we build is tied to practical action.',
   },
@@ -121,7 +108,7 @@ const HORIZONTAL_CARDS = [
     number: '3.',
     titleLine1: 'Momentum',
     titleLine2: 'at every stage',
-    image: '/images/ref%20images/25.webp',
+    image: '/images/about/momentum-runner.webp',
     alt: 'Momentum at every stage',
     description: 'Early-stage founder or multinational — we deliver solutions that create traction.',
   },
@@ -137,12 +124,19 @@ export default function AboutIntro() {
   const leftQuoteRefs = useRef<(HTMLDivElement | null)[]>([]);
   const focusWordRefs = useRef<(HTMLSpanElement | null)[][]>([]);
 
-  const flyItemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const flyCenterRef = useRef<HTMLDivElement>(null);
+  const carouselWrapRef = useRef<HTMLDivElement>(null);
+  const carouselControlRef = useRef<UnwovenCarouselControl>({
+    offset: 0,
+    drift: CAROUSEL_DRIFT,
+    strength: 0,
+    active: false,
+  });
 
   const clarityTrackRef = useRef<HTMLDivElement>(null);
   const clarityStickyRef = useRef<HTMLDivElement>(null);
   const clarityTextWrapRef = useRef<HTMLDivElement>(null);
+  const clarityHeadlineRef = useRef<HTMLHeadingElement>(null);
+  const clarityParaRef = useRef<HTMLParagraphElement>(null);
   const clarityWordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const horizontalTrackRef = useRef<HTMLDivElement>(null);
   const cardDescWordRefs = useRef<(HTMLSpanElement | null)[][]>([]);
@@ -166,12 +160,8 @@ export default function AboutIntro() {
           w.style.transform = 'none';
         }
       });
-      flyItemRefs.current.forEach((el) => {
-        if (el) el.style.display = 'none';
-      });
-      if (flyCenterRef.current) {
-        flyCenterRef.current.style.display = 'none';
-      }
+      if (carouselWrapRef.current) carouselWrapRef.current.style.opacity = '1';
+      carouselControlRef.current = { offset: 0, drift: 0, strength: 1, active: true };
       if (horizontalTrackRef.current) {
         horizontalTrackRef.current.style.opacity = '1';
         horizontalTrackRef.current.style.transform = 'none';
@@ -388,84 +378,63 @@ export default function AboutIntro() {
               clarityTextWrapRef.current.style.pointerEvents = 'none';
             }
 
-            // Scattered images blur-fade in near center, then fly outward and exit (starts once canvas is black)
-            flyItemRefs.current.forEach((el, i) => {
-              if (!el) return;
-              const cfg = FLYTHROUGH_IMAGES[i];
-              const start = 0.16 + cfg.stagger;
-              const end = Math.min(start + 0.3, 0.88);
-              const t = Math.min(Math.max((introP - start) / (end - start), 0), 1);
-              const ease = t * t; // accelerate outward, like warp speed
-
-              const curX = cfg.startX + ease * cfg.dirX * 90; // vw
-              const curY = cfg.startY + ease * cfg.dirY * 90; // vh
-              const scale = 0.25 + ease * 3.2;
-              const fadeInT = Math.min(t / 0.18, 1); // blur-fade-in window at the start
-              const opacity =
-                t <= 0.18 ? fadeInT : t >= 0.8 ? Math.max(1 - (t - 0.8) / 0.2, 0) : 1;
-              const blur = (1 - fadeInT) * 16;
-
-              el.style.opacity = opacity.toFixed(3);
-              el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-              el.style.transform = `translate3d(calc(-50% + ${curX.toFixed(1)}vw), calc(-50% + ${curY.toFixed(1)}vh), 0) scale(${scale.toFixed(3)})`;
-            });
-
-            // The center image blur-fades in near center, then settles at its
-            // fixed size dead-center and holds there.
-            if (flyCenterRef.current) {
-              const start = 0.58;
-              const end = 0.85;
-              const t = Math.min(Math.max((introP - start) / (end - start), 0), 1);
+            // Carousel fades in once the canvas has turned black; its edges unravel
+            // as it appears, and it travels sideways with the page scroll.
+            {
+              const t = Math.min(Math.max((introP - 0.14) / (0.34 - 0.14), 0), 1);
               const ease = t * t * (3 - 2 * t);
-              const fadeInT = Math.min(t / 0.3, 1);
-
-              const centerStartX = 3;
-              const centerStartY = -3;
-              const curX = centerStartX * (1 - ease);
-              const curY = centerStartY * (1 - ease);
-              const scale = 0.3 + ease * 0.7;
-              const blur = (1 - fadeInT) * 16;
-
-              flyCenterRef.current.style.opacity = fadeInT.toFixed(3);
-              flyCenterRef.current.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-              flyCenterRef.current.style.transform = `translate3d(calc(-50% + ${curX.toFixed(1)}vw), calc(-50% + ${curY.toFixed(1)}vh), 0) scale(${scale.toFixed(3)})`;
+              if (carouselWrapRef.current) {
+                carouselWrapRef.current.style.opacity = ease.toFixed(3);
+                carouselWrapRef.current.style.transform = `scale(${(0.96 + ease * 0.04).toFixed(4)})`;
+              }
+              const control = carouselControlRef.current;
+              control.offset = Math.max(-rect.top, 0) * CAROUSEL_SCROLL_RATIO;
+              control.strength = ease;
+              control.active = ease > 0;
             }
 
-            // Once the center image has settled, the headline + paragraph words
-            // blur-fade in flanking it (reusing the same scatter order the
-            // word-blur-out below uses, just running in the fade-in direction).
+            // While the carousel keeps moving: headline blurs up in the top-left,
+            // then the paragraph blurs up in the bottom-right (word by word).
             {
-              const dStart = 0.85;
-              const totalWords = CLARITY_ALL_WORDS.length;
-              const windowSize = 0.4;
-              const activeRange = 1 - windowSize;
-              const dProgress = Math.min(Math.max((introP - dStart) / (1 - dStart), 0), 1);
+              const headlineCount = CLARITY_HEADLINE_LINES.flat().length;
+              const bodyCount = CLARITY_BODY_WORDS.length;
+              const phases = [
+                { from: 0, count: headlineCount, start: 0.42, end: 0.66 },
+                { from: headlineCount, count: bodyCount, start: 0.62, end: 0.96 },
+              ];
 
-              clarityWordRefs.current.forEach((span, index) => {
-                if (!span) return;
-                const rank = CLARITY_RANDOM_ORDER[index] ?? index;
-                const wordStart = (rank / (totalWords - 1 || 1)) * activeRange;
-                const wordEnd = wordStart + windowSize;
-                const wordP = Math.min(Math.max((dProgress - wordStart) / (wordEnd - wordStart), 0), 1);
-
-                const opacity = wordP;
-                const blur = (1 - wordP) * 16;
-                const translateY = (1 - wordP) * 10;
-
-                span.style.opacity = opacity.toFixed(3);
-                span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-                span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+              phases.forEach(({ from, count, start, end }) => {
+                const phaseP = Math.min(Math.max((introP - start) / (end - start), 0), 1);
+                const windowSize = 0.45;
+                for (let i = 0; i < count; i++) {
+                  const span = clarityWordRefs.current[from + i];
+                  if (!span) continue;
+                  const wordStart = (i / Math.max(count - 1, 1)) * (1 - windowSize);
+                  const wordP = Math.min(Math.max((phaseP - wordStart) / windowSize, 0), 1);
+                  const blur = (1 - wordP) * 16;
+                  span.style.opacity = wordP.toFixed(3);
+                  span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
+                  span.style.transform = `translate3d(0, ${((1 - wordP) * 18).toFixed(1)}px, 0)`;
+                }
               });
             }
           } else {
             const oldP = Math.min(Math.max((progress - INTRO_END) / (1 - INTRO_END), 0), 1);
 
-            // Intro is done — peripheral images have already self-faded to 0;
-            // the center image rests as-is (opacity 1, settled), its visibility
-            // from here on is carried entirely by clarityTextWrapRef's opacity below.
-            flyItemRefs.current.forEach((el) => {
-              if (el) el.style.opacity = '0';
-            });
+            // Carousel keeps travelling with the scroll while it fades out
+            // alongside the words, before the horizontal cards arrive.
+            {
+              const t = Math.min(Math.max((oldP - 0.04) / (0.19 - 0.04), 0), 1);
+              const vis = 1 - t * t * (3 - 2 * t);
+              if (carouselWrapRef.current) {
+                carouselWrapRef.current.style.opacity = vis.toFixed(3);
+                carouselWrapRef.current.style.transform = 'scale(1)';
+              }
+              const control = carouselControlRef.current;
+              control.offset = Math.max(-rect.top, 0) * CAROUSEL_SCROLL_RATIO;
+              control.strength = 1;
+              control.active = vis > 0;
+            }
 
             // Background theme: stays black through the headline/paragraph and the
             // first two horizontal cards, then crosses to white exactly as Card 3
@@ -481,8 +450,7 @@ export default function AboutIntro() {
               clarityStickyRef.current.style.backgroundColor = `rgb(${channel}, ${channel}, ${channel})`;
             }
 
-            // Phase 1: Words (and the settled image via container opacity) blur
-            // out randomly between oldP 0.02 and 0.18
+            // Phase 1: Words blur out randomly between oldP 0.02 and 0.18
             const totalWords = CLARITY_ALL_WORDS.length;
             const startBuffer = 0.02;
             const endBuffer = 0.18;
@@ -507,8 +475,7 @@ export default function AboutIntro() {
               span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
             });
 
-            // Container (headline + paragraph + settled image) fades out completely
-            // once words are gone — this is what finally hides the center image too.
+            // Container (headline + paragraph) fades out completely once words are gone
             if (clarityTextWrapRef.current) {
               clarityTextWrapRef.current.style.opacity = oldP >= 0.2 ? '0' : '1';
               clarityTextWrapRef.current.style.pointerEvents = 'none';
@@ -617,6 +584,37 @@ export default function AboutIntro() {
     };
   }, []);
 
+  // Fit the carousel into the band between the top-left headline and the
+  // bottom-right paragraph so the cards never sit under either text block.
+  useEffect(() => {
+    const sticky = clarityStickyRef.current;
+    const headline = clarityHeadlineRef.current;
+    const para = clarityParaRef.current;
+    const wrap = carouselWrapRef.current;
+    if (!sticky || !headline || !para || !wrap) return;
+
+    const GAP = 24;
+    const layout = () => {
+      const box = sticky.getBoundingClientRect();
+      if (box.height === 0) return;
+      let top = headline.getBoundingClientRect().bottom - box.top + GAP;
+      let bottom = box.bottom - para.getBoundingClientRect().top + GAP;
+      // Very short/narrow screens: keep a usable band, centred, even if it overlaps
+      const minBand = box.height * 0.3;
+      if (box.height - top - bottom < minBand) {
+        top = (box.height - minBand) / 2;
+        bottom = top;
+      }
+      wrap.style.top = `${Math.round(top)}px`;
+      wrap.style.bottom = `${Math.round(bottom)}px`;
+    };
+
+    const observer = new ResizeObserver(layout);
+    [sticky, headline, para].forEach((el) => observer.observe(el));
+    layout();
+    return () => observer.disconnect();
+  }, []);
+
   let clarityWordCounter = 0;
 
   return (
@@ -653,11 +651,11 @@ export default function AboutIntro() {
                 <div className="lg:col-span-6 flex items-center justify-center lg:justify-end w-full">
                   <FragmentedImageGrid
                     images={[
-                      { src: '/images/ref%20images/1.webp', alt: 'Gemstrat Strategic Advisory' },
-                      { src: '/images/ref%20images/7.webp', alt: 'Enterprise Architecture & Mapping' },
-                      { src: '/images/ref%20images/24.webp', alt: 'Scalable Execution & Systems' },
-                      { src: '/images/ref%20images/14.webp', alt: 'Momentum at Scale' },
-                      { src: '/images/ref%20images/27.webp', alt: 'Strategic Consultancy' },
+                      { src: '/images/about/boardroom.webp', alt: 'Gemstrat Strategic Advisory' },
+                      { src: '/images/about/architect-drawing.webp', alt: 'Enterprise Architecture & Mapping' },
+                      { src: '/images/about/tower-crane.webp', alt: 'Scalable Execution & Systems' },
+                      { src: '/images/about/high-speed-train.webp', alt: 'Momentum at Scale' },
+                      { src: '/images/about/strategy-notebook.webp', alt: 'Strategic Consultancy' },
                     ]}
                   />
                 </div>
@@ -740,7 +738,7 @@ export default function AboutIntro() {
                       </p>
                     </div>
 
-                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,82px)] font-medium text-[#090909] leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
+                    <h2 className="font-archivo-expanded text-[clamp(2.8rem,6.8vw,82px)] font-normal text-[#090909] leading-[1.02] tracking-[-0.035em] m-0 mb-10 sm:mb-14 text-left">
                       {item.titleLines.map((line, lIdx) => (
                         <span key={lIdx} className="block">
                           {line}
@@ -786,74 +784,32 @@ export default function AboutIntro() {
             />
           </div>
 
-          {/* Scattered flythrough images: blur-fade in near center, fly outward, exit.
-              A single instance of the center photo is nested in Layer 1 below —
-              no separate/duplicate image element. */}
-          <div className="absolute inset-0 z-15 pointer-events-none">
-            {FLYTHROUGH_IMAGES.map((img, i) => (
-              <div
-                key={img.src}
-                ref={(el) => {
-                  flyItemRefs.current[i] = el;
-                }}
-                className="absolute left-1/2 top-1/2 w-[140px] sm:w-[180px] aspect-[4/5] overflow-hidden border border-white/10 bg-[#141414] opacity-0 will-change-[transform,opacity,filter]"
-                style={{
-                  transform: `translate3d(calc(-50% + ${img.startX}vw), calc(-50% + ${img.startY}vh), 0) scale(0.2)`,
-                  filter: 'blur(16px)',
-                }}
-              >
-                <Image
-                  src={img.src}
-                  alt=""
-                  fill
-                  sizes="180px"
-                  className="object-cover grayscale"
-                />
-              </div>
-            ))}
+          {/* Scroll-driven unravelling carousel (fades in, travels with scroll) */}
+          <div
+            ref={carouselWrapRef}
+            className="absolute inset-x-0 top-0 bottom-0 z-15 pointer-events-none opacity-0 will-change-[opacity,transform]"
+          >
+            {/* Fills the band between the headline and the paragraph (sized by the
+                layout effect); sharp corners to match the rest of the imagery */}
+            <UnwovenCarousel
+              images={CAROUSEL_IMAGES}
+              controlRef={carouselControlRef}
+              config={{ cardHeightRatio: 0.92, cardMaxHeight: 400, cardRadius: 0 }}
+            />
           </div>
 
-          {/* Layer 1: Initial "Clarity, execution, momentum" Text + the flythrough's
-              settled image, centered — (words blur out randomly on scroll) */}
+          {/* Layer 1: "Clarity, execution, momentum" — headline top-left, paragraph
+              bottom-right, over the carousel (words blur up, later blur out) */}
           <div
             ref={clarityTextWrapRef}
-            className="absolute inset-0 flex items-center justify-center z-20 px-6 sm:px-12 lg:px-20 pointer-events-none select-none transition-opacity duration-150"
+            className="absolute inset-0 z-20 pointer-events-none select-none transition-opacity duration-150"
           >
-            <div className="w-full max-w-[1600px] mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 lg:gap-16 items-center">
-
-                {/* Left Column: 3-line Heading */}
-                <div className="lg:col-span-5">
-                  <h2 className="font-archivo-expanded text-[clamp(2.5rem,5.2vw,72px)] font-medium text-white leading-[1.04] tracking-[-0.03em] m-0 text-left">
-                    {CLARITY_HEADLINE_LINES.map((line, lIdx) => (
-                      <span key={lIdx} className="block">
-                        {line.map((word) => {
-                          const idx = clarityWordCounter++;
-                          return (
-                            <span
-                              key={idx}
-                              ref={(el) => {
-                                clarityWordRefs.current[idx] = el;
-                              }}
-                              className="inline-block will-change-[opacity,filter,transform]"
-                            >
-                              {word}
-                            </span>
-                          );
-                        })}
-                      </span>
-                    ))}
-                  </h2>
-                </div>
-
-                {/* Center: empty spacer reserving visual space for the
-                    absolutely-positioned settle image below */}
-                <div className="hidden lg:block lg:col-span-3" />
-
-                {/* Right Column: Editorial Paragraph */}
-                <div className="lg:col-span-4 flex justify-start lg:justify-end">
-                  <p className="font-archivo text-[clamp(1.18rem,1.6vw,23px)] font-normal text-[#d4d4d8] leading-[1.56] tracking-[-0.015em] max-w-[420px] m-0 text-left">
-                    {CLARITY_BODY_WORDS.map((word) => {
+            <div className="w-full h-full max-w-[1600px] mx-auto px-6 sm:px-12 lg:px-20 py-[6vh] box-border flex flex-col justify-between">
+              <div className="self-start">
+              <h2 ref={clarityHeadlineRef} className="font-archivo-expanded text-[clamp(2.2rem,min(5.2vw,7vh),72px)] font-normal text-white leading-[1.04] tracking-[-0.03em] m-0 text-left">
+                {CLARITY_HEADLINE_LINES.map((line, lIdx) => (
+                  <span key={lIdx} className="block">
+                    {line.map((word) => {
                       const idx = clarityWordCounter++;
                       return (
                         <span
@@ -861,36 +817,34 @@ export default function AboutIntro() {
                           ref={(el) => {
                             clarityWordRefs.current[idx] = el;
                           }}
-                          className="inline-block mr-[0.28em] will-change-[opacity,filter,transform]"
+                          className="inline-block will-change-[opacity,filter,transform]"
                         >
                           {word}
                         </span>
                       );
                     })}
-                  </p>
-                </div>
-
+                  </span>
+                ))}
+              </h2>
               </div>
-            </div>
-
-            {/* The one settle image — a direct child of this container so its
-                visibility is carried by clarityTextWrapRef's opacity once the
-                intro is over (fades out together with the text, no duplicate). */}
-            <div
-              ref={flyCenterRef}
-              className="absolute left-1/2 top-1/2 w-[220px] sm:w-[260px] lg:w-[300px] aspect-[9/16] overflow-hidden border border-white/10 bg-[#141414] opacity-0 will-change-[transform,opacity,filter]"
-              style={{
-                transform: 'translate3d(calc(-50% + 3vw), calc(-50% - 3vh), 0) scale(0.3)',
-                filter: 'blur(16px)',
-              }}
-            >
-              <Image
-                src={FLYTHROUGH_CENTER_IMAGE}
-                alt="Gemstrat in motion"
-                fill
-                sizes="300px"
-                className="object-cover grayscale"
-              />
+              <div className="self-end">
+              <p ref={clarityParaRef} className="font-archivo text-[clamp(1.05rem,min(1.6vw,2.6vh),23px)] font-normal text-[#d4d4d8] leading-[1.56] tracking-[-0.015em] max-w-[460px] m-0 text-left">
+                {CLARITY_BODY_WORDS.map((word) => {
+                  const idx = clarityWordCounter++;
+                  return (
+                    <span
+                      key={idx}
+                      ref={(el) => {
+                        clarityWordRefs.current[idx] = el;
+                      }}
+                      className="inline-block mr-[0.28em] will-change-[opacity,filter,transform]"
+                    >
+                      {word}
+                    </span>
+                  );
+                })}
+              </p>
+              </div>
             </div>
           </div>
 
@@ -913,7 +867,7 @@ export default function AboutIntro() {
 
                     {/* Left Title */}
                     <div className="lg:self-center shrink-0 pointer-events-none w-full lg:w-[320px] xl:w-[380px]">
-                      <h3 className={`font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-medium leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none ${isDark ? 'text-white' : 'text-[#090909]'}`}>
+                      <h3 className={`font-archivo-expanded text-[clamp(2.2rem,4vw,54px)] font-normal leading-[1.1] tracking-[-0.025em] m-0 text-left pointer-events-none ${isDark ? 'text-white' : 'text-[#090909]'}`}>
                         {card.number}{card.titleLine1}<br />{card.titleLine2}
                       </h3>
                     </div>

@@ -25,12 +25,12 @@ const REVIEWS: ReviewItem[] = [
 ];
 
 const DIRECTORY_LINKS = [
-  { num: '01', title: 'About us', href: '#about', image: '/images/ref%20images/1.webp' },
-  { num: '02', title: 'What we enable', href: '#enable', image: '/images/ref%20images/2.webp' },
-  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/ref%20images/3.webp' },
-  { num: '04', title: 'Work', href: '#work', image: '/images/ref%20images/4.webp' },
-  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/ref%20images/5.webp' },
-  { num: '06', title: 'Contact', href: '#contact', image: '/images/ref%20images/6.webp' },
+  { num: '01', title: 'About us', href: '#about', image: '/images/reviews/about-us.webp' },
+  { num: '02', title: 'What we enable', href: '#enable', image: '/images/reviews/what-we-enable.webp' },
+  { num: '03', title: 'Industries we shape', href: '#industries', image: '/images/reviews/industries.webp' },
+  { num: '04', title: 'Work', href: '#work', image: '/images/reviews/work.webp' },
+  { num: '05', title: 'FAQs', href: '#faqs', image: '/images/reviews/faqs.webp' },
+  { num: '06', title: 'Contact', href: '#contact', image: '/images/reviews/contact.webp' },
 ];
 
 const SOCIAL_NETWORKS = [
@@ -391,7 +391,7 @@ export default function ReviewsSection() {
                   <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
                     // Architecture statement
                   </span>
-                  <h2 className="font-archivo-expanded text-[clamp(2.6rem,6.8vw,104px)] font-bold text-white leading-[0.88] tracking-[-0.04em] m-0">
+                  <h2 className="font-archivo-expanded text-[clamp(2.6rem,6.8vw,104px)] font-normal text-white leading-[0.88] tracking-[-0.04em] m-0">
                     <span className="block">Let&apos;s build</span>
                     <span className="block text-white/95">what&apos;s next,</span>
                     <span className="block text-white/60">together.</span>

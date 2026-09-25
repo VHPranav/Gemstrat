@@ -84,7 +84,7 @@ export default function ScalingExpertise() {
               }}
             >
               <Image
-                src="/images/ref%20images/14.webp"
+                src="/images/scaling/spiral-staircase.webp"
                 alt="Motion Blur - Dynamic Speed & Focus"
                 fill
                 priority
@@ -95,9 +95,10 @@ export default function ScalingExpertise() {
 
             {/* Bottom-Left: Title with Blur-In-Up Stagger Animation */}
             <div className="flex flex-col items-start gap-3 sm:gap-3.5 max-w-[440px]">
-              <h2 className="font-archivo text-[clamp(2.2rem,3.4vw,50px)] font-medium tracking-[-0.035em] leading-[1.08] text-black m-0">
+              <h2 className="font-archivo text-[clamp(2.2rem,4.2vw,64px)] font-normal tracking-[-0.035em] leading-[1.08] text-black m-0">
                 {TITLE_LINES.map((line, lIdx) => (
-                  <span key={lIdx} className="block">
+                  // Each line stays on one line; it may run past the column edge
+                  <span key={lIdx} className="block whitespace-nowrap">
                     {line.map((item, wIdx) => (
                       <span
                         key={wIdx}
@@ -138,7 +139,7 @@ export default function ScalingExpertise() {
               }}
             >
               <Image
-                src="/images/ref%20images/15.webp"
+                src="/images/scaling/leadership-window.webp"
                 alt="Deepak - Founder of Gemstrat"
                 fill
                 priority
@@ -194,9 +195,10 @@ export default function ScalingExpertise() {
               </p>
             </div>
 
-            {/* Bottom-Right Corner: Image 3 */}
+            {/* Bottom-Right Corner: Image 3 — capped by viewport height so this
+                column (text + image) fits short screens; it sets the row height */}
             <div
-              className="relative w-[240px] sm:w-[280px] lg:w-[310px] xl:w-[335px] aspect-[4/5] bg-neutral-100 overflow-hidden border border-black/5 transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
+              className="relative w-[240px] sm:w-[280px] lg:w-[min(310px,34vh)] xl:w-[min(335px,34vh)] aspect-[4/5] bg-neutral-100 overflow-hidden border border-black/5 transition-all duration-800 ease-[cubic-bezier(0.16,1,0.3,1)] group"
               style={{
                 opacity: inView ? 1 : 0,
                 transform: inView ? 'none' : 'translate3d(0, 20px, 0)',
@@ -205,7 +207,7 @@ export default function ScalingExpertise() {
               }}
             >
               <Image
-                src="/images/ref%20images/16.webp"
+                src="/images/scaling/glass-facade.webp"
                 alt="Techwear Motion Blur - Execution & Momentum"
                 fill
                 unoptimized

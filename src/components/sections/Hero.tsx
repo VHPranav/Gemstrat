@@ -11,7 +11,7 @@ export default function Hero() {
       id="hero"
     >
       <div className="w-full max-w-[1400px] mx-auto flex flex-col items-center justify-center relative z-10">
-        <h1 className="font-sans font-semibold text-center text-white tracking-[-0.035em] leading-[0.94] text-[clamp(3.2rem,8.5vw,9.5rem)] select-none">
+        <h1 className="font-sans font-normal text-center text-white tracking-[-0.035em] leading-[0.94] text-[clamp(3.2rem,8.5vw,9.5rem)] select-none">
           <span
             className={`block transition-all duration-500 ease-out ${
               isLastsHovered ? 'opacity-20 blur-[0.6px]' : 'opacity-100'
