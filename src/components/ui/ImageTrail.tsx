@@ -80,11 +80,8 @@ class ImageTrailVariant1 {
   private cacheMousePos: { x: number; y: number };
   private rafId: number | null = null;
   private destroyed = false;
-  // Cached container rect — avoids a forced layout on every pointermove
-  private containerRect: DOMRect;
   private handlePointerMove!: (ev: MouseEvent | TouchEvent) => void;
   private initRender!: (ev: MouseEvent | TouchEvent) => void;
-  private onResize!: () => void;
 
   constructor(container: HTMLDivElement) {
     this.container = container;
@@ -99,12 +96,6 @@ class ImageTrailVariant1 {
     this.mousePos = { x: 0, y: 0 };
     this.lastMousePos = { x: 0, y: 0 };
     this.cacheMousePos = { x: 0, y: 0 };
-    this.containerRect = container.getBoundingClientRect();
-
-    this.onResize = () => {
-      this.containerRect = this.container.getBoundingClientRect();
-    };
-    window.addEventListener('resize', this.onResize, { passive: true });
 
     const isInsideContainer = (ev: MouseEvent | TouchEvent, rect: DOMRect): boolean => {
       let clientX = 0, clientY = 0;
@@ -124,7 +115,7 @@ class ImageTrailVariant1 {
     };
 
     const handlePointerMove = (ev: MouseEvent | TouchEvent) => {
-      const rect = this.containerRect;
+      const rect = this.container.getBoundingClientRect();
       if (rect.bottom > 0 && rect.top < window.innerHeight && isInsideContainer(ev, rect)) {
         this.mousePos = getLocalPointerPos(ev, rect);
         // Restart idle loop on movement
@@ -135,7 +126,7 @@ class ImageTrailVariant1 {
     };
 
     const initRender = (ev: MouseEvent | TouchEvent) => {
-      const rect = this.containerRect;
+      const rect = this.container.getBoundingClientRect();
       if (rect.bottom > 0 && rect.top < window.innerHeight && isInsideContainer(ev, rect)) {
         this.mousePos = getLocalPointerPos(ev, rect);
         this.cacheMousePos = { ...this.mousePos };
@@ -234,7 +225,6 @@ class ImageTrailVariant1 {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
-    window.removeEventListener('resize', this.onResize);
     window.removeEventListener('mousemove', this.handlePointerMove as EventListener);
     window.removeEventListener('touchmove', this.handlePointerMove as EventListener);
     window.removeEventListener('mousemove', this.initRender as EventListener);
@@ -280,10 +270,8 @@ class ImageTrailVariant2 {
   private cacheMousePos: { x: number; y: number };
   private rafId: number | null = null;
   private destroyed = false;
-  private containerRect: DOMRect;
   private handlePointerMove!: (ev: MouseEvent | TouchEvent) => void;
   private initRender!: (ev: MouseEvent | TouchEvent) => void;
-  private onResize!: () => void;
 
   constructor(container: HTMLDivElement) {
     this.container = container;
@@ -298,10 +286,6 @@ class ImageTrailVariant2 {
     this.mousePos = { x: 0, y: 0 };
     this.lastMousePos = { x: 0, y: 0 };
     this.cacheMousePos = { x: 0, y: 0 };
-    this.containerRect = container.getBoundingClientRect();
-
-    this.onResize = () => { this.containerRect = this.container.getBoundingClientRect(); };
-    window.addEventListener('resize', this.onResize, { passive: true });
 
     const isInsideContainer = (ev: MouseEvent | TouchEvent, rect: DOMRect): boolean => {
       let clientX = 0, clientY = 0;
@@ -321,7 +305,7 @@ class ImageTrailVariant2 {
     };
 
     const handlePointerMove = (ev: MouseEvent | TouchEvent) => {
-      const rect = this.containerRect;
+      const rect = this.container.getBoundingClientRect();
       if (rect.bottom > 0 && rect.top < window.innerHeight && isInsideContainer(ev, rect)) {
         this.mousePos = getLocalPointerPos(ev, rect);
         if (this.rafId === null && !this.destroyed) {
@@ -331,7 +315,7 @@ class ImageTrailVariant2 {
     };
 
     const initRender = (ev: MouseEvent | TouchEvent) => {
-      const rect = this.containerRect;
+      const rect = this.container.getBoundingClientRect();
       if (rect.bottom > 0 && rect.top < window.innerHeight && isInsideContainer(ev, rect)) {
         this.mousePos = getLocalPointerPos(ev, rect);
         this.cacheMousePos = { ...this.mousePos };
@@ -438,7 +422,6 @@ class ImageTrailVariant2 {
       cancelAnimationFrame(this.rafId);
       this.rafId = null;
     }
-    window.removeEventListener('resize', this.onResize);
     window.removeEventListener('mousemove', this.handlePointerMove as EventListener);
     window.removeEventListener('touchmove', this.handlePointerMove as EventListener);
     window.removeEventListener('mousemove', this.initRender as EventListener);

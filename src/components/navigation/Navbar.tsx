@@ -51,7 +51,8 @@ export default function Navbar() {
             e.preventDefault();
             scrollTo('#hero');
           }}
-          className={`pointer-events-auto flex items-center gap-2.5 h-10 px-3.5 border transition-colors duration-300 ${
+          style={{ animationDelay: '1.25s' }}
+          className={`nav-item-in pointer-events-auto flex items-center gap-2.5 h-10 px-3.5 border transition-colors duration-300 ${
             isLight
               ? 'bg-black text-white border-black hover:bg-zinc-800'
               : 'bg-white/[0.06] text-white border-white/15 hover:bg-white/[0.14] backdrop-blur-md'
@@ -73,7 +74,8 @@ export default function Navbar() {
             e.preventDefault();
             scrollTo('#contact');
           }}
-          className={`pointer-events-auto group flex items-center justify-between gap-6 sm:gap-16 h-10 pl-3.5 pr-3 font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
+          style={{ animationDelay: '1.38s' }}
+          className={`nav-item-in pointer-events-auto group flex items-center justify-between gap-6 sm:gap-16 h-10 pl-3.5 pr-3 font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
             isLight ? 'bg-black text-white hover:bg-zinc-800' : 'bg-white text-black hover:bg-zinc-200'
           }`}
         >

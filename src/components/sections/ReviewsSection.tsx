@@ -95,14 +95,26 @@ export default function ReviewsSection() {
       }
     };
 
+    let inView = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+      },
+      { rootMargin: '60% 0px' }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
     const updateAnimation = () => {
-      if (!sectionRef.current || !trackRef.current) return;
+      if (!inView || !sectionRef.current || !trackRef.current) return;
+      // --- PHASE 1: ALL READS first (one layout, no style writes yet) ---
       const rect = sectionRef.current.getBoundingClientRect();
+      const r2Rect = review2Ref.current?.getBoundingClientRect() ?? null;
       const viewportH = window.innerHeight;
       const totalScrollable = rect.height - viewportH;
 
       if (totalScrollable <= 0) return;
 
+      // --- PHASE 2: COMPUTE + WRITE ---
       // Overall section progress: 0 to 1
       const progress = Math.min(Math.max(-rect.top / totalScrollable, 0), 1);
 
@@ -120,14 +132,13 @@ export default function ReviewsSection() {
       }
 
       // Review 2 triggers as it horizontally glides into the viewport
-      if (review2Ref.current) {
-        const r2Rect = review2Ref.current.getBoundingClientRect();
+      if (r2Rect) {
         if (rect.top <= 0 && r2Rect.left < window.innerWidth * 0.92) {
           if (!review2ActiveRef.current) {
             review2ActiveRef.current = true;
             setReview2InView(true);
           }
-        } else if (r2Rect.left >= window.innerWidth && review2ActiveRef.current) {
+        } else if ((r2Rect?.left ?? window.innerWidth) >= window.innerWidth && review2ActiveRef.current) {
           review2ActiveRef.current = false;
           setReview2InView(false);
         }
@@ -183,6 +194,7 @@ export default function ReviewsSection() {
     }
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('resize', alignReviewWithSettle);
       unsubscribe();
     };

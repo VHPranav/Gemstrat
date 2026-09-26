@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { onScrollFrame } from '@/lib/scrollFrame';
+import { isLowEndDevice } from '@/lib/device';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -106,6 +107,11 @@ const PILLAR_SIZES = [
 export default function GemstratAdvantage() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const pillarsRef = useRef<HTMLDivElement>(null);
+  // mix-blend-difference is GPU-expensive on mobile. Detect once on mount.
+  const [useMixBlend, setUseMixBlend] = useState(true);
+  useEffect(() => {
+    setUseMixBlend(!isLowEndDevice());
+  }, []);
 
   // Single scroll loop drives all 8 cards (parallax layer + card drift).
   // All rects are captured once per scroll-frame (top of the tick, before any
@@ -123,7 +129,18 @@ export default function GemstratAdvantage() {
     const layerTravels = layers.map(el => Number(el.dataset.parallax) || 10);
     const cardDrifts = cardEls.map(el => Number(el.dataset.drift) || 0);
 
-    return onScrollFrame(() => {
+    // Only run layout reads and style writes when the section is near/in the viewport
+    let inView = true;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        inView = entry.isIntersecting;
+      },
+      { rootMargin: '60% 0px' }
+    );
+    if (sectionRef.current) observer.observe(sectionRef.current);
+
+    const unsubscribe = onScrollFrame(() => {
+      if (!inView) return;
       const vh = window.innerHeight;
 
       // --- Phase 1: read all rects (ONE layout recalculation) ---
@@ -153,6 +170,11 @@ export default function GemstratAdvantage() {
         card.style.transform = `translateY(${y.toFixed(2)}px)`;
       });
     });
+
+    return () => {
+      observer.disconnect();
+      unsubscribe();
+    };
   }, []);
 
   // Pillars fade/slide up as they enter the viewport
@@ -183,12 +205,13 @@ export default function GemstratAdvantage() {
       id="advantage"
       className="relative w-full bg-white text-[#090909] z-40"
     >
-      {/* Sticky centred title: stays fixed in the middle of the screen for the
-          whole section, ON TOP of the 8 pillars scrolling up beneath it.
-          White + difference blend → black over the white page, inverted over
-          the photos, so it stays legible everywhere. */}
-      <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center z-20 mix-blend-difference pointer-events-none select-none px-6">
-        <h2 className="content__title-main !text-white">
+      {/* Sticky centred title */}
+      <div
+        className={`sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center z-20 pointer-events-none select-none px-6 ${
+          useMixBlend ? 'mix-blend-difference' : ''
+        }`}
+      >
+        <h2 className={`content__title-main ${useMixBlend ? '!text-white' : '!text-[#090909]'}`}>
           <span className="block">The Gemstrat</span>
           <span className="block">Advantage</span>
         </h2>

@@ -308,11 +308,7 @@ body {
 .formation-grid .pos-16 { grid-area: 3 / 8; }
 
 
-/* ---------- Hero intro (letters → sculpture → copy) ---------- */
-@keyframes heroLetterUp {
-  from { transform: translate3d(0, 110%, 0); }
-  to { transform: translate3d(0, 0, 0); }
-}
+/* ---------- Hero intro (sculpture → copy) ---------- */
 @keyframes heroSculptureIn {
   from { opacity: 0; transform: scale(1.08); }
   to { opacity: 1; transform: scale(1); }
@@ -321,23 +317,72 @@ body {
   from { opacity: 0; filter: blur(8px); transform: translate3d(0, 14px, 0); }
   to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
 }
-.hero-letter {
-  display: inline-block;
-  transform: translate3d(0, 110%, 0);
-  animation: heroLetterUp 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
 .hero-sculpture-in {
   opacity: 0;
   animation: heroSculptureIn 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
-.hero-fade-up {
-  opacity: 0;
-  animation: heroFadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* ---------- Hero tagline word-by-word mask reveal ---------- */
+@keyframes heroWordRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 105%, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
+.hero-word-inner {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(0, 105%, 0);
+  will-change: transform, opacity;
+  animation: heroWordRise 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heroAsteriskPop {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-70deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.3) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+.hero-asterisk-pop {
+  opacity: 0;
+  transform: scale(0);
+  animation: heroAsteriskPop 0.75s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* ---------- Navigation slide-down entrance ---------- */
+@keyframes navDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+.nav-item-in {
+  opacity: 0;
+  transform: translate3d(0, -18px, 0);
+  animation: navDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .hero-letter,
   .hero-sculpture-in,
-  .hero-fade-up {
+  .hero-fade-up,
+  .hero-word-inner,
+  .hero-asterisk-pop,
+  .nav-item-in {
     animation: none;
     opacity: 1;
     transform: none;

@@ -16,9 +16,15 @@ export function isLowEndDevice(): boolean {
   if (cached !== null) return cached;
   if (typeof navigator === 'undefined') return false;
   const nav = navigator as NavigatorHints;
-  const cores = nav.hardwareConcurrency ?? 8;
-  const memory = nav.deviceMemory ?? 8;
+  // Chrome Android always reports hardwareConcurrency as 8 even on mid-range
+  // phones. Safari never exposes deviceMemory. Use viewport width as a mobile
+  // proxy — narrow screen = mobile = budget GPU/CPU path.
+  const cores = nav.hardwareConcurrency ?? 4;
+  const memory = nav.deviceMemory ?? 4; // default to 4 (conservative) not 8
   const saveData = nav.connection?.saveData ?? false;
-  cached = cores <= 4 || memory <= 4 || saveData;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  // Low-end if: data-saver on, <4GB RAM, <4 cores, OR mobile with ≤8 cores
+  // (mobile "8-core" chips are still much slower than desktop per-core)
+  cached = saveData || memory <= 4 || cores <= 4 || (isMobile && cores <= 8);
   return cached;
 }

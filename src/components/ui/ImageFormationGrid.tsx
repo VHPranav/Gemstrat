@@ -54,6 +54,14 @@ export default function ImageFormationGrid({
   // is idle after load (or when the section gets within ~3 screens, whichever
   // comes first) — not at page load, and not mid-scroll. Stays true afterwards.
   const [near, setNear] = useState(false);
+  // On mobile / low-end devices, avoid instantiating 16 simultaneous WebGL
+  // canvases from img-fx, which exceeds mobile GPU limits and causes browser lag.
+  const [enableFx, setEnableFx] = useState(false);
+
+  useEffect(() => {
+    setEnableFx(!isLowEndDevice());
+  }, []);
+
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -221,7 +229,7 @@ export default function ImageFormationGrid({
             style={near ? { backgroundImage: `url("${src}")` } : undefined}
             onMouseEnter={() => onTileHover(index)}
           >
-            {near && (
+            {near && enableFx && (
               <ImageGeneration
                 {...tileProps(index)}
                 preset="pixels-organic"
@@ -277,7 +285,7 @@ export default function ImageFormationGrid({
             style={near ? { backgroundImage: `url("${src}")` } : undefined}
             onMouseEnter={() => onTileHover(index + 8)}
           >
-            {near && (
+            {near && enableFx && (
               <ImageGeneration
                 {...tileProps(index + 8)}
                 preset="pixels-organic"

@@ -93,7 +93,7 @@ export default function FragmentedImageGrid({
         return (
           <div
             key={sliceIndex}
-            className="absolute overflow-hidden border border-white/10 bg-[#121214] will-change-[left,top,width,height,transform]"
+            className="absolute overflow-hidden border border-white/10 bg-[#121214]"
             style={{
               left: `${slice.left}%`,
               top: `${slice.top}%`,
@@ -121,7 +121,7 @@ export default function FragmentedImageGrid({
                 return (
                   <div
                     key={item.src}
-                    className="absolute inset-0 will-change-opacity transition-opacity duration-1000 ease-in-out"
+                    className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
                     style={{
                       opacity: isActive ? 1 : 0,
                       zIndex: isActive ? 10 : 1,

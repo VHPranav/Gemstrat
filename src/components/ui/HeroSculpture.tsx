@@ -9,19 +9,6 @@ import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { isLowEndDevice } from '@/lib/device';
 
-// ---------------------------------------------------------------------------
-// HeroSculpture
-// Procedural architectural sculpture: a tall stack of thick, soft-edged
-// flat square plates threaded along a sweeping helix. The stack twists
-// slowly along its length, so the plates alternate between face-on and
-// edge-on. The back of the helix recedes top-left into the dark; the front
-// sweeps down through the frame and out bottom-right. Real self-shadowing
-// darkens the tight gaps between plates, and ambient occlusion (GTAO) softens
-// every crease like a rendered plaster model. Rotates slowly, faster with scroll.
-//
-// Generated in code (no model download); one InstancedMesh.
-// ---------------------------------------------------------------------------
-
 interface HeroSculptureProps {
   className?: string;
 }
@@ -113,7 +100,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.7;
     renderer.shadowMap.enabled = !lowEnd;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.shadowMap.type = THREE.PCFShadowMap;
     const canvas = renderer.domElement;
     canvas.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.6s ease;';
     container.appendChild(canvas);
@@ -182,7 +169,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     const plateGeometry = buildPlateGeometry();
     const material = new THREE.MeshStandardMaterial({
       // Fully matte: no gloss or sheen, just soft diffuse shading
-      color: 0x141518,
+      color: 0x000000,
       metalness: 0,
       roughness: 1,
       envMapIntensity: 0.12,
@@ -256,7 +243,13 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
 
     let visible = true;
     const io = new IntersectionObserver(([entry]) => {
+      const wasVisible = visible;
       visible = entry.isIntersecting;
+      // Restart the loop only when it has fully stopped
+      if (visible && !wasVisible && rafId === 0) {
+        last = performance.now();
+        rafId = requestAnimationFrame(loop);
+      }
     });
     io.observe(container);
 
@@ -282,10 +275,14 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     let scrollTurn = 0;
     let last = performance.now();
     const loop = (now: number) => {
-      rafId = requestAnimationFrame(loop);
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
-      if (!visible || reduceMotion) return;
+      // Stop the loop completely when off-screen or motion reduced.
+      // IntersectionObserver above restarts it when visible again.
+      if (!visible || reduceMotion) {
+        rafId = 0;
+        return;
+      }
       if (quality < 3) {
         sampleSum += dt * 1000;
         if (++sampleCount >= SAMPLE_FRAMES) {
@@ -298,6 +295,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
       scrollTurn += (window.scrollY * SCROLL_TURN - scrollTurn) * 0.08;
       spinner.rotation.y = spin + scrollTurn;
       render();
+      rafId = requestAnimationFrame(loop);
     };
     rafId = requestAnimationFrame(loop);
 

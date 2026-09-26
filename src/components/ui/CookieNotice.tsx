@@ -52,7 +52,7 @@ export default function CookieNotice() {
       role="region"
       aria-label="Cookie notice"
       className="hero-fade-up fixed bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-[950] flex items-center gap-5 pl-5 pr-2 py-2 bg-[#141416] border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
-      style={{ animationDelay: '2.6s' }}
+      style={{ animationDelay: '1.55s' }}
     >
       <p className="m-0 font-sans text-[11px] sm:text-xs uppercase tracking-[0.03em] text-white/45 whitespace-nowrap">
         This website uses <span className="text-white">cookies</span>

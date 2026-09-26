@@ -224,6 +224,11 @@ export default function AboutIntro() {
       // -----------------------------------------------------------------------
       const sectionRect = sectionRef.current?.getBoundingClientRect();
       const clarityRect = clarityTrackRef.current?.getBoundingClientRect();
+
+      // If the user has not reached AboutIntro yet (far above) or is past Clarity (far below), early return
+      if (sectionRect && sectionRect.top > viewportH * 1.5) return;
+      if (clarityRect && clarityRect.bottom < -viewportH * 1.5) return;
+
       // Snapshot all focus-item rects in a single pass
       const itemRects = rightItemRefs.current.map(el => el?.getBoundingClientRect() ?? null);
       // Snapshot text block rects only if clarity section is relevant

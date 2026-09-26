@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 
 // three.js sculpture loads after the page is interactive (its canvas fades in
@@ -17,8 +17,8 @@ import { onScrollFrame } from '@/lib/scrollFrame';
 // still visible, and only fades out once the quote has fully dissolved.
 // ---------------------------------------------------------------------------
 
-// Intro timing matches the Hero's (sculpture fades in after the wordmark)
-const SCULPTURE_START = 1.1;
+// Intro timing: sculpture fades in last, after heading, navbar, and cookie banner
+const SCULPTURE_START = 1.95;
 // Fade window in the Statement's own scroll progress (0 = its sticky locks,
 // 1 = it ends). Its words finish dissolving at 0.82 (see Statement.tsx), so
 // the sculpture fades from there to the end of the section.
@@ -28,6 +28,14 @@ const FADE_END = 1;
 export default function HeroBackdrop({ children }: { children: React.ReactNode }) {
   const dimRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const [loadSculpture, setLoadSculpture] = useState(false);
+
+  useEffect(() => {
+    // Postpone heavy WebGL & Three.js shader compilation until after
+    // the heading and navbar text entrance has smoothly finished
+    const timer = setTimeout(() => setLoadSculpture(true), 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const el = dimRef.current;
@@ -62,7 +70,7 @@ export default function HeroBackdrop({ children }: { children: React.ReactNode }
             className="hero-sculpture-in absolute inset-0"
             style={{ animationDelay: `${SCULPTURE_START}s` }}
           >
-            <HeroSculpture className="absolute inset-0" />
+            {loadSculpture && <HeroSculpture className="absolute inset-0" />}
           </div>
         </div>
       </div>
