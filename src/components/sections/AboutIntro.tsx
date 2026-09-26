@@ -1,10 +1,17 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import ImageTrail from '@/components/ui/ImageTrail';
 import FragmentedImageGrid from '@/components/ui/FragmentedImageGrid';
-import UnwovenCarousel, { type UnwovenCarouselControl } from '@/components/ui/UnwovenCarousel';
+import dynamic from 'next/dynamic';
+import type { UnwovenCarouselControl } from '@/components/ui/UnwovenCarousel';
+import { onScrollFrame } from '@/lib/scrollFrame';
+import { setWordStyle } from '@/lib/wordStyle';
+import { whenIdle } from '@/lib/whenIdle';
+
+// WebGL carousel (three.js) loads on demand, off the critical path
+const UnwovenCarousel = dynamic(() => import('@/components/ui/UnwovenCarousel'), { ssr: false });
 
 const TRAIL_IMAGES = [
   '/images/motion/airport.webp',
@@ -122,7 +129,8 @@ export default function AboutIntro() {
 
   const rightItemRefs = useRef<(HTMLDivElement | null)[]>([]);
   const leftQuoteRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const focusWordRefs = useRef<(HTMLSpanElement | null)[][]>([]);
+  // One slot per focus item, created up front (not during render)
+  const focusWordRefs = useRef<(HTMLSpanElement | null)[][]>(FOCUS_ITEMS.map(() => []));
 
   const carouselWrapRef = useRef<HTMLDivElement>(null);
   const carouselControlRef = useRef<UnwovenCarouselControl>({
@@ -133,6 +141,29 @@ export default function AboutIntro() {
   });
 
   const clarityTrackRef = useRef<HTMLDivElement>(null);
+  // The image trail + WebGL carousel (and their ~1 MB of photos) are prepared in
+  // the background when the page is idle after load, or when the Clarity
+  // section gets within ~2 screens — never at load, never mid-scroll
+  const [clarityNear, setClarityNear] = useState(false);
+  useEffect(() => {
+    const el = clarityTrackRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setClarityNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200% 0px' }
+    );
+    observer.observe(el);
+    const cancelIdle = whenIdle(() => setClarityNear(true), 5000);
+    return () => {
+      observer.disconnect();
+      cancelIdle();
+    };
+  }, []);
   const clarityStickyRef = useRef<HTMLDivElement>(null);
   const clarityTextWrapRef = useRef<HTMLDivElement>(null);
   const clarityHeadlineRef = useRef<HTMLHeadingElement>(null);
@@ -183,8 +214,6 @@ export default function AboutIntro() {
       }
       return;
     }
-
-    let rafId: number;
 
     const updateScroll = () => {
       const viewportH = window.innerHeight;
@@ -269,9 +298,7 @@ export default function AboutIntro() {
           }
           words.forEach((span) => {
             if (span) {
-              span.style.opacity = '0';
-              span.style.filter = 'blur(14px)';
-              span.style.transform = 'translate3d(0, 10px, 0)';
+              setWordStyle(span, 0, 14, 10);
             }
           });
         } else if (rect.top <= enterStart && rect.top > enterEnd) {
@@ -294,9 +321,7 @@ export default function AboutIntro() {
             const blur = (1 - wProgress) * 14;
             const translateY = (1 - wProgress) * 10;
 
-            span.style.opacity = opacity.toFixed(3);
-            span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-            span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+            setWordStyle(span, opacity, blur, translateY);
           });
         } else if (rect.top <= enterEnd && rect.top > exitStart) {
           // Fully active phase: 100% visible and crisp
@@ -308,9 +333,7 @@ export default function AboutIntro() {
           }
           words.forEach((span) => {
             if (span) {
-              span.style.opacity = '1';
-              span.style.filter = 'none';
-              span.style.transform = 'none';
+              setWordStyle(span, 1, 0, 0);
             }
           });
         } else if (rect.top <= exitStart && rect.top > exitEnd) {
@@ -412,9 +435,7 @@ export default function AboutIntro() {
                   const wordStart = (i / Math.max(count - 1, 1)) * (1 - windowSize);
                   const wordP = Math.min(Math.max((phaseP - wordStart) / windowSize, 0), 1);
                   const blur = (1 - wordP) * 16;
-                  span.style.opacity = wordP.toFixed(3);
-                  span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-                  span.style.transform = `translate3d(0, ${((1 - wordP) * 18).toFixed(1)}px, 0)`;
+                  setWordStyle(span, wordP, blur, ((1 - wordP) * 18));
                 }
               });
             }
@@ -470,9 +491,7 @@ export default function AboutIntro() {
               const blur = wordP * 16;
               const translateY = -wordP * 10;
 
-              span.style.opacity = opacity.toFixed(3);
-              span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-              span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+              setWordStyle(span, opacity, blur, translateY);
             });
 
             // Container (headline + paragraph) fades out completely once words are gone
@@ -491,9 +510,7 @@ export default function AboutIntro() {
                 cardDescWordRefs.current.forEach((words) => {
                   words?.forEach((span) => {
                     if (span) {
-                      span.style.opacity = '0';
-                      span.style.filter = 'blur(12px)';
-                      span.style.transform = 'translate3d(0, 14px, 0)';
+                      setWordStyle(span, 0, 12, 14);
                     }
                   });
                 });
@@ -556,9 +573,7 @@ export default function AboutIntro() {
                     const blur = (1 - wProgress) * 12;
                     const translateY = (1 - wProgress) * 14;
 
-                    span.style.opacity = op.toFixed(3);
-                    span.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-                    span.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+                    setWordStyle(span, op, blur, translateY);
                   });
                 });
               }
@@ -568,20 +583,8 @@ export default function AboutIntro() {
       }
     };
 
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateScroll);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    updateScroll();
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      cancelAnimationFrame(rafId);
-    };
+    // Same-frame updates from the shared scroll loop (no rAF lag)
+    return onScrollFrame(updateScroll);
   }, []);
 
   // Fit the carousel into the band between the top-left headline and the
@@ -687,9 +690,6 @@ export default function AboutIntro() {
               <div className="relative w-full max-w-[440px] min-h-[160px]">
                 {FOCUS_ITEMS.map((item, idx) => {
                   const words = item.quote.split(' ');
-                  if (!focusWordRefs.current[idx]) {
-                    focusWordRefs.current[idx] = [];
-                  }
 
                   return (
                     <div
@@ -707,7 +707,7 @@ export default function AboutIntro() {
                             ref={(el) => {
                               focusWordRefs.current[idx][wIdx] = el;
                             }}
-                            className="inline-block mr-[0.28em] opacity-0 blur-[14px] translate-y-2 will-change-[opacity,filter,transform]"
+                            className="inline-block mr-[0.28em] opacity-0 blur-[14px] translate-y-2"
                           >
                             {word}
                           </span>
@@ -751,7 +751,7 @@ export default function AboutIntro() {
                         src={item.image}
                         alt={item.alt}
                         fill
-                        unoptimized
+                        sizes="(max-width: 640px) 100vw, 580px"
                         className="object-cover grayscale"
                       />
                     </div>
@@ -778,10 +778,7 @@ export default function AboutIntro() {
         >
           {/* Interactive GSAP Image Trail Layer */}
           <div className="absolute inset-0 z-10 pointer-events-auto overflow-hidden">
-            <ImageTrail
-              items={TRAIL_IMAGES}
-              variant="2"
-            />
+            {clarityNear && <ImageTrail items={TRAIL_IMAGES} variant="2" />}
           </div>
 
           {/* Scroll-driven unravelling carousel (fades in, travels with scroll) */}
@@ -791,11 +788,13 @@ export default function AboutIntro() {
           >
             {/* Fills the band between the headline and the paragraph (sized by the
                 layout effect); sharp corners to match the rest of the imagery */}
-            <UnwovenCarousel
-              images={CAROUSEL_IMAGES}
-              controlRef={carouselControlRef}
-              config={{ cardHeightRatio: 0.92, cardMaxHeight: 400, cardRadius: 0 }}
-            />
+            {clarityNear && (
+              <UnwovenCarousel
+                images={CAROUSEL_IMAGES}
+                controlRef={carouselControlRef}
+                config={{ cardHeightRatio: 0.92, cardMaxHeight: 400, cardRadius: 0 }}
+              />
+            )}
           </div>
 
           {/* Layer 1: "Clarity, execution, momentum" — headline top-left, paragraph
@@ -817,7 +816,7 @@ export default function AboutIntro() {
                           ref={(el) => {
                             clarityWordRefs.current[idx] = el;
                           }}
-                          className="inline-block will-change-[opacity,filter,transform]"
+                          className="inline-block"
                         >
                           {word}
                         </span>
@@ -837,7 +836,7 @@ export default function AboutIntro() {
                       ref={(el) => {
                         clarityWordRefs.current[idx] = el;
                       }}
-                      className="inline-block mr-[0.28em] will-change-[opacity,filter,transform]"
+                      className="inline-block mr-[0.28em]"
                     >
                       {word}
                     </span>
@@ -895,7 +894,7 @@ export default function AboutIntro() {
                               }
                               cardDescWordRefs.current[idx][wIdx] = el;
                             }}
-                            className="inline-block mr-[0.25em] last:mr-0 opacity-0 will-change-[opacity,filter,transform]"
+                            className="inline-block mr-[0.25em] last:mr-0 opacity-0"
                             style={{
                               filter: 'blur(12px)',
                               transform: 'translate3d(0, 14px, 0)',

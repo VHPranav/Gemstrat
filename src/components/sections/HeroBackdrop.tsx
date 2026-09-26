@@ -1,7 +1,12 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
-import HeroSculpture from '@/components/ui/HeroSculpture';
+import dynamic from 'next/dynamic';
+
+// three.js sculpture loads after the page is interactive (its canvas fades in
+// anyway), so it never delays the hero's first paint
+const HeroSculpture = dynamic(() => import('@/components/ui/HeroSculpture'), { ssr: false });
+import { onScrollFrame } from '@/lib/scrollFrame';
 
 // ---------------------------------------------------------------------------
 // HeroBackdrop
@@ -27,9 +32,7 @@ export default function HeroBackdrop({ children }: { children: React.ReactNode }
   useEffect(() => {
     const el = dimRef.current;
     if (!el) return;
-    let raf = 0;
     const update = () => {
-      raf = 0;
       // The Statement is the last child; measure its scroll progress the same
       // way Statement.tsx does
       const statement = contentRef.current?.lastElementChild;
@@ -46,17 +49,7 @@ export default function HeroBackdrop({ children }: { children: React.ReactNode }
       // check pauses rendering until the user scrolls back up
       el.style.display = opacity <= 0.001 ? 'none' : '';
     };
-    const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(update);
-    };
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-    };
+    return onScrollFrame(update);
   }, []);
 
   return (

@@ -20,11 +20,6 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="preload" href="/fonts/PPFrama-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://use.typekit.net" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="https://use.typekit.net/tas3jji.css" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Besley:ital,wght@0,400..900;1,400..900&display=swap" />
       </head>
       <body className="font-sans">
         <ScrollToTop />

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { onScrollFrame } from '@/lib/scrollFrame';
 
 interface ReviewItem {
   id: string;
@@ -61,15 +62,17 @@ export default function ReviewsSection() {
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
-      setReview1InView(true);
-      setReview2InView(true);
+      // Deferred a frame: setting state synchronously in an effect causes a
+      // cascading render
+      const id = requestAnimationFrame(() => {
+        setReview1InView(true);
+        setReview2InView(true);
+      });
       if (trackRef.current) trackRef.current.style.transform = 'none';
       if (curtainRef.current) curtainRef.current.style.transform = 'none';
       if (footerCurtainRef.current) footerCurtainRef.current.style.transform = 'none';
-      return;
+      return () => cancelAnimationFrame(id);
     }
-
-    let rafId: number;
 
     const alignReviewWithSettle = () => {
       if (!lastERef.current || !review1Ref.current || !review2Ref.current || !trackRef.current) return;
@@ -166,21 +169,11 @@ export default function ReviewsSection() {
       }
     };
 
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateAnimation);
-    };
-
-    const onResize = () => {
-      alignReviewWithSettle();
-      onScroll();
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onResize, { passive: true });
-
+    // Scroll (and resize) updates come from the shared same-frame loop; the
+    // layout alignment only needs recomputing on resize
+    window.addEventListener('resize', alignReviewWithSettle, { passive: true });
     alignReviewWithSettle();
-    updateAnimation();
+    const unsubscribe = onScrollFrame(updateAnimation);
 
     if (typeof document !== 'undefined' && 'fonts' in document) {
       document.fonts.ready.then(() => {
@@ -190,9 +183,8 @@ export default function ReviewsSection() {
     }
 
     return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', alignReviewWithSettle);
+      unsubscribe();
     };
   }, []);
 
@@ -227,7 +219,7 @@ export default function ReviewsSection() {
                   {REVIEWS[0].quote.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
-                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      className="inline-block mr-[0.25em] last:mr-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                       style={{
                         opacity: review1InView ? 1 : 0,
                         filter: review1InView ? 'blur(0px)' : 'blur(12px)',
@@ -243,7 +235,7 @@ export default function ReviewsSection() {
                   {REVIEWS[0].author.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
-                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      className="inline-block mr-[0.25em] last:mr-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                       style={{
                         opacity: review1InView ? 1 : 0,
                         filter: review1InView ? 'blur(0px)' : 'blur(10px)',
@@ -267,7 +259,7 @@ export default function ReviewsSection() {
                   {REVIEWS[1].quote.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
-                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      className="inline-block mr-[0.25em] last:mr-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                       style={{
                         opacity: review2InView ? 1 : 0,
                         filter: review2InView ? 'blur(0px)' : 'blur(12px)',
@@ -283,7 +275,7 @@ export default function ReviewsSection() {
                   {REVIEWS[1].author.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
-                      className="inline-block mr-[0.25em] last:mr-0 will-change-[opacity,filter,transform] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      className="inline-block mr-[0.25em] last:mr-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
                       style={{
                         opacity: review2InView ? 1 : 0,
                         filter: review2InView ? 'blur(0px)' : 'blur(10px)',
@@ -389,7 +381,7 @@ export default function ReviewsSection() {
               <div className="lg:col-span-7 flex flex-col justify-between px-6 sm:px-12 lg:px-16 py-8 sm:py-10 border-b lg:border-b-0 lg:border-r border-white/[0.08]">
                 <div>
                   <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
-                    // Architecture statement
+                    {'// Architecture statement'}
                   </span>
                   <h2 className="font-archivo-expanded text-[clamp(2.6rem,6.8vw,104px)] font-normal text-white leading-[0.88] tracking-[-0.04em] m-0">
                     <span className="block">Let&apos;s build</span>

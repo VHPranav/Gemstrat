@@ -7,6 +7,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { isLowEndDevice } from '@/lib/device';
 
 // ---------------------------------------------------------------------------
 // HeroSculpture
@@ -51,6 +52,11 @@ const OFFSET_X_WIDE = -1.35; // left of centre on wide screens
 const OFFSET_Y = 0.7; // nudged up
 const SPIN_SPEED = 0.07; // rad/s
 const SCROLL_TURN = 0.0015; // rad per px scrolled
+
+// Adaptive quality: if frames average slower than this (≈40fps) over a
+// sampling window, drop one quality level (AO → shadows → pixel ratio)
+const SLOW_FRAME_MS = 25;
+const SAMPLE_FRAMES = 90;
 
 // Rounded rectangle in the plate plane, extruded to its thickness with a
 // rounded bevel so every edge catches a soft highlight.
@@ -99,11 +105,14 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     } catch {
       return; // No WebGL: the hero shows its type on black
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); // AO post-processing: keep it light
+    // Low-end devices start without AO/shadows at 1x; everyone else starts at
+    // full quality and steps down only if frames actually get slow
+    const lowEnd = isLowEndDevice();
+    renderer.setPixelRatio(lowEnd ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.7;
-    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.enabled = !lowEnd;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     const canvas = renderer.domElement;
     canvas.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.6s ease;';
@@ -126,6 +135,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     gtao.updateGtaoMaterial({ radius: 0.7, distanceExponent: 1.1, thickness: 2, scale: 1.6, samples: 16 });
     gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 16 });
     gtao.blendIntensity = 1.6; // deep shadow in the bends and between plates
+    gtao.enabled = !lowEnd;
     composer.addPass(gtao);
     composer.addPass(new OutputPass());
 
@@ -250,6 +260,23 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     });
     io.observe(container);
 
+    // Quality governor: 0 = full, 1 = no AO, 2 = no shadows, 3 = 1x pixel ratio
+    let quality = lowEnd ? 2 : 0;
+    let sampleSum = 0;
+    let sampleCount = 0;
+    const stepDownQuality = () => {
+      quality++;
+      if (quality === 1) gtao.enabled = false;
+      if (quality === 2) {
+        renderer.shadowMap.enabled = false;
+        material.needsUpdate = true;
+      }
+      if (quality === 3) {
+        renderer.setPixelRatio(1);
+        fit();
+      }
+    };
+
     let rafId = 0;
     let spin = 0;
     let scrollTurn = 0;
@@ -259,6 +286,14 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
       const dt = Math.min((now - last) / 1000, 0.1);
       last = now;
       if (!visible || reduceMotion) return;
+      if (quality < 3) {
+        sampleSum += dt * 1000;
+        if (++sampleCount >= SAMPLE_FRAMES) {
+          if (sampleSum / sampleCount > SLOW_FRAME_MS) stepDownQuality();
+          sampleSum = 0;
+          sampleCount = 0;
+        }
+      }
       spin += SPIN_SPEED * dt;
       scrollTurn += (window.scrollY * SCROLL_TURN - scrollTurn) * 0.08;
       spinner.rotation.y = spin + scrollTurn;

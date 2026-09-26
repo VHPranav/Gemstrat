@@ -32,8 +32,10 @@ export default function ScalingExpertise() {
   useEffect(() => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
-      setInView(true);
-      return;
+      // Deferred a frame: setting state synchronously in an effect causes a
+      // cascading render
+      const id = requestAnimationFrame(() => setInView(true));
+      return () => cancelAnimationFrame(id);
     }
 
     const observer = new IntersectionObserver(
@@ -87,8 +89,7 @@ export default function ScalingExpertise() {
                 src="/images/scaling/spiral-staircase.webp"
                 alt="Motion Blur - Dynamic Speed & Focus"
                 fill
-                priority
-                unoptimized
+                sizes="(max-width: 640px) 240px, 340px"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] grayscale"
               />
             </div>
@@ -110,7 +111,7 @@ export default function ScalingExpertise() {
                             ? `${100 + (lIdx * 3 + wIdx) * 50}ms`
                             : '0ms',
                         }}
-                        className={`inline-block mr-[0.24em] will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] ${item.highlight
+                        className={`inline-block mr-[0.24em] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)] ${item.highlight
                           ? 'text-neutral-400 font-normal'
                           : 'text-black font-medium'
                           }`}
@@ -142,8 +143,7 @@ export default function ScalingExpertise() {
                 src="/images/scaling/leadership-window.webp"
                 alt="Deepak - Founder of Gemstrat"
                 fill
-                priority
-                unoptimized
+                sizes="(max-width: 640px) 240px, 340px"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] grayscale"
               />
             </div>
@@ -167,7 +167,7 @@ export default function ScalingExpertise() {
                       filter: inView ? 'none' : 'blur(8px)',
                       transitionDelay: inView ? `${140 + wIdx * 25}ms` : '0ms',
                     }}
-                    className="inline-block mr-[0.25em] last:mr-0 will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="inline-block mr-[0.25em] last:mr-0 transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   >
                     {word}
                   </span>
@@ -187,7 +187,7 @@ export default function ScalingExpertise() {
                         ? `${140 + (DESC_P1_WORDS.length + wIdx) * 18}ms`
                         : '0ms',
                     }}
-                    className="inline-block mr-[0.25em] last:mr-0 will-change-[transform,opacity,filter] transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    className="inline-block mr-[0.25em] last:mr-0 transition-all duration-600 ease-[cubic-bezier(0.16,1,0.3,1)]"
                   >
                     {word}
                   </span>
@@ -210,7 +210,7 @@ export default function ScalingExpertise() {
                 src="/images/scaling/glass-facade.webp"
                 alt="Techwear Motion Blur - Execution & Momentum"
                 fill
-                unoptimized
+                sizes="(max-width: 640px) 240px, 340px"
                 className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03] grayscale"
               />
             </div>

@@ -31,7 +31,9 @@ export default function SmoothScroll() {
       lenis.raf(time * 1000);
     };
 
-    gsap.ticker.add(updateTicker);
+    // Prioritised: Lenis moves the page first each tick, then the shared
+    // scrollFrame subscribers (src/lib/scrollFrame.ts) react in the same frame
+    gsap.ticker.add(updateTicker, false, true);
     gsap.ticker.lagSmoothing(0);
 
     return () => {

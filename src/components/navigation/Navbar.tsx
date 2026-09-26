@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { onScrollFrame } from '@/lib/scrollFrame';
 
 // ---------------------------------------------------------------------------
 // Navbar
@@ -33,13 +34,7 @@ export default function Navbar() {
       );
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('resize', handleScroll, { passive: true });
-    handleScroll();
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', handleScroll);
-    };
+    return onScrollFrame(handleScroll);
   }, []);
 
   const scrollTo = (href: string) => {

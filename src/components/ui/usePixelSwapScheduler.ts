@@ -1,12 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useRef, type RefObject } from 'react';
-import {
-  setFrameRate,
-  setMaxDpr,
-  type ImageGenerationCycleEvent,
-  type ImageGenerationHandle,
-} from 'img-fx';
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+// Types only: the img-fx runtime (and three.js with it) is loaded on demand
+import type { ImageGenerationCycleEvent, ImageGenerationHandle } from 'img-fx';
+import { isLowEndDevice } from '@/lib/device';
+import { onScrollFrame } from '@/lib/scrollFrame';
 
 // ---------------------------------------------------------------------------
 // usePixelSwapScheduler
@@ -47,6 +45,10 @@ const OBSERVER_THRESHOLDS = Array.from({ length: 101 }, (_, i) => i / 100);
 const RELEASE_FALLBACK_MS = 4000;
 // How often the scheduler checks whether the next random pair may start
 const TICK_MS = 200;
+// Scrolling must have paused this long before a new pair starts
+const SCROLL_SETTLE_MS = 350;
+// How long a tile stays live after its transition finishes before re-pausing
+const PAUSE_AFTER_MS = 400;
 
 export function usePixelSwapScheduler({
   initialSrcs,
@@ -60,55 +62,53 @@ export function usePixelSwapScheduler({
   // Image each tile shows (or is currently transitioning to)
   const srcsRef = useRef<string[]>([...initialSrcs]);
   const busyRef = useRef<Map<number, Slot>>(new Map());
-  // Tiles waiting for their re-measure before being primed
-  const primingRef = useRef<Set<number>>(new Set());
   const releaseTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(new Map());
   // True while the grid is fully in view — the effect only runs then
   const activeRef = useRef(false);
   const tileCount = initialSrcs.length;
 
-  const release = useCallback((index: number) => {
-    busyRef.current.delete(index);
-    const timer = releaseTimersRef.current.get(index);
-    if (timer) clearTimeout(timer);
-    releaseTimersRef.current.delete(index);
+  // Tiles are kept PAUSED unless transitioning. A paused img-fx tile skips all
+  // rendering (its canvas keeps the last frame), and with every tile paused
+  // the library's render loop stops entirely — so the idle grid costs nothing
+  // per frame instead of redrawing 16 invisible canvases at 60fps.
+  const [liveTiles, setLiveTiles] = useState<ReadonlySet<number>>(() => new Set());
+  const setLive = useCallback((index: number, live: boolean) => {
+    setLiveTiles((prev) => {
+      if (prev.has(index) === live) return prev;
+      const next = new Set(prev);
+      if (live) next.add(index);
+      else next.delete(index);
+      return next;
+    });
   }, []);
 
-  // Tiles start static (no image revealed), and triggerRegenerate only works on
-  // a revealed image. Reveal each tile's own image once so it is ready to churn;
-  // since it is the same image as the static layer underneath, this is invisible.
+  const release = useCallback(
+    (index: number) => {
+      busyRef.current.delete(index);
+      const timer = releaseTimersRef.current.get(index);
+      if (timer) clearTimeout(timer);
+      releaseTimersRef.current.delete(index);
+      // Let the final frame paint, then pause the tile again
+      setTimeout(() => {
+        if (!busyRef.current.has(index)) setLive(index, false);
+      }, PAUSE_AFTER_MS);
+    },
+    [setLive]
+  );
+
+  // Start a pixel transition on one tile.
+  // - Already-revealed tiles churn (triggerRegenerate) into their next image.
+  // - Fresh tiles (nothing revealed yet) run a reveal instead — itself a pixel
+  //   dissolve into the target image, so it looks the same. This replaces the
+  //   old "prime all 16 tiles up front", which ran 16 simultaneous reveals (each
+  //   reading pixels back from the GPU every frame) exactly as the section
+  //   scrolled in — the main source of scroll jank here.
   //
   // img-fx sizes its canvas from getBoundingClientRect() and only re-measures on
-  // resize or when the child's class/style changes. A tile that mounted while
-  // transformed (e.g. GSAP's squashed 3D entry state) keeps that size and draws
-  // a vertically stretched image. Touch the child's style to force a re-measure
-  // (it runs on the next frame), then reveal once it has.
-  const primeTiles = useCallback(() => {
-    const pending: number[] = [];
-    handlesRef.current.forEach((handle, i) => {
-      if (!handle || busyRef.current.has(i) || primingRef.current.has(i)) return;
-      if (handle.isImageActive()) return;
-      handle.element
-        ?.querySelector<HTMLElement>('.image-gen-child > *')
-        ?.style.setProperty('--fx-remeasure', String(performance.now()));
-      primingRef.current.add(i);
-      pending.push(i);
-    });
-    if (pending.length === 0) return;
-
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        pending.forEach((i) => {
-          primingRef.current.delete(i);
-          const handle = handlesRef.current[i];
-          if (!handle || busyRef.current.has(i) || handle.isImageActive()) return;
-          handle.triggerReveal({ hold: 'manual' });
-        });
-      })
-    );
-  }, []);
-
-  const startChurn = useCallback(
+  // resize or when the child's class/style changes, so a tile that mounted
+  // while transformed keeps a stale size. Touch the child's style to force a
+  // re-measure (it runs next frame) before a fresh tile's first reveal.
+  const startTransition = useCallback(
     (index: number, slot: Slot, durationMs: number) => {
       const handle = handlesRef.current[index];
       if (!handle) return;
@@ -117,12 +117,34 @@ export function usePixelSwapScheduler({
         index,
         setTimeout(() => release(index), durationMs + RELEASE_FALLBACK_MS)
       );
-      handle.triggerRegenerate({ durationMs, tintFromImage: false, autoReveal: true });
+      // Unpause first — img-fx ignores triggers while a tile is paused — and
+      // wait until the tile reports it's live before triggering
+      setLive(index, true);
+      let tries = 0;
+      const whenLive = () => {
+        const h = handlesRef.current[index];
+        if (!h) return;
+        if (h.element?.dataset.paused === 'true' && tries++ < 30) {
+          requestAnimationFrame(whenLive);
+          return;
+        }
+        if (h.isImageActive()) {
+          h.triggerRegenerate({ durationMs, tintFromImage: false, autoReveal: true });
+          return;
+        }
+        h.element
+          ?.querySelector<HTMLElement>('.image-gen-child > *')
+          ?.style.setProperty('--fx-remeasure', String(performance.now()));
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => handlesRef.current[index]?.triggerReveal({ hold: 'manual' }))
+        );
+      };
+      requestAnimationFrame(whenLive);
     },
-    [release]
+    [release, setLive]
   );
 
-  // Track when the section is fully in view (and prime tiles as it approaches)
+  // Track when the section is fully in view
   useEffect(() => {
     const el = viewRef?.current;
     if (!el) return;
@@ -131,19 +153,26 @@ export function usePixelSwapScheduler({
         activeRef.current =
           entry.isIntersecting &&
           entry.intersectionRect.height >= entry.boundingClientRect.height * FULL_VIEW_RATIO;
-        if (entry.isIntersecting) primeTiles();
       },
       { threshold: OBSERVER_THRESHOLDS }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [viewRef, primeTiles]);
+  }, [viewRef]);
 
   // 60 FPS renderer + periodic random pair swap
   useEffect(() => {
     try {
-      setFrameRate(60);
-      setMaxDpr(window.devicePixelRatio > 2 ? 1.5 : 1.25);
+      // Loaded lazily so three.js stays off the critical path; 30fps on
+      // low-end devices
+      import('img-fx')
+        .then(({ setFrameRate, setMaxDpr }) => {
+          setFrameRate(isLowEndDevice() ? 30 : 60);
+          setMaxDpr(isLowEndDevice() ? 1 : window.devicePixelRatio > 2 ? 1.5 : 1.25);
+        })
+        .catch(() => {
+          // WebGL/img-fx unavailable — tiles keep their static images
+        });
     } catch {
       // WebGL unavailable — silent no-op
     }
@@ -153,35 +182,47 @@ export function usePixelSwapScheduler({
     const releaseTimers = releaseTimersRef.current;
     const busy = busyRef.current;
     let lastPairAt = -Infinity;
+    // New pairs only start once scrolling has paused, so their start-up cost
+    // never lands mid-scroll (running transitions just finish)
+    let lastScrollAt = 0;
+    const unsubscribeScroll = onScrollFrame(() => {
+      lastScrollAt = performance.now();
+    });
     const interval = setInterval(() => {
       if (!activeRef.current) return;
-      primeTiles();
-
-      if (performance.now() - lastPairAt < intervalMs) return;
+      const now = performance.now();
+      if (now - lastScrollAt < SCROLL_SETTLE_MS) return;
+      if (now - lastPairAt < intervalMs) return;
       // Only one random pair at a time
       for (const slot of busyRef.current.values()) if (slot === 'random') return;
 
       const free = Array.from({ length: tileCount }, (_, i) => i)
-        .filter((i) => !busyRef.current.has(i) && handlesRef.current[i]?.isImageActive())
+        .filter((i) => !busyRef.current.has(i) && handlesRef.current[i])
         .sort(() => Math.random() - 0.5);
       if (free.length < 2) return;
 
-      const [a, b] = free;
+      // Pair tiles in the same state (both fresh → both reveal, both revealed →
+      // both churn) so the two transitions stay in step
+      const a = free[0];
+      const aActive = handlesRef.current[a]!.isImageActive();
+      const b =
+        free.slice(1).find((i) => handlesRef.current[i]!.isImageActive() === aActive) ?? free[1];
       const srcs = srcsRef.current;
       [srcs[a], srcs[b]] = [srcs[b], srcs[a]];
 
       lastPairAt = performance.now();
-      startChurn(a, 'random', swapDurationMs);
-      startChurn(b, 'random', swapDurationMs);
+      startTransition(a, 'random', swapDurationMs);
+      startTransition(b, 'random', swapDurationMs);
     }, TICK_MS);
 
     return () => {
       clearInterval(interval);
+      unsubscribeScroll();
       releaseTimers.forEach(clearTimeout);
       releaseTimers.clear();
       busy.clear();
     };
-  }, [tileCount, intervalMs, swapDurationMs, primeTiles, startChurn]);
+  }, [tileCount, intervalMs, swapDurationMs, startTransition]);
 
   // Hover: only one hovered tile at a time, never one of the random pair
   const onTileHover = useCallback(
@@ -189,10 +230,10 @@ export function usePixelSwapScheduler({
       if (!activeRef.current) return;
       if (busyRef.current.has(index)) return;
       for (const slot of busyRef.current.values()) if (slot === 'hover') return;
-      if (!handlesRef.current[index]?.isImageActive()) return;
-      startChurn(index, 'hover', hoverDurationMs);
+      if (!handlesRef.current[index]) return;
+      startTransition(index, 'hover', hoverDurationMs);
     },
-    [hoverDurationMs, startChurn]
+    [hoverDurationMs, startTransition]
   );
 
   // Props to spread onto each tile's <ImageGeneration>
@@ -201,6 +242,7 @@ export function usePixelSwapScheduler({
       handlesRef.current[index] = handle;
     },
     images: pool,
+    paused: !liveTiles.has(index),
     excludeSrcs: () => pool.filter((src) => src !== srcsRef.current[index]),
     onCycle: (event: ImageGenerationCycleEvent) => {
       if (event.phase !== 'visible') return;
@@ -216,13 +258,9 @@ export function usePixelSwapScheduler({
     },
   });
 
-  const setActive = useCallback(
-    (active: boolean) => {
-      if (active && !activeRef.current) primeTiles();
-      activeRef.current = active;
-    },
-    [primeTiles]
-  );
+  const setActive = useCallback((active: boolean) => {
+    activeRef.current = active;
+  }, []);
 
   return { tileProps, onTileHover, setActive };
 }

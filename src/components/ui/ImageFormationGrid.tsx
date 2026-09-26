@@ -1,9 +1,17 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ImageGeneration } from 'img-fx';
+import dynamic from 'next/dynamic';
+import { whenIdle } from '@/lib/whenIdle';
+import { isLowEndDevice } from '@/lib/device';
+
+// img-fx (and three.js with it) loads on demand; until then each tile shows
+// its image via its own background, so there's no visible difference
+const ImageGeneration = dynamic(() => import('img-fx').then((m) => m.ImageGeneration), {
+  ssr: false,
+});
 import { usePixelSwapScheduler } from './usePixelSwapScheduler';
 
 interface ImageFormationGridProps {
@@ -38,11 +46,62 @@ const DEFAULT_IMAGES = [
 
 export default function ImageFormationGrid({
   images = DEFAULT_IMAGES,
-  videoSrc = '/videos/Gemstart rough cut 02 (1).mp4',
+  // 1080p H.264 at 4.5 Mbps, no audio, fast-start (re-encoded from the 95 MB master)
+  videoSrc = '/videos/gemstrat-film.mp4',
 }: ImageFormationGridProps) {
   const sectionRef = useRef<HTMLDivElement | null>(null);
+  // Tile images + pixel effects are prepared in the background once the page
+  // is idle after load (or when the section gets within ~3 screens, whichever
+  // comes first) — not at page load, and not mid-scroll. Stays true afterwards.
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300% 0px' }
+    );
+    observer.observe(el);
+    const cancelIdle = whenIdle(() => setNear(true), 2500);
+    return () => {
+      observer.disconnect();
+      cancelIdle();
+    };
+  }, []);
   const gridRef = useRef<HTMLDivElement | null>(null);
   const videoContainerRef = useRef<HTMLDivElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Lazy video: nothing downloads until the section is within ~1 screen of the
+  // viewport; it pauses again when far away so it isn't decoding off-screen
+  useEffect(() => {
+    const video = videoRef.current;
+    const section = sectionRef.current;
+    if (!video || !section) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!video.src) {
+            video.src = videoSrc;
+            video.load();
+          }
+          video.play().catch(() => {
+            // Autoplay blocked (e.g. low-power mode): the poster stays visible
+          });
+        } else if (!video.paused) {
+          video.pause();
+        }
+      },
+      { rootMargin: '100% 0px' }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [videoSrc]);
   const tileSrcs = images.slice(0, 16);
   const { tileProps, onTileHover } = usePixelSwapScheduler({
     initialSrcs: tileSrcs,
@@ -59,7 +118,40 @@ export default function ImageFormationGrid({
 
       const section = sectionRef.current;
       const video = videoContainerRef.current;
-      const allGridImages = gridRef.current.querySelectorAll('.grid__img:not(.pos-video)');
+      const allGridImages = gridRef.current.querySelectorAll<HTMLElement>(
+        '.grid__img:not(.pos-video)'
+      );
+
+      // Entrance: as the section scrolls in, the tiles flow in one after
+      // another — a diagonal wave from top-left to bottom-right — instead of
+      // arriving together. Scrubbed, and only transform + opacity (composited).
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const gridRect = gridRef.current.getBoundingClientRect();
+        const order = Array.from(allGridImages, (tile) => {
+          const r = tile.getBoundingClientRect();
+          return (
+            (r.left - gridRect.left) / (gridRect.width || 1) +
+            ((r.top - gridRect.top) / (gridRect.height || 1)) * 0.5
+          );
+        });
+        const maxOrder = Math.max(...order) || 1;
+        const entrance = gsap.timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top 85%',
+            end: 'top top',
+            scrub: true,
+          },
+        });
+        allGridImages.forEach((tile, i) => {
+          entrance.fromTo(
+            tile,
+            { y: 160, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.4, ease: 'power3.out' },
+            (order[i] / maxOrder) * 0.6
+          );
+        });
+      }
 
       const timeline = gsap.timeline({
         scrollTrigger: {
@@ -73,11 +165,14 @@ export default function ImageFormationGrid({
         },
       });
 
-      timeline.to(
+      // fromTo so the exit never records the entrance's hidden state as its start
+      timeline.fromTo(
         allGridImages,
+        { opacity: 1, scale: 1 },
         {
           opacity: 0,
           scale: 0.95,
+          immediateRender: false,
           duration: 0.5,
           stagger: {
             each: 0.03,
@@ -123,36 +218,38 @@ export default function ImageFormationGrid({
           <div
             key={`img-pre-${index}`}
             className={`grid__img pos-${index + 1} relative overflow-hidden pointer-events-auto cursor-pointer`}
-            style={{ backgroundImage: `url("${src}")` }}
+            style={near ? { backgroundImage: `url("${src}")` } : undefined}
             onMouseEnter={() => onTileHover(index)}
           >
-            <ImageGeneration
-              {...tileProps(index)}
-              preset="pixels-organic"
-              pixelScale={0.8}
-              strength={0}
-              cardBg="#090909"
-              theme="dark"
-              suppressHydrationWarning
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                display: 'block',
-              }}
-              className="w-full h-full absolute inset-0"
-            >
-              <div
-                className="w-full h-full bg-cover bg-center"
+            {near && (
+              <ImageGeneration
+                {...tileProps(index)}
+                preset="pixels-organic"
+                pixelScale={isLowEndDevice() ? 1.2 : 0.8}
+                strength={0}
+                cardBg="#090909"
+                theme="dark"
+                suppressHydrationWarning
                 style={{
-                  backgroundImage: `url("${src}")`,
+                  position: 'absolute',
+                  inset: 0,
                   width: '100%',
                   height: '100%',
-                  backgroundColor: 'transparent',
+                  display: 'block',
                 }}
-              />
-            </ImageGeneration>
+                className="w-full h-full absolute inset-0"
+              >
+                <div
+                  className="w-full h-full bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url("${src}")`,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'transparent',
+                  }}
+                />
+              </ImageGeneration>
+            )}
           </div>
         ))}
 
@@ -162,8 +259,9 @@ export default function ImageFormationGrid({
           className="grid__img pos-video relative overflow-hidden bg-black border border-white/10"
         >
           <video
-            src={videoSrc}
-            autoPlay
+            ref={videoRef}
+            poster="/videos/gemstrat-film-poster.webp"
+            preload="none"
             loop
             muted
             playsInline
@@ -176,36 +274,38 @@ export default function ImageFormationGrid({
           <div
             key={`img-post-${index}`}
             className={`grid__img pos-${index + 9} relative overflow-hidden pointer-events-auto cursor-pointer`}
-            style={{ backgroundImage: `url("${src}")` }}
+            style={near ? { backgroundImage: `url("${src}")` } : undefined}
             onMouseEnter={() => onTileHover(index + 8)}
           >
-            <ImageGeneration
-              {...tileProps(index + 8)}
-              preset="pixels-organic"
-              pixelScale={0.8}
-              strength={0}
-              cardBg="#090909"
-              theme="dark"
-              suppressHydrationWarning
-              style={{
-                position: 'absolute',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                display: 'block',
-              }}
-              className="w-full h-full absolute inset-0"
-            >
-              <div
-                className="w-full h-full bg-cover bg-center"
+            {near && (
+              <ImageGeneration
+                {...tileProps(index + 8)}
+                preset="pixels-organic"
+                pixelScale={isLowEndDevice() ? 1.2 : 0.8}
+                strength={0}
+                cardBg="#090909"
+                theme="dark"
+                suppressHydrationWarning
                 style={{
-                  backgroundImage: `url("${src}")`,
+                  position: 'absolute',
+                  inset: 0,
                   width: '100%',
                   height: '100%',
-                  backgroundColor: 'transparent',
+                  display: 'block',
                 }}
-              />
-            </ImageGeneration>
+                className="w-full h-full absolute inset-0"
+              >
+                <div
+                  className="w-full h-full bg-cover bg-center"
+                  style={{
+                    backgroundImage: `url("${src}")`,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'transparent',
+                  }}
+                />
+              </ImageGeneration>
+            )}
           </div>
         ))}
       </div>

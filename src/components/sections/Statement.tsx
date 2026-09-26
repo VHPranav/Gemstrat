@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef } from 'react';
+import { onScrollFrame } from '@/lib/scrollFrame';
+import { setWordStyle } from '@/lib/wordStyle';
 
 const QUOTE_LINES = [
   ['“Scale,', 'transform,', 'and'],
@@ -31,8 +33,6 @@ export default function Statement() {
       });
       return;
     }
-
-    let rafId: number;
 
     const updateScrollAnimation = () => {
       if (!sectionRef.current) return;
@@ -65,12 +65,10 @@ export default function Statement() {
         const wordP = Math.min(Math.max((progress - wordStart) / (wordEnd - wordStart), 0), 1);
 
         const opacity = 1 - wordP;
-        const blur = wordP * 16;
+        const blur = wordP * 10; // big type: keep the blur radius (paint cost) modest
         const translateY = -wordP * 14;
 
-        el.style.opacity = opacity.toFixed(3);
-        el.style.filter = blur > 0.05 ? `blur(${blur.toFixed(1)}px)` : 'none';
-        el.style.transform = `translate3d(0, ${translateY.toFixed(1)}px, 0)`;
+        setWordStyle(el, opacity, blur, translateY);
       });
 
       // Quote container fade-out toward the end
@@ -80,20 +78,8 @@ export default function Statement() {
       }
     };
 
-    const onScroll = () => {
-      cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(updateScrollAnimation);
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll, { passive: true });
-    updateScrollAnimation();
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      cancelAnimationFrame(rafId);
-    };
+    // Same-frame updates from the shared scroll loop (no rAF lag)
+    return onScrollFrame(updateScrollAnimation);
   }, []);
 
   let wordCounter = 0;
@@ -123,7 +109,7 @@ export default function Statement() {
                       ref={(el) => {
                         wordRefs.current[currentIdx] = el;
                       }}
-                      className="inline-block mr-[0.28em] opacity-100 blur-none translate-y-0 will-change-[opacity,filter,transform] transition-[opacity,filter,transform] duration-75"
+                      className="inline-block mr-[0.28em] opacity-100 blur-none translate-y-0"
                     >
                       {word}
                     </span>

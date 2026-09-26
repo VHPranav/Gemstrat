@@ -131,8 +131,7 @@ export default function FragmentedImageGrid({
                       src={item.src}
                       alt={item.alt || 'Gemstrat'}
                       fill
-                      priority={imgIdx < 2}
-                      unoptimized
+                      sizes="(max-width: 1024px) 60vw, 25vw"
                       className="object-cover grayscale"
                     />
                   </div>
