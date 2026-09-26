@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { isLowEndDevice } from '@/lib/device';
+import { getGpuTier, isLowEndDevice } from '@/lib/device';
 
 // ---------------------------------------------------------------------------
 // UnwovenCarousel
@@ -257,9 +257,15 @@ export const UnwovenCarousel: React.FC<UnwovenCarouselProps> = ({
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Software-emulated WebGL would freeze the tab: use the static fallback
+    if (getGpuTier() === 'none') return mountFallback(container, images);
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isLowEndDevice(),
+        alpha: true,
+        failIfMajorPerformanceCaveat: true,
+      });
     } catch {
       return mountFallback(container, images);
     }

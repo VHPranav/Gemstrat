@@ -7,7 +7,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { isLowEndDevice } from '@/lib/device';
+import { getGpuTier, isLowEndDevice } from '@/lib/device';
 
 interface HeroSculptureProps {
   className?: string;
@@ -41,9 +41,16 @@ const SPIN_SPEED = 0.07; // rad/s
 const SCROLL_TURN = 0.0015; // rad per px scrolled
 
 // Adaptive quality: if frames average slower than this (≈40fps) over a
-// sampling window, drop one quality level (AO → shadows → pixel ratio)
+// sampling window, drop one quality level (AO → shadows → pixel ratio).
+// The window is time-based so a GPU drawing 1 frame/s steps down within a
+// second or two, instead of after 90 (very slow) frames.
 const SLOW_FRAME_MS = 25;
-const SAMPLE_FRAMES = 90;
+const SAMPLE_WINDOW_MS = 600;
+const SAMPLE_MIN_FRAMES = 8;
+// A single frame this slow means the GPU is drowning: drop quality at once
+const STALL_FRAME_MS = 150;
+// Still slow at the lowest quality: stop animating and keep the still frame
+const GIVE_UP_FRAME_MS = 60;
 
 // Rounded rectangle in the plate plane, extruded to its thickness with a
 // rounded bevel so every edge catches a soft highlight.
@@ -86,15 +93,24 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     if (!container) return;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Software-emulated WebGL (hardware acceleration off / blocklisted GPU)
+    // would freeze the tab: the hero shows its type on black instead
+    if (getGpuTier() === 'none') return;
+    // Low-end devices start without AO/shadows/MSAA at 1x; everyone else
+    // starts at full quality and steps down only if frames actually get slow
+    const lowEnd = isLowEndDevice();
+
     let renderer: THREE.WebGLRenderer;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+      renderer = new THREE.WebGLRenderer({
+        antialias: !lowEnd,
+        alpha: true,
+        powerPreference: 'high-performance',
+        failIfMajorPerformanceCaveat: true,
+      });
     } catch {
-      return; // No WebGL: the hero shows its type on black
+      return; // No (hardware) WebGL: the hero shows its type on black
     }
-    // Low-end devices start without AO/shadows at 1x; everyone else starts at
-    // full quality and steps down only if frames actually get slow
-    const lowEnd = isLowEndDevice();
     renderer.setPixelRatio(lowEnd ? 1 : Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -135,7 +151,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     const key = new THREE.DirectionalLight(0xffffff, 2.2);
     key.position.set(2.5, 7, 4);
     key.castShadow = true;
-    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.mapSize.set(lowEnd ? 1024 : 2048, lowEnd ? 1024 : 2048);
     key.shadow.camera.left = -6;
     key.shadow.camera.right = 6;
     key.shadow.camera.top = 10;
@@ -228,7 +244,9 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
       sculpture.position.y = OFFSET_Y;
       camera.updateProjectionMatrix();
     }
-    const render = () => composer.render();
+    // Without AO the composer only adds a full-screen copy pass; render
+    // straight to the canvas (the renderer applies tone mapping itself)
+    const render = () => (gtao.enabled ? composer.render() : renderer.render(scene, camera));
     const resizeObserver = new ResizeObserver(() => {
       fit();
       render();
@@ -257,6 +275,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     let quality = lowEnd ? 2 : 0;
     let sampleSum = 0;
     let sampleCount = 0;
+    let slowAtFloor = 0;
     const stepDownQuality = () => {
       quality++;
       if (quality === 1) gtao.enabled = false;
@@ -275,7 +294,8 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     let scrollTurn = 0;
     let last = performance.now();
     const loop = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.1);
+      const frameMs = now - last;
+      const dt = Math.min(frameMs / 1000, 0.1);
       last = now;
       // Stop the loop completely when off-screen or motion reduced.
       // IntersectionObserver above restarts it when visible again.
@@ -283,13 +303,29 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
         rafId = 0;
         return;
       }
+      // Measure the real frame time (not the clamped dt), so a GPU taking
+      // seconds per frame is noticed immediately
       if (quality < 3) {
-        sampleSum += dt * 1000;
-        if (++sampleCount >= SAMPLE_FRAMES) {
-          if (sampleSum / sampleCount > SLOW_FRAME_MS) stepDownQuality();
+        if (frameMs > STALL_FRAME_MS) {
+          stepDownQuality();
           sampleSum = 0;
           sampleCount = 0;
+        } else {
+          sampleSum += frameMs;
+          if (++sampleCount >= SAMPLE_MIN_FRAMES && sampleSum >= SAMPLE_WINDOW_MS) {
+            if (sampleSum / sampleCount > SLOW_FRAME_MS) stepDownQuality();
+            sampleSum = 0;
+            sampleCount = 0;
+          }
         }
+      } else if (frameMs > GIVE_UP_FRAME_MS) {
+        // Lowest quality and still struggling: freeze on the current frame
+        if (++slowAtFloor >= 20) {
+          rafId = 0;
+          return;
+        }
+      } else {
+        slowAtFloor = 0;
       }
       spin += SPIN_SPEED * dt;
       scrollTurn += (window.scrollY * SCROLL_TURN - scrollTurn) * 0.08;
