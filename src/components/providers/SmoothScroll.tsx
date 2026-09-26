@@ -34,7 +34,9 @@ export default function SmoothScroll() {
     // Prioritised: Lenis moves the page first each tick, then the shared
     // scrollFrame subscribers (src/lib/scrollFrame.ts) react in the same frame
     gsap.ticker.add(updateTicker, false, true);
-    gsap.ticker.lagSmoothing(0);
+    // Re-enable lag smoothing: clamps time-jumps from GC pauses / heavy frames
+    // to a max of 33ms so animations don't pop forward after a slow frame.
+    gsap.ticker.lagSmoothing(500, 33);
 
     return () => {
       gsap.ticker.remove(updateTicker);

@@ -40,7 +40,9 @@ interface Options {
 // only: a `100vw` element is wider than the viewport by the scrollbar, so its
 // area ratio never reaches 1.
 const FULL_VIEW_RATIO = 0.98;
-const OBSERVER_THRESHOLDS = Array.from({ length: 101 }, (_, i) => i / 100);
+// 5 thresholds are sufficient to detect the 0.98 FULL_VIEW_RATIO reliably.
+// 101 thresholds caused measurable overhead in older Safari / Android Chrome.
+const OBSERVER_THRESHOLDS = [0, 0.25, 0.5, 0.75, 0.98];
 // Safety net in case the `visible` cycle event never arrives
 const RELEASE_FALLBACK_MS = 4000;
 // How often the scheduler checks whether the next random pair may start

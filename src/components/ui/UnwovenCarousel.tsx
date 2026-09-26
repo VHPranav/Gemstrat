@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
+import { isLowEndDevice } from '@/lib/device';
 
 // ---------------------------------------------------------------------------
 // UnwovenCarousel
@@ -263,7 +264,15 @@ export const UnwovenCarousel: React.FC<UnwovenCarouselProps> = ({
       return mountFallback(container, images);
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    const dpr = window.devicePixelRatio || 1;
+    const isMobile = window.innerWidth < 768;
+    renderer.setPixelRatio(
+      isLowEndDevice()
+        ? 1
+        : isMobile
+          ? Math.min(dpr, 1.5)
+          : Math.min(dpr, 2)
+    );
     const domElement = renderer.domElement;
     domElement.style.display = 'block';
     domElement.style.width = '100%';

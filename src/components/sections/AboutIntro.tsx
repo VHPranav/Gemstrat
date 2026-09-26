@@ -219,11 +219,34 @@ export default function AboutIntro() {
       const viewportH = window.innerHeight;
       const viewportW = window.innerWidth;
 
+      // -----------------------------------------------------------------------
+      // PHASE 1: ALL DOM READS (one layout calculation, no style writes yet)
+      // -----------------------------------------------------------------------
+      const sectionRect = sectionRef.current?.getBoundingClientRect();
+      const clarityRect = clarityTrackRef.current?.getBoundingClientRect();
+      // Snapshot all focus-item rects in a single pass
+      const itemRects = rightItemRefs.current.map(el => el?.getBoundingClientRect() ?? null);
+      // Snapshot text block rects only if clarity section is relevant
+      let headlineBottom = 0, paraTop = 0, stickyTop = 0, stickyHeight = 0;
+      if (clarityRect && clarityStickyRef.current) {
+        const stickyBox = clarityStickyRef.current.getBoundingClientRect();
+        stickyTop = stickyBox.top;
+        stickyHeight = stickyBox.height;
+      }
+
+      // -----------------------------------------------------------------------
+      // PHASE 2: COMPUTE (pure math, no DOM access)
+      // -----------------------------------------------------------------------
+
+      // -----------------------------------------------------------------------
+      // PHASE 3: ALL DOM WRITES (style mutations happen only here)
+      // -----------------------------------------------------------------------
+
       // ----------------------------------------------------
       // 1. Pinned About Intro fade-out & Focus Areas scroll
       // ----------------------------------------------------
-      if (sectionRef.current) {
-        const rect = sectionRef.current.getBoundingClientRect();
+      if (sectionRect) {
+        const rect = sectionRect;
         const totalScrollable = rect.height - viewportH;
 
         if (totalScrollable > 0) {
@@ -274,10 +297,12 @@ export default function AboutIntro() {
 
       // ----------------------------------------------------
       // 2. Dynamic In-Place Word-by-Word Blur-In for Left Quotes
+      // Uses pre-snapshotted rects — no getBoundingClientRect here
       // ----------------------------------------------------
       rightItemRefs.current.forEach((itemEl, idx) => {
         if (!itemEl) return;
-        const rect = itemEl.getBoundingClientRect();
+        const rect = itemRects[idx];
+        if (!rect) return;
         const quoteEl = leftQuoteRefs.current[idx];
         const words = focusWordRefs.current[idx] || [];
         const totalWords = words.length;
@@ -367,8 +392,8 @@ export default function AboutIntro() {
       //      one settles centered at a fixed size, then headline/paragraph fade in.
       //    Then (INTRO_END -> 1): word-blur-out + horizontal 3-card sequence.
       // ----------------------------------------------------
-      if (clarityTrackRef.current) {
-        const rect = clarityTrackRef.current.getBoundingClientRect();
+      if (clarityTrackRef.current && clarityRect) {
+        const rect = clarityRect;
         const totalScrollable = rect.height - viewportH;
 
         if (totalScrollable > 0) {

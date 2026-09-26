@@ -2,8 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { onScrollFrame } from '@/lib/scrollFrame';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -108,47 +107,52 @@ export default function GemstratAdvantage() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const pillarsRef = useRef<HTMLDivElement>(null);
 
-  // Parallax: each image layer drifts inside its frame, and each card drifts
-  // against the page, while it scrolls through the viewport
+  // Single scroll loop drives all 8 cards (parallax layer + card drift).
+  // All rects are captured once per scroll-frame (top of the tick, before any
+  // writes), so there is exactly ONE forced layout per frame regardless of how
+  // many cards are on-screen.
   useEffect(() => {
     const root = pillarsRef.current;
     if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    gsap.registerPlugin(ScrollTrigger);
 
-    const ctx = gsap.context(() => {
-      root.querySelectorAll<HTMLElement>('[data-parallax]').forEach((layer) => {
-        const travel = Number(layer.dataset.parallax) || 10;
-        gsap.fromTo(
-          layer,
-          { yPercent: -travel },
-          {
-            yPercent: travel,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: layer.parentElement,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: true,
-            },
-          }
-        );
+    // Collect live references to parallax layers and cards
+    const layers = Array.from(root.querySelectorAll<HTMLElement>('[data-parallax]'));
+    const cardEls = Array.from(root.querySelectorAll<HTMLElement>('[data-drift]'));
+
+    // Parse config from data attributes once
+    const layerTravels = layers.map(el => Number(el.dataset.parallax) || 10);
+    const cardDrifts = cardEls.map(el => Number(el.dataset.drift) || 0);
+
+    return onScrollFrame(() => {
+      const vh = window.innerHeight;
+
+      // --- Phase 1: read all rects (ONE layout recalculation) ---
+      const layerRects = layers.map(el => {
+        const parent = el.parentElement;
+        return parent ? parent.getBoundingClientRect() : null;
       });
-      // Card-level drift (GSAP transform; the reveal uses the separate CSS
-      // `translate` property, so the two don't fight)
-      root.querySelectorAll<HTMLElement>('[data-drift]').forEach((card) => {
-        const drift = Number(card.dataset.drift) || 0;
-        gsap.fromTo(
-          card,
-          { y: drift },
-          {
-            y: -drift,
-            ease: 'none',
-            scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: true },
-          }
-        );
+      const cardRects = cardEls.map(el => el.getBoundingClientRect());
+
+      // --- Phase 2+3: compute + write ---
+      layers.forEach((layer, i) => {
+        const rect = layerRects[i];
+        if (!rect) return;
+        const travel = layerTravels[i];
+        // t = 0 when top of trigger hits bottom of viewport, 1 when bottom hits top
+        const t = Math.min(Math.max((vh - rect.top) / (rect.height + vh), 0), 1);
+        const y = -travel + t * travel * 2;
+        layer.style.transform = `translateY(${y.toFixed(2)}%)`;
       });
-    }, root);
-    return () => ctx.revert();
+
+      cardEls.forEach((card, i) => {
+        const rect = cardRects[i];
+        if (!rect) return;
+        const drift = cardDrifts[i];
+        const t = Math.min(Math.max((vh - rect.top) / (rect.height + vh), 0), 1);
+        const y = drift - t * drift * 2;
+        card.style.transform = `translateY(${y.toFixed(2)}px)`;
+      });
+    });
   }, []);
 
   // Pillars fade/slide up as they enter the viewport
