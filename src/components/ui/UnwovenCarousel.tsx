@@ -4,6 +4,8 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import { getGpuTier, isLowEndDevice } from '@/lib/device';
+import { setLite } from '@/lib/perf';
+import { usePerfLite } from '@/lib/usePerfLite';
 
 // ---------------------------------------------------------------------------
 // UnwovenCarousel
@@ -250,6 +252,7 @@ export const UnwovenCarousel: React.FC<UnwovenCarouselProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const controlled = controlRef !== undefined;
   const config = { ...DEFAULT_CONFIG, ...userConfig };
+  const lite = usePerfLite();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -258,7 +261,9 @@ export const UnwovenCarousel: React.FC<UnwovenCarouselProps> = ({
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Software-emulated WebGL would freeze the tab: use the static fallback
-    if (getGpuTier() === 'none') return mountFallback(container, images);
+    // Lite mode (slow device) too: switching to lite re-runs this effect, so
+    // the WebGL version is disposed and replaced by the static row
+    if (lite || getGpuTier() === 'none') return mountFallback(container, images);
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({
@@ -280,6 +285,11 @@ export const UnwovenCarousel: React.FC<UnwovenCarouselProps> = ({
           : Math.min(dpr, 2)
     );
     const domElement = renderer.domElement;
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      setLite('webgl-context-lost');
+    };
+    domElement.addEventListener('webglcontextlost', onContextLost);
     domElement.style.display = 'block';
     domElement.style.width = '100%';
     domElement.style.height = '100%';
@@ -493,11 +503,12 @@ export const UnwovenCarousel: React.FC<UnwovenCarouselProps> = ({
         slot.texture.dispose();
         slot.material.dispose();
       });
+      domElement.removeEventListener('webglcontextlost', onContextLost);
       renderer.dispose();
       domElement.remove();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- config is read once per mount
-  }, [images, controlled]);
+  }, [images, controlled, lite]);
 
   return (
     <div

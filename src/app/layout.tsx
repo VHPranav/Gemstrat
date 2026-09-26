@@ -3,6 +3,8 @@ import SmoothScroll from '@/components/providers/SmoothScroll';
 import ScrollToTop from '@/components/providers/ScrollToTop';
 import Navbar from '@/components/navigation/Navbar';
 import CookieNotice from '@/components/ui/CookieNotice';
+import PerfWatchdog from '@/components/providers/PerfWatchdog';
+import Loader from '@/components/ui/Loader';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -17,17 +19,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="is-loading">
       <head>
         <link rel="preload" href="/fonts/PPFrama-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/PPFramaText-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body className="font-sans">
+        <Loader />
         <ScrollToTop />
         <Navbar />
         <SmoothScroll />
         {children}
         <CookieNotice />
+        <PerfWatchdog />
       </body>
     </html>
   );

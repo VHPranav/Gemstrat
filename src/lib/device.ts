@@ -45,22 +45,53 @@ const SOFTWARE_GPU = /swiftshader|llvmpipe|softpipe|software|basic render|micros
 const LOW_GPU = /intel|mali|adreno|powervr|videocore|radeon\(tm\) graphics|vega \d+ graphics/i;
 
 let gpuCached: GpuTier | null = null;
+let gpuName = '';
+let gpuProbeMs = 0;
+// Probe time limits (see getGpuTier)
+const PROBE_LOW_MS = 250;
+const PROBE_NONE_MS = 1000;
+
+/** How long the GPU probe took, for debugging. */
+export function getGpuProbeMs(): number {
+  return gpuProbeMs;
+}
+
+/** The GPU's reported name (after getGpuTier() ran), for debugging. */
+export function getGpuName(): string {
+  return gpuName;
+}
 
 export function getGpuTier(): GpuTier {
   if (gpuCached !== null) return gpuCached;
   if (typeof document === 'undefined') return 'high';
   try {
+    // Timed probe: create a context and force one GPU round trip. A healthy
+    // GPU does this in a few ms; one that takes hundreds of ms (overloaded,
+    // bad driver, disguised software rendering) would stall the page for
+    // seconds on the hero's much bigger context, shaders and buffers.
+    const start = performance.now();
     const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 16;
     const gl = (canvas.getContext('webgl2', { failIfMajorPerformanceCaveat: true }) ||
       canvas.getContext('webgl', { failIfMajorPerformanceCaveat: true })) as WebGLRenderingContext | null;
     if (!gl) {
       gpuCached = 'none';
       return gpuCached;
     }
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array(4));
+    gpuProbeMs = performance.now() - start;
     const info = gl.getExtension('WEBGL_debug_renderer_info');
     const renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+    gpuName = renderer;
     gl.getExtension('WEBGL_lose_context')?.loseContext();
-    gpuCached = SOFTWARE_GPU.test(renderer) ? 'none' : LOW_GPU.test(renderer) ? 'low' : 'high';
+    gpuCached =
+      SOFTWARE_GPU.test(renderer) || gpuProbeMs > PROBE_NONE_MS
+        ? 'none'
+        : LOW_GPU.test(renderer) || gpuProbeMs > PROBE_LOW_MS
+          ? 'low'
+          : 'high';
   } catch {
     gpuCached = 'none';
   }

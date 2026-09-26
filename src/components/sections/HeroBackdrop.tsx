@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 // anyway), so it never delays the hero's first paint
 const HeroSculpture = dynamic(() => import('@/components/ui/HeroSculpture'), { ssr: false });
 import { onScrollFrame } from '@/lib/scrollFrame';
+import { usePerfLite } from '@/lib/usePerfLite';
 
 // ---------------------------------------------------------------------------
 // HeroBackdrop
@@ -29,6 +30,8 @@ export default function HeroBackdrop({ children }: { children: React.ReactNode }
   const dimRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [loadSculpture, setLoadSculpture] = useState(false);
+  // Lite mode (slow device): unmounting the sculpture disposes its WebGL
+  const lite = usePerfLite();
 
   useEffect(() => {
     // Postpone heavy WebGL & Three.js shader compilation until after
@@ -70,7 +73,7 @@ export default function HeroBackdrop({ children }: { children: React.ReactNode }
             className="hero-sculpture-in absolute inset-0"
             style={{ animationDelay: `${SCULPTURE_START}s` }}
           >
-            {loadSculpture && <HeroSculpture className="absolute inset-0" />}
+            {loadSculpture && !lite && <HeroSculpture className="absolute inset-0" />}
           </div>
         </div>
       </div>

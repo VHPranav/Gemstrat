@@ -9,6 +9,7 @@ import type { UnwovenCarouselControl } from '@/components/ui/UnwovenCarousel';
 import { onScrollFrame } from '@/lib/scrollFrame';
 import { setWordStyle } from '@/lib/wordStyle';
 import { whenIdle } from '@/lib/whenIdle';
+import { usePerfLite } from '@/lib/usePerfLite';
 
 // WebGL carousel (three.js) loads on demand, off the critical path
 const UnwovenCarousel = dynamic(() => import('@/components/ui/UnwovenCarousel'), { ssr: false });
@@ -145,6 +146,7 @@ export default function AboutIntro() {
   // the background when the page is idle after load, or when the Clarity
   // section gets within ~2 screens — never at load, never mid-scroll
   const [clarityNear, setClarityNear] = useState(false);
+  const lite = usePerfLite();
   useEffect(() => {
     const el = clarityTrackRef.current;
     if (!el) return;
@@ -808,7 +810,7 @@ export default function AboutIntro() {
         >
           {/* Interactive GSAP Image Trail Layer */}
           <div className="absolute inset-0 z-10 pointer-events-auto overflow-hidden">
-            {clarityNear && <ImageTrail items={TRAIL_IMAGES} variant="2" />}
+            {clarityNear && !lite && <ImageTrail items={TRAIL_IMAGES} variant="2" />}
           </div>
 
           {/* Scroll-driven unravelling carousel (fades in, travels with scroll) */}

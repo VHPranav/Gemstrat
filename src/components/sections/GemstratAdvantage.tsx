@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { onScrollFrame } from '@/lib/scrollFrame';
-import { isLowEndDevice } from '@/lib/device';
+import { useLowEndDevice, usePerfLite } from '@/lib/usePerfLite';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -108,10 +108,9 @@ export default function GemstratAdvantage() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const pillarsRef = useRef<HTMLDivElement>(null);
   // mix-blend-difference is GPU-expensive on mobile. Detect once on mount.
-  const [useMixBlend, setUseMixBlend] = useState(true);
-  useEffect(() => {
-    setUseMixBlend(!isLowEndDevice());
-  }, []);
+  const lowEnd = useLowEndDevice();
+  const lite = usePerfLite();
+  const useMixBlend = !lowEnd && !lite;
 
   // Single scroll loop drives all 8 cards (parallax layer + card drift).
   // All rects are captured once per scroll-frame (top of the tick, before any

@@ -8,6 +8,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { getGpuTier, isLowEndDevice } from '@/lib/device';
+import { setLite } from '@/lib/perf';
 
 interface HeroSculptureProps {
   className?: string;
@@ -118,6 +119,13 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
     renderer.shadowMap.enabled = !lowEnd;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     const canvas = renderer.domElement;
+    // GPU driver reset / out of GPU memory: switch the page to lite mode
+    // (HeroBackdrop unmounts this component) instead of a dead black canvas
+    const onContextLost = (e: Event) => {
+      e.preventDefault();
+      setLite('webgl-context-lost');
+    };
+    canvas.addEventListener('webglcontextlost', onContextLost);
     canvas.style.cssText = 'display:block;width:100%;height:100%;opacity:0;transition:opacity 1.6s ease;';
     container.appendChild(canvas);
 
@@ -319,9 +327,11 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
           }
         }
       } else if (frameMs > GIVE_UP_FRAME_MS) {
-        // Lowest quality and still struggling: freeze on the current frame
+        // Lowest quality and still struggling: this device can't run the
+        // page's effects — switch everything to lite
         if (++slowAtFloor >= 20) {
           rafId = 0;
+          setLite('hero-slow');
           return;
         }
       } else {
@@ -337,6 +347,7 @@ export default function HeroSculpture({ className = '' }: HeroSculptureProps) {
 
     return () => {
       cancelAnimationFrame(rafId);
+      canvas.removeEventListener('webglcontextlost', onContextLost);
       resizeObserver.disconnect();
       io.disconnect();
       gtao.dispose();

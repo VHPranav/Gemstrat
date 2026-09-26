@@ -5,12 +5,14 @@ import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { usePerfLite } from '@/lib/usePerfLite';
 
 export default function SmoothScroll() {
+  const lite = usePerfLite();
   useEffect(() => {
-    // Respect reduced motion
+    // Respect reduced motion; slow devices (lite mode) keep native scrolling
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || lite) return;
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -42,7 +44,7 @@ export default function SmoothScroll() {
       gsap.ticker.remove(updateTicker);
       lenis.destroy();
     };
-  }, []);
+  }, [lite]);
 
   return null;
 }

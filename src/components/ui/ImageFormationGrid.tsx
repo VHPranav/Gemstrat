@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import dynamic from 'next/dynamic';
 import { whenIdle } from '@/lib/whenIdle';
 import { isLowEndDevice } from '@/lib/device';
+import { useLowEndDevice, usePerfLite } from '@/lib/usePerfLite';
 
 // img-fx (and three.js with it) loads on demand; until then each tile shows
 // its image via its own background, so there's no visible difference
@@ -56,11 +57,10 @@ export default function ImageFormationGrid({
   const [near, setNear] = useState(false);
   // On mobile / low-end devices, avoid instantiating 16 simultaneous WebGL
   // canvases from img-fx, which exceeds mobile GPU limits and causes browser lag.
-  const [enableFx, setEnableFx] = useState(false);
-
-  useEffect(() => {
-    setEnableFx(!isLowEndDevice());
-  }, []);
+  const lowEnd = useLowEndDevice();
+  // Lite mode (slow device): tiles fall back to their plain background image
+  const lite = usePerfLite();
+  const enableFx = !lowEnd && !lite;
 
   useEffect(() => {
     const el = sectionRef.current;
