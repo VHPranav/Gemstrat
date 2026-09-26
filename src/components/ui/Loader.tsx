@@ -15,8 +15,9 @@ import { useEffect, useRef, useState } from 'react';
 const COUNT_MS = 1800;
 const COUNT_MS_REDUCED = 500;
 const MAX_WAIT_MS = 6000;
-const HOLD_MS = 200; // "100" stays on screen briefly before the fade
-const FADE_MS = 600;
+const HOLD_MS = 500; // "100" stays on screen before the fade
+const FADE_MS = 800;
+const GAP_MS = 500; // black pause between the loader and the hero intro
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -57,15 +58,21 @@ export default function Loader() {
     let rafId = 0;
     let holdTimer = 0;
     let fadeTimer = 0;
+    let gapTimer = 0;
 
     const finish = () => {
       if (numberRef.current) numberRef.current.textContent = '100';
       holdTimer = window.setTimeout(() => {
-        // Start the hero intro as the loader fades
-        root.classList.remove('is-loading');
-        unblock();
         setLeaving(true);
-        fadeTimer = window.setTimeout(() => setDone(true), FADE_MS);
+        // Faded out (the page behind is still black): pause, then start the
+        // hero intro. Unmount only after, as unmounting cancels the timers.
+        fadeTimer = window.setTimeout(() => {
+          gapTimer = window.setTimeout(() => {
+            root.classList.remove('is-loading');
+            unblock();
+            setDone(true);
+          }, GAP_MS);
+        }, FADE_MS);
       }, HOLD_MS);
     };
 
@@ -91,6 +98,7 @@ export default function Loader() {
       cancelAnimationFrame(rafId);
       window.clearTimeout(holdTimer);
       window.clearTimeout(fadeTimer);
+      window.clearTimeout(gapTimer);
       window.removeEventListener('load', onLoad);
       unblock();
       root.classList.remove('is-loading');
