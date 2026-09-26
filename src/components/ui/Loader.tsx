@@ -1,15 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { playIntroWhenHeroVisible } from '@/lib/intro';
 
 // ---------------------------------------------------------------------------
 // Loader
 // A 1 → 100 counter in the centre of the viewport, shown before the hero.
 // It counts over COUNT_MS but waits at 99 until the page has finished loading
 // (at most MAX_WAIT_MS), then fades out. While it's up, <html> carries
-// `is-loading`, which pauses the hero / navbar entrance animations (their
-// delays included) and locks scrolling — so the intro choreography plays
-// untouched the moment the loader lifts.
+// `is-loading`, which locks scrolling. The hero intro doesn't run under it:
+// once the loader is gone it hands over to playIntroWhenHeroVisible().
 // ---------------------------------------------------------------------------
 
 const COUNT_MS = 1800;
@@ -71,6 +71,7 @@ export default function Loader() {
             root.classList.remove('is-loading');
             unblock();
             setDone(true);
+            playIntroWhenHeroVisible();
           }, GAP_MS);
         }, FADE_MS);
       }, HOLD_MS);

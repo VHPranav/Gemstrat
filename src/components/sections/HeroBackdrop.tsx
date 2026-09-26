@@ -8,6 +8,7 @@ import dynamic from 'next/dynamic';
 const HeroSculpture = dynamic(() => import('@/components/ui/HeroSculpture'), { ssr: false });
 import { onScrollFrame } from '@/lib/scrollFrame';
 import { usePerfLite } from '@/lib/usePerfLite';
+import { onIntroStart } from '@/lib/intro';
 
 // ---------------------------------------------------------------------------
 // HeroBackdrop
@@ -34,10 +35,17 @@ export default function HeroBackdrop({ children }: { children: React.ReactNode }
   const lite = usePerfLite();
 
   useEffect(() => {
-    // Postpone heavy WebGL & Three.js shader compilation until after
-    // the heading and navbar text entrance has smoothly finished
-    const timer = setTimeout(() => setLoadSculpture(true), 1200);
-    return () => clearTimeout(timer);
+    // Nothing loads under the loader: once the hero intro starts, postpone
+    // the heavy WebGL & Three.js shader compilation until the heading and
+    // navbar text entrance has smoothly finished
+    let timer = 0;
+    const stop = onIntroStart(() => {
+      timer = window.setTimeout(() => setLoadSculpture(true), 1200);
+    });
+    return () => {
+      stop();
+      window.clearTimeout(timer);
+    };
   }, []);
 
   useEffect(() => {

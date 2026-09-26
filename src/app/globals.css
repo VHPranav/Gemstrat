@@ -395,12 +395,14 @@ body {
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
-/* While the loader is up: no scrolling, and the intro waits (a paused
-   animation's delay is paused too, so the choreography stays intact) */
+/* While the loader is up: no scrolling */
 html.is-loading {
   overflow: hidden;
 }
-html.is-loading :is(.hero-sculpture-in, .hero-word-inner, .hero-asterisk-pop, .nav-item-in, .hero-fade-up) {
+/* The hero intro waits until src/lib/intro.ts adds .intro-play (loader gone,
+   hero in view). A paused animation's delay is paused too, so every part
+   keeps its original timing. */
+html:not(.intro-play) :is(.hero-sculpture-in, .hero-word-inner, .hero-asterisk-pop, .nav-item-in, .hero-fade-up) {
   animation-play-state: paused;
 }
 
