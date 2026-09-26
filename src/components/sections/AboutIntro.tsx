@@ -233,13 +233,6 @@ export default function AboutIntro() {
 
       // Snapshot all focus-item rects in a single pass
       const itemRects = rightItemRefs.current.map(el => el?.getBoundingClientRect() ?? null);
-      // Snapshot text block rects only if clarity section is relevant
-      let headlineBottom = 0, paraTop = 0, stickyTop = 0, stickyHeight = 0;
-      if (clarityRect && clarityStickyRef.current) {
-        const stickyBox = clarityStickyRef.current.getBoundingClientRect();
-        stickyTop = stickyBox.top;
-        stickyHeight = stickyBox.height;
-      }
 
       // -----------------------------------------------------------------------
       // PHASE 2: COMPUTE (pure math, no DOM access)

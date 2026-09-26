@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { playIntroWhenHeroVisible } from '@/lib/intro';
 
 // ---------------------------------------------------------------------------
@@ -69,6 +70,9 @@ export default function Loader() {
         fadeTimer = window.setTimeout(() => {
           gapTimer = window.setTimeout(() => {
             root.classList.remove('is-loading');
+            // Browsers without scrollbar-gutter gain a scrollbar here, so
+            // pinned sections must re-measure the (now narrower) page
+            ScrollTrigger.refresh();
             unblock();
             setDone(true);
             playIntroWhenHeroVisible();

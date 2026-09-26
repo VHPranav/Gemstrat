@@ -395,7 +395,16 @@ body {
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
 }
-/* While the loader is up: no scrolling */
+/* While the loader is up: no scrolling. The scrollbar's space stays reserved
+   (scrollbar-gutter) so the page is the same width during and after loading —
+   otherwise pinned sections measured under the loader come out a scrollbar
+   wider than the page and cause a horizontal scrollbar. */
+html {
+  scrollbar-gutter: stable;
+  /* The empty gutter (while scrolling is locked) shows the root background:
+     keep it black like the loader and hero, not the body's paper colour */
+  background: #090909;
+}
 html.is-loading {
   overflow: hidden;
 }
