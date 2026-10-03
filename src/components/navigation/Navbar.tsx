@@ -52,19 +52,18 @@ export default function Navbar() {
             scrollTo('#hero');
           }}
           style={{ animationDelay: '1.25s' }}
-          className={`nav-item-in pointer-events-auto flex items-center gap-2.5 h-10 px-3.5 border transition-colors duration-300 ${
-            isLight
-              ? 'bg-black text-white border-black hover:bg-zinc-800'
-              : 'bg-white/[0.06] text-white border-white/15 hover:bg-white/[0.14] backdrop-blur-md'
-          }`}
+          className="nav-item-in pointer-events-auto flex items-center h-10 transition-opacity duration-300 hover:opacity-75"
           aria-label="Gemstrat home"
         >
-          <span className="relative w-[18px] h-[18px] shrink-0 overflow-hidden">
-            <Image src="/gemstrat-logo.png" alt="" fill sizes="18px" className="object-contain" />
-          </span>
-          <span className="font-archivo-expanded text-[11px] sm:text-xs font-bold uppercase tracking-wider">
-            Gemstrat
-          </span>
+          {/* The wordmark is white; over the white sections it flips to black */}
+          <Image
+            src="/images/gems.svg"
+            alt=""
+            width={183}
+            height={37}
+            priority
+            className={`h-[22px] sm:h-6 w-auto transition-[filter] duration-300 ${isLight ? 'invert' : ''}`}
+          />
         </a>
 
         {/* Right: call to action */}

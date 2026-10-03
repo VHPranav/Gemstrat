@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="is-loading">
+    <html lang="en">
       <head>
         <link rel="preload" href="/fonts/PPFrama-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/PPFramaText-Variable.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
