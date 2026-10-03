@@ -57,9 +57,9 @@ const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const ramp = (t: number, start: number, dur: number) => clamp01((t - start) / dur);
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-const EDGE_COLOR = new THREE.Color(0x363e4d);
+const EDGE_COLOR = new THREE.Color(0x3a3a3a);
 const EDGE_OPACITY = [0.08, 0.05];
-const WIRE_COLOR = new THREE.Color(0xdde6ff);
+const WIRE_COLOR = new THREE.Color(0xe8e8e8);
 const SOLID_OPACITY = 0.88;
 const OBJECT_SCALE = 0.72; // the logo's size in the frame
 const OBJECT_Y = -0.35; // nudged down, clear of the headline
@@ -222,44 +222,45 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     const camera = new THREE.PerspectiveCamera(view.fov, W / H, 0.1, 200);
     camera.position.set(0, 0, view.z);
 
-    // Cool rim lights from every side, plus warm point lights that orbit
-    scene.add(new THREE.AmbientLight(0x2a3040, 2.8 * Math.PI));
+    // Monochrome: grey rim lights from every side, plus white point lights
+    // that orbit and throw moving glints across the glass
+    scene.add(new THREE.AmbientLight(0x2e2e2e, 2.8 * Math.PI));
     (
       [
         [0xffffff, 1.6, [4, 5, 4]],
-        [0x889aaa, 0.8, [-4, 1, -2]],
-        [0xccddee, 1.5, [0, -3, -5]],
-        [0x889aaa, 1, [-3, 2, 6]],
-        [0xaabbcc, 1, [0, 8, 2]],
-        [0x6677aa, 1.2, [0, 0, -8]],
-        [0x6677aa, 1, [-8, 0, 0]],
-        [0x6677aa, 1, [8, 0, 0]],
-        [0x6677aa, 1, [0, -8, 0]],
+        [0x999999, 0.8, [-4, 1, -2]],
+        [0xdddddd, 1.5, [0, -3, -5]],
+        [0x999999, 1, [-3, 2, 6]],
+        [0xbbbbbb, 1, [0, 8, 2]],
+        [0x777777, 1.2, [0, 0, -8]],
+        [0x777777, 1, [-8, 0, 0]],
+        [0x777777, 1, [8, 0, 0]],
+        [0x777777, 1, [0, -8, 0]],
       ] as const
     ).forEach(([color, intensity, [x, y, z]]) => {
       const light = new THREE.DirectionalLight(color, intensity * Math.PI);
       light.position.set(x, y, z);
       scene.add(light);
     });
-    const warm1 = new THREE.PointLight(0xff3300, 12 * Math.PI, 22, 1);
-    const warm2 = new THREE.PointLight(0xff2200, 9 * Math.PI, 20, 1);
-    const warm3 = new THREE.PointLight(0xff5500, 6 * Math.PI, 14, 1);
-    warm1.position.set(3, -1, 3);
-    warm2.position.set(-3, 2, -2);
-    warm3.position.set(0, 4, 3);
-    scene.add(warm1, warm2, warm3);
+    const glint1 = new THREE.PointLight(0xffffff, 7 * Math.PI, 22, 1);
+    const glint2 = new THREE.PointLight(0xd8d8d8, 5 * Math.PI, 20, 1);
+    const glint3 = new THREE.PointLight(0xeeeeee, 3.5 * Math.PI, 14, 1);
+    glint1.position.set(3, -1, 3);
+    glint2.position.set(-3, 2, -2);
+    glint3.position.set(0, 4, 3);
+    scene.add(glint1, glint2, glint3);
 
-    // Embers drifting in the background
+    // Faint dust drifting in the background
     const dustPos = new Float32Array(600);
     for (let i = 0; i < dustPos.length; i++) dustPos[i] = (Math.random() - 0.5) * 20;
     const dustGeo = new THREE.BufferGeometry();
     dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-    const dustMat = new THREE.PointsMaterial({ color: 0xff3300, size: 0.022, transparent: true, opacity: 0.35 });
+    const dustMat = new THREE.PointsMaterial({ color: 0xbdbdbd, size: 0.022, transparent: true, opacity: 0.25 });
     const dust = new THREE.Points(dustGeo, dustMat);
     dust.visible = W >= 768;
     scene.add(dust);
 
-    // The object reflects the scene itself (lights, embers)
+    // The object reflects the scene itself (lights, dust)
     const cubeRT = new THREE.WebGLCubeRenderTarget(256, {
       generateMipmaps: true,
       minFilter: THREE.LinearMipmapLinearFilter,
@@ -275,16 +276,16 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     studio.height = 256;
     const sctx = studio.getContext('2d')!;
     const grad = sctx.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, '#3c434e');
-    grad.addColorStop(0.45, '#0d0e10');
-    grad.addColorStop(0.6, '#0b0b0c');
-    grad.addColorStop(1, '#1c1f24');
+    grad.addColorStop(0, '#404040');
+    grad.addColorStop(0.45, '#0e0e0e');
+    grad.addColorStop(0.6, '#0b0b0b');
+    grad.addColorStop(1, '#1e1e1e');
     sctx.fillStyle = grad;
     sctx.fillRect(0, 0, 512, 256);
-    sctx.fillStyle = 'rgba(200,215,235,0.55)';
+    sctx.fillStyle = 'rgba(225,225,225,0.55)';
     sctx.fillRect(60, 40, 70, 90);
     sctx.fillRect(300, 30, 120, 26);
-    sctx.fillStyle = 'rgba(255,120,60,0.35)';
+    sctx.fillStyle = 'rgba(160,160,160,0.3)';
     sctx.fillRect(420, 150, 50, 60);
     const studioTex = new THREE.CanvasTexture(studio);
     studioTex.colorSpace = THREE.SRGBColorSpace;
@@ -298,8 +299,8 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
 
     // --- The object --------------------------------------------------------
     const material = new THREE.MeshPhysicalMaterial({
-      color: 0x3a3d42,
-      emissive: new THREE.Color(0x1a2030),
+      color: 0x3c3c3c,
+      emissive: new THREE.Color(0x1c1c1c),
       emissiveIntensity: 0.15,
       metalness: 1,
       roughness: 0.08,
@@ -614,8 +615,8 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         }
       });
 
-      warm1.position.set(4 * Math.sin(0.6 * t), 2 * Math.cos(0.4 * t), 3 * Math.cos(0.5 * t) + 2);
-      warm2.position.set(4 * Math.cos(0.5 * t), 2 * Math.sin(0.7 * t), 3 * Math.sin(0.3 * t) - 1);
+      glint1.position.set(4 * Math.sin(0.6 * t), 2 * Math.cos(0.4 * t), 3 * Math.cos(0.5 * t) + 2);
+      glint2.position.set(4 * Math.cos(0.5 * t), 2 * Math.sin(0.7 * t), 3 * Math.sin(0.3 * t) - 1);
 
       // Reflections: once up front, then every 6th frame while blasting
       if (!s.envReady || (s.frame % 6 === 0 && (s.burst > 0.01 || s.holding))) {
@@ -730,7 +731,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       <div
         ref={tipRef}
         aria-hidden="true"
-        className="fixed left-0 top-0 z-20 pointer-events-none opacity-0 transition-opacity duration-300 flex items-center gap-2 h-9 pl-2 pr-3.5 rounded-full bg-[#141416]/85 border border-white/10 backdrop-blur-md text-[11px] uppercase tracking-[0.12em] text-white whitespace-nowrap"
+        className="fixed left-0 top-0 z-20 pointer-events-none opacity-0 transition-opacity duration-300 flex items-center gap-2 h-9 pl-2 pr-3.5 rounded-full bg-[#141414]/85 border border-white/10 backdrop-blur-md text-[11px] uppercase tracking-[0.12em] text-white whitespace-nowrap"
       >
         <Image src="/images/blast.gif" alt="" width={22} height={22} unoptimized />
         Hold to blast

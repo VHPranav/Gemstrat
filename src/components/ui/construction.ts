@@ -107,13 +107,13 @@ export function createConstruction(outline: P[][], w: number, h: number) {
     // Soft halo, then the hairline core
     ctx.globalAlpha = alpha * 0.1;
     ctx.lineWidth = width * 4;
-    ctx.strokeStyle = 'rgb(170,190,255)';
+    ctx.strokeStyle = 'rgb(190,190,190)';
     ctx.beginPath();
     path();
     ctx.stroke();
     ctx.globalAlpha = alpha;
     ctx.lineWidth = width;
-    ctx.strokeStyle = 'rgb(235,240,255)';
+    ctx.strokeStyle = 'rgb(240,240,240)';
     ctx.beginPath();
     path();
     ctx.stroke();
@@ -158,7 +158,7 @@ export function createConstruction(outline: P[][], w: number, h: number) {
         const ty = hy - ((g.b.y - g.a.y) / len) * tail;
         const glow = Math.sin(Math.PI * k); // brightest mid-flight
         const grad = ctx.createLinearGradient(tx, ty, hx, hy);
-        grad.addColorStop(0, 'rgba(235,240,255,0)');
+        grad.addColorStop(0, 'rgba(240,240,240,0)');
         grad.addColorStop(1, `rgba(255,255,255,${0.85 * glow * fade})`);
         ctx.globalAlpha = 1;
         ctx.strokeStyle = grad;
@@ -191,7 +191,7 @@ export function createConstruction(outline: P[][], w: number, h: number) {
       const fill = easeInOutCubic(ramp(t, CONSTRUCT.outlineStart + 0.7, 0.8)) * outlineFade;
       if (fill > 0) {
         ctx.globalAlpha = 0.05 * fill;
-        ctx.fillStyle = 'rgb(200,215,255)';
+        ctx.fillStyle = 'rgb(215,215,215)';
         ctx.beginPath();
         path();
         ctx.fill();
