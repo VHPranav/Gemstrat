@@ -13,6 +13,9 @@ import { playIntroWhenHeroVisible } from '@/lib/intro';
 // once the loader is gone it hands over to playIntroWhenHeroVisible().
 // ---------------------------------------------------------------------------
 
+// Set to false to bypass the 1 -> 100 loader and display the hero immediately
+const LOADER_ENABLED = false;
+
 const COUNT_MS = 1800;
 const COUNT_MS_REDUCED = 500;
 const MAX_WAIT_MS = 6000;
@@ -22,13 +25,20 @@ const GAP_MS = 500; // black pause between the loader and the hero intro
 
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-export default function Loader() {
+export default function Loader({ enabled = LOADER_ENABLED }: { enabled?: boolean }) {
   const numberRef = useRef<HTMLSpanElement>(null);
   const [leaving, setLeaving] = useState(false);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(!enabled);
 
   useEffect(() => {
     const root = document.documentElement;
+
+    if (!enabled) {
+      root.classList.remove('is-loading');
+      ScrollTrigger.refresh();
+      playIntroWhenHeroVisible();
+      return;
+    }
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const countMs = reduceMotion ? COUNT_MS_REDUCED : COUNT_MS;
 
@@ -108,7 +118,7 @@ export default function Loader() {
       unblock();
       root.classList.remove('is-loading');
     };
-  }, []);
+  }, [enabled]);
 
   if (done) return null;
   return (

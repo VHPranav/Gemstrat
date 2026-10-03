@@ -92,7 +92,7 @@ export default function Statement() {
       role="region"
       aria-label="Company Statement"
     >
-      {/* Transparent: the shared HeroBackdrop sculpture shows through */}
+      {/* Transparent: the hero's 3D scene shows through (see Hero) */}
       <div className="sticky top-0 h-screen h-[100svh] w-full flex items-center justify-center bg-transparent z-10 overflow-hidden">
         <div
           ref={quoteWrapRef}

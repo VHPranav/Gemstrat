@@ -220,12 +220,6 @@ body {
   display: block !important;
 }
 
-.formation-section .image-gen-root,
-.formation-section .image-gen-root canvas {
-  filter: grayscale(100%) contrast(105%) !important;
-  -webkit-filter: grayscale(100%) contrast(105%) !important;
-}
-
 .image-gen-root > .image-gen-child {
   width: 100% !important;
   height: 100% !important;
@@ -243,83 +237,14 @@ body {
   text-align: center;
 }
 
-/* ---------- ImageFormationGrid: formation-section layout ---------- */
-.formation-section {
-  display: grid;
-  height: 100vh;
-  width: 100%;
-  place-items: center;
-  grid-template-areas: 'main';
-  grid-template-rows: 100%;
-  grid-template-columns: 100%;
-  position: relative;
-  overflow: hidden;
-  padding: 0.5rem;
-  background-color: #090909;
-  color: #f5f3ee;
-  font-family: inherit;
-}
-
-.formation-grid {
-  grid-area: main;
-  display: grid;
-  width: 100%;
-  height: 100%;
-  gap: 0.5rem;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: 1fr 1fr 1fr;
-}
-
-.grid__img {
-  background-size: cover;
-  background-position: 50% 50%;
-  will-change: transform, opacity;
-  transform: translateZ(0.1px);
-  filter: grayscale(100%);
-  -webkit-filter: grayscale(100%);
-}
-
-.formation-grid .pos-video {
-  grid-area: 2 / 4 / 3 / 6;
-  z-index: 5;
-  transform-origin: 50% 50%;
-  will-change: transform;
-  pointer-events: none;
-  filter: none !important;
-  -webkit-filter: none !important;
-}
-
-/* Artistic Scattered Grid Positions for Formation Grid */
-.formation-grid .pos-1 { grid-area: 1 / 1; }
-.formation-grid .pos-2 { grid-area: 1 / 3; }
-.formation-grid .pos-3 { grid-area: 1 / 5; }
-.formation-grid .pos-4 { grid-area: 1 / 6; }
-.formation-grid .pos-5 { grid-area: 1 / 7; }
-.formation-grid .pos-6 { grid-area: 1 / 8; }
-.formation-grid .pos-7 { grid-area: 2 / 2; }
-.formation-grid .pos-8 { grid-area: 2 / 3; }
-.formation-grid .pos-9 { grid-area: 2 / 6; }
-.formation-grid .pos-10 { grid-area: 2 / 7; }
-.formation-grid .pos-11 { grid-area: 3 / 1; }
-.formation-grid .pos-12 { grid-area: 3 / 2; }
-.formation-grid .pos-13 { grid-area: 3 / 4; }
-.formation-grid .pos-14 { grid-area: 3 / 6; }
-.formation-grid .pos-15 { grid-area: 3 / 7; }
-.formation-grid .pos-16 { grid-area: 3 / 8; }
-
-
 /* ---------- Hero intro (sculpture → copy) ---------- */
-@keyframes heroSculptureIn {
-  from { opacity: 0; transform: scale(1.08); }
-  to { opacity: 1; transform: scale(1); }
-}
 @keyframes heroFadeUp {
   from { opacity: 0; filter: blur(8px); transform: translate3d(0, 14px, 0); }
   to { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0); }
 }
-.hero-sculpture-in {
+.hero-fade-up {
   opacity: 0;
-  animation: heroSculptureIn 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: heroFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 /* ---------- Hero tagline word-by-word mask reveal ---------- */
 @keyframes heroWordRise {
@@ -338,6 +263,26 @@ body {
   transform: translate3d(0, 105%, 0);
   will-change: transform, opacity;
   animation: heroWordRise 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ---------- Hero region clock: each new city fades in ---------- */
+@keyframes heroSwapIn {
+  from { opacity: 0; filter: blur(6px); }
+  to { opacity: 1; filter: blur(0); }
+}
+.hero-swap-in {
+  animation: heroSwapIn 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- Hero last word: letters blur in one by one ---------- */
+@keyframes heroLetterIn {
+  0% { opacity: 0; filter: blur(14px); transform: translate3d(0, 0.08em, 0) scale(1.15); }
+  60% { opacity: 0.7; filter: blur(4px); }
+  100% { opacity: 1; filter: blur(0); transform: translate3d(0, 0, 0) scale(1); }
+}
+.hero-letter-in {
+  opacity: 0;
+  animation: heroLetterIn 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes heroAsteriskPop {
@@ -408,17 +353,18 @@ html {
 html.is-loading {
   overflow: hidden;
 }
-/* The hero intro waits until src/lib/intro.ts adds .intro-play (loader gone,
-   hero in view). A paused animation's delay is paused too, so every part
+/* The hero copy waits until src/lib/intro.ts adds .hero-reveal (loader gone,
+   hero in view, and the scene's construction intro finished). A paused
+   animation's delay is paused too, so every part
    keeps its original timing. */
-html:not(.intro-play) :is(.hero-sculpture-in, .hero-word-inner, .hero-asterisk-pop, .nav-item-in, .hero-fade-up) {
+html:not(.hero-reveal) :is(.hero-word-inner, .hero-letter-in, .hero-asterisk-pop, .nav-item-in, .hero-fade-up) {
   animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-sculpture-in,
   .hero-fade-up,
   .hero-word-inner,
+  .hero-letter-in,
   .hero-asterisk-pop,
   .nav-item-in {
     animation: none;
