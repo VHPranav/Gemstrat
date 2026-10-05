@@ -12,18 +12,14 @@ import * as THREE from 'three';
 
 export interface HeroObject {
   /** Pieces of the object, in object space, roughly centred on the origin
-   *  and ~2.5 units tall. Each piece bobs on its own phase while idle. */
+   *  and ~2.6 units tall. Each piece bobs on its own phase while idle. */
   parts: THREE.BufferGeometry[];
-  /** The object's flat front outline, one closed polygon per piece (object
-   *  space, on the front face). The intro's construction lines are drawn
-   *  along these edges before the object turns 3D. */
-  outline: THREE.Vector3[][];
 }
 
 // The "S" of the Gemstrat wordmark (gems.svg, viewBox units, y down): a top
 // bar, a bottom bar, two short stubs and the diagonal between them. Stubs are
 // trimmed to meet the bars instead of overlapping them, so no faces coincide.
-const S_PIECES: [number, number][][] = [
+export const S_PIECES: [number, number][][] = [
   // top bar
   [[70.948, 0], [94.147, 0], [94.147, 4], [70.948, 4]],
   // bottom bar
@@ -35,8 +31,10 @@ const S_PIECES: [number, number][][] = [
   // right stub, rising from the bottom bar
   [[90.054, 13.736], [94.151, 13.736], [94.151, 19.878], [90.054, 19.878]],
 ];
-const S_CENTER = { x: 82.55, y: 11.94 };
-const S_SCALE = 2.6 / 23.879; // ~2.6 units tall
+export const S_CENTER = { x: 82.55, y: 11.94 };
+/** The S's height in object space (it spans the wordmark's 23.879-unit band) */
+export const S_HEIGHT = 2.6;
+const S_SCALE = S_HEIGHT / 23.879;
 const DEPTH = 0.42;
 const EXTRUDE: THREE.ExtrudeGeometryOptions = {
   depth: DEPTH,
@@ -59,9 +57,5 @@ export function createHeroObject(): HeroObject {
     return geo;
   });
 
-  const front = DEPTH / 2;
-  return {
-    parts,
-    outline: flat.map((points) => points.map((p) => new THREE.Vector3(p.x, p.y, front))),
-  };
+  return { parts };
 }

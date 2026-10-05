@@ -4,26 +4,82 @@ import { useSyncExternalStore } from 'react';
 
 // ---------------------------------------------------------------------------
 // RegionClock
-// "Right now, it's 15:07 in Dubai. <a line for that time of day>" — live local
-// time, cycling through a city in each region Gemstrat works across.
+// "Right now, it's 15:07 in Dubai. <a line about that city>" — live local
+// time, cycling through a city in each region Gemstrat works across. Each
+// city has five lines; every time a city comes round it shows the next one in
+// an order shuffled per visit, so they arrive at random and none repeats until
+// all five have shown.
 // ---------------------------------------------------------------------------
 
 const CITIES = [
-  { city: 'New York', tz: 'America/New_York' },
-  { city: 'Toronto', tz: 'America/Toronto' },
-  { city: 'Mumbai', tz: 'Asia/Kolkata' },
-  { city: 'Dubai', tz: 'Asia/Dubai' },
-  { city: 'Nairobi', tz: 'Africa/Nairobi' },
+  {
+    city: 'New York',
+    tz: 'America/New_York',
+    lines: [
+      'Somewhere on Wall Street, a forecast is being rewritten.',
+      'A boardroom just asked the right question.',
+      'Ambition is running ahead of the subway.',
+      'The market moved. The plan should too.',
+      'Big bets are getting a second look.',
+    ],
+  },
+  {
+    city: 'Toronto',
+    tz: 'America/Toronto',
+    lines: [
+      'Bay Street is weighing its next move.',
+      'Steady growth, carefully built.',
+      'Somewhere downtown, a merger is finding its logic.',
+      'Patience is a strategy here.',
+      'A good plan is being made winter-proof.',
+    ],
+  },
+  {
+    city: 'Mumbai',
+    tz: 'Asia/Kolkata',
+    lines: [
+      'A thousand deals are moving at once.',
+      'Dalal Street never waits.',
+      'Scale is meeting speed, again.',
+      'A founder’s idea is meeting its first real number.',
+      'Hustle works better with a plan.',
+    ],
+  },
+  {
+    city: 'Dubai',
+    tz: 'Asia/Dubai',
+    lines: [
+      'Skylines are drafted before breakfast.',
+      'Ambition, planned to the metre.',
+      'A bold idea is asking for a careful plan.',
+      'Somewhere, a vision is meeting its budget.',
+      'The desert keeps teaching patience.',
+    ],
+  },
+  {
+    city: 'Nairobi',
+    tz: 'Africa/Nairobi',
+    lines: [
+      'Mobile money is moving faster than the traffic.',
+      'Somewhere, a startup is outgrowing its plan.',
+      'Growth, built from the ground up.',
+      'Tomorrow’s markets are being shaped here.',
+      'The fastest market you’re not watching yet.',
+    ],
+  },
 ];
 const CITY_MS = 6000; // how long each city stays up
 
-// A line for the local hour there
-function lineFor(hour: number) {
-  if (hour >= 5 && hour < 11) return 'A good hour for asking the hard questions.';
-  if (hour >= 11 && hour < 17) return 'Somewhere, a plan is meeting reality.';
-  if (hour >= 17 && hour < 22) return 'The numbers are getting a second look.';
-  return 'The best strategies are still being refined.';
-}
+// Each city's lines in a random order, shuffled once per visit (client only;
+// the server renders the first line)
+const lineOrder = CITIES.map((c) => {
+  const order = c.lines.map((_, i) => i);
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return order;
+});
 
 // Seconds since the epoch, ticking once a second (null on the server)
 let second = 0;
@@ -40,11 +96,14 @@ const getServerSnapshot = () => null;
 export default function RegionClock({ className = '' }: { className?: string }) {
   const now = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   // Before hydration: the first city, without a time
-  const index = now === null ? 0 : Math.floor((now * 1000) / CITY_MS) % CITIES.length;
-  const { city, tz } = CITIES[index];
+  const cycle = now === null ? 0 : Math.floor((now * 1000) / CITY_MS);
+  const index = cycle % CITIES.length;
+  const { city, tz, lines } = CITIES[index];
+  // This city's how-many-th appearance picks its next line
+  const visit = Math.floor(cycle / CITIES.length);
+  const line = now === null ? lines[0] : lines[lineOrder[index][visit % lines.length]];
 
   let time = '--:--';
-  let line = lineFor(12);
   if (now !== null) {
     const parts = new Intl.DateTimeFormat('en-GB', {
       hour: '2-digit',
@@ -55,7 +114,6 @@ export default function RegionClock({ className = '' }: { className?: string }) 
     const hour = parts.find((p) => p.type === 'hour')?.value ?? '00';
     const minute = parts.find((p) => p.type === 'minute')?.value ?? '00';
     time = `${hour}:${minute}`;
-    line = lineFor(Number(hour) % 24);
   }
 
   return (
@@ -65,7 +123,7 @@ export default function RegionClock({ className = '' }: { className?: string }) 
       <span key={city} className="hero-swap-in inline-block text-white">
         {city}.
       </span>{' '}
-      <span key={`${city}-line`} className="hero-swap-in text-white/55">
+      <span key={`${city}-${line}`} className="hero-swap-in text-white/55">
         {line}
       </span>
     </p>
