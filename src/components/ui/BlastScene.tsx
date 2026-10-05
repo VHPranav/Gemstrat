@@ -35,17 +35,18 @@ const EXPLODE_DIST = 5.5; // how far panels fly at full blast
 
 // Idle "breath": while the visitor sits at the top of the hero, the plates pull
 // apart a little and snap back every few seconds — the scroll explosion in
-// miniature, hinting to scroll. It runs as a wave: each plate (piece of the
-// logo) starts a little after the one before, from top left to bottom right.
+// miniature, hinting to scroll. It runs as a wave, plate by plate: every face
+// panel of the logo pushes out along its own direction in turn, from top left
+// to bottom right, evenly spaced.
 // Any scroll stops it; back at the top and idle again, it resumes.
 const BREATH_DIST = 0.14; // world units the plates separate
 const BREATH_PERIOD = 4.2; // s between waves
 const BREATH_DELAY = 1.8; // s after the intro before the first one
 const BREATH_RESUME = 5; // s without scrolling, back at the top, before it resumes
-const BREATH_WAVE = 0.9; // s from the first plate starting to the last
-const BREATH_PULL = 0.55; // s for a plate to pull apart
-const BREATH_HOLD = 0.08; // s held apart
-const BREATH_SNAP = 0.4; // s to snap back (with a small overshoot)
+const BREATH_WAVE = 1.8; // s from the first plate starting to the last
+const BREATH_PULL = 0.4; // s for a plate to pull out
+const BREATH_HOLD = 0.06; // s held out
+const BREATH_SNAP = 0.35; // s to snap back (with a small overshoot)
 
 // A plate's separation (0-1) at time u into its own breath
 function breathAt(u: number) {
@@ -98,15 +99,7 @@ interface Panel {
   part: number;
   edge: boolean;
   flash: number;
-  wave: number; // 0-1: when this panel's plate breathes, within the wave
-  breathDir: THREE.Vector3; // its plate's breath: outward from the logo's centre
-}
-
-// The direction a plate breathes in: outward from the logo's centre, or toward
-// the viewer for a plate sitting on the centre (the diagonal)
-function plateBreathDir(plateCentre: THREE.Vector3) {
-  const d = new THREE.Vector3(plateCentre.x, plateCentre.y, 0);
-  return d.lengthSq() < 0.04 ? new THREE.Vector3(0, 0, 1) : d.normalize();
+  wave: number; // 0-1: when this panel breathes, within the wave
 }
 
 // Split a geometry into flat panels (triangles sharing a face direction)
@@ -182,8 +175,7 @@ function shatter(
       part,
       edge: false,
       flash: 0,
-      wave: center.x * 0.35 - center.y, // raw; normalised once all plates exist
-      breathDir: plateBreathDir(center),
+      wave: centroid.x * 0.35 - centroid.y + centroid.z * 0.15, // raw; ranked once all panels exist
     });
   });
 
@@ -204,7 +196,6 @@ function shatter(
       edge: true,
       flash: 0,
       wave: 0,
-      breathDir: new THREE.Vector3(),
     });
   });
   if (geo !== geometry) geo.dispose();
@@ -357,12 +348,11 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       g.dispose();
     });
     const solidMeshes = panels.filter((p) => !p.edge).map((p) => p.obj);
-    // Normalise each plate's place in the breath wave to 0 (first) – 1 (last)
+    // Each panel's turn in the breath wave: ranked top left → bottom right and
+    // spaced evenly from 0 (first) to 1 (last), so they go strictly one by one
     {
-      const solid = panels.filter((p) => !p.edge);
-      const lo = Math.min(...solid.map((p) => p.wave));
-      const hi = Math.max(...solid.map((p) => p.wave));
-      solid.forEach((p) => (p.wave = hi > lo ? (p.wave - lo) / (hi - lo) : 0));
+      const solid = panels.filter((p) => !p.edge).sort((m, n) => m.wave - n.wave);
+      solid.forEach((p, i) => (p.wave = solid.length > 1 ? i / (solid.length - 1) : 0));
     }
     scene.add(group);
     const placeGroup = () => {
@@ -636,9 +626,10 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       panels.forEach((panel) => {
         const n = Math.max(0, p - panel.delay);
         const fly = EXPLODE_DIST * n;
-        // This plate's breath, at its own moment in the wave
+        // This panel's breath, at its own moment in the wave, along its own
+        // outward direction
         const br = s.breathAmp > 0.001 ? BREATH_DIST * s.breathAmp * breathAt(s.breathU - panel.wave * BREATH_WAVE) : 0;
-        const bd = panel.breathDir;
+        const bd = panel.dir;
         const ph = panel.part * ((2 * Math.PI) / 3);
         const idle = 1 - p;
         panel.obj.position.set(
