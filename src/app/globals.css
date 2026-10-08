@@ -353,6 +353,10 @@ html {
 html.is-loading {
   overflow: hidden;
 }
+/* The navbar's full-screen index is open: no page scrolling behind it */
+html.index-open {
+  overflow: hidden;
+}
 /* The hero copy waits until src/lib/intro.ts adds .hero-reveal (loader gone,
    hero in view, and the scene's construction intro finished). A paused
    animation's delay is paused too, so every part

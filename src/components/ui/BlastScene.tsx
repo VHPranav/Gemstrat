@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
-import { createHeroObject, S_CENTER, S_HEIGHT, S_PIECES } from '@/lib/heroObject';
+import { createHeroObject, S_CENTER, S_HEIGHT, S_PIECE_SHADES, S_PIECES } from '@/lib/heroObject';
 import { WORDMARK_BAND, WORDMARK_PATHS, WORDMARK_VIEWBOX } from '@/lib/wordmark';
 import { onIntroStart } from '@/lib/intro';
 import { CONSTRUCT, createConstruction } from '@/components/ui/construction';
@@ -31,6 +31,15 @@ const BG = 0x090909;
 
 // Hold to blast (seconds held)
 const CHARGE_TIME = 0.5; // s held before the blast
+
+// Hover shake: while the cursor is over the logo the scene trembles — the
+// camera shakes, the hero copy moves with it and the plates jitter. Eases in
+// and out; off while holding (the blast takes over)
+const SHAKE_HOVER = 0.03; // world units of camera shake at full strength
+const SHAKE_TEXT_PX = 140; // the hero copy's shake, px per world unit
+const SHAKE_JITTER = 0.012; // world units each plate jitters
+const SHAKE_EASE_IN = 0.12; // per-frame easing toward full shake
+const SHAKE_EASE_OUT = 0.1; // per-frame easing back to still
 const EXPLODE_DIST = 5.5; // how far panels fly at full blast
 
 // Idle "breath": while the visitor sits at the top of the hero, the plates pull
@@ -82,12 +91,21 @@ const EDGE_OPACITY = [0.08, 0.05];
 const WIRE_COLOR = new THREE.Color(0xe8e8e8);
 const SOLID_OPACITY = 0.88;
 const OBJECT_SCALE = 0.72; // the logo's size in the frame
+// Two-tone glass, like the logo (white bars, grey diagonal): the pieces that
+// aren't white in the wordmark get a charcoal — still black, a shade lighter
+// than the near-black bars
+const ACCENT_COLOR = 0x4a4c50;
+const ACCENT_EMISSIVE = 0x232427;
+// A little less metallic than the bars, so its own shade shows under the
+// lights instead of only reflecting the dark scene
+const ACCENT_METALNESS = 0.75;
 const OBJECT_Y = -0.35; // nudged down, clear of the headline
 const MOUSE_TILT_X = 0.06; // rad the logo tips toward the cursor vertically
 // The intro draws the whole wordmark this wide (fraction of the viewport, and
 // at most WORDMARK_MAX_PX), centred, before its S turns into the logo
-const WORDMARK_WIDTH = 0.78;
-const WORDMARK_MAX_PX = 1100;
+const WORDMARK_WIDTH = 0.5;
+const WORDMARK_WIDTH_MOBILE = 0.8; // under 768px wide, so it stays legible
+const WORDMARK_MAX_PX = 720;
 
 interface Panel {
   obj: THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial> | THREE.LineSegments;
@@ -220,6 +238,8 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       return;
     }
     const heroEl = hero;
+    // The hero copy shakes with the camera (marked by the Hero)
+    const shakeEl = hero.querySelector<HTMLElement>('[data-shake]');
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Play the construction intro unless the copy is already showing (the
@@ -348,6 +368,14 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       g.dispose();
     });
     const solidMeshes = panels.filter((p) => !p.edge).map((p) => p.obj);
+    // The logo's grey piece (the diagonal) in its own shade of glass
+    panels.forEach((p) => {
+      if (p.edge || (S_PIECE_SHADES[p.part] ?? '#ffffff').toLowerCase() === '#ffffff') return;
+      const m = (p.obj as THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial>).material;
+      m.color.setHex(ACCENT_COLOR);
+      m.emissive.setHex(ACCENT_EMISSIVE);
+      m.metalness = ACCENT_METALNESS;
+    });
     // Each panel's turn in the breath wave: ranked top left → bottom right and
     // spaced evenly from 0 (first) to 1 (last), so they go strictly one by one
     {
@@ -391,6 +419,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       envReady: false,
       frame: 0,
       cursorShown: false,
+      shake: 0, // hover shake strength, 0-1 (eased)
       doneAt: 0, // s.time when the intro finished
       scrolled: false, // the visitor has scrolled at least once
       lastScrollY: window.scrollY,
@@ -426,7 +455,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     function startConstruction() {
       if (s.phase !== 'waiting') return;
       // Lay the wordmark out centred on screen (SVG units → px)
-      const k = Math.min(W * WORDMARK_WIDTH, WORDMARK_MAX_PX) / WORDMARK_VIEWBOX.width;
+      const k = Math.min(W * (W < 768 ? WORDMARK_WIDTH_MOBILE : WORDMARK_WIDTH), WORDMARK_MAX_PX) / WORDMARK_VIEWBOX.width;
       const left = W / 2 - (WORDMARK_VIEWBOX.width / 2) * k;
       const top = H / 2 - ((WORDMARK_BAND.top + WORDMARK_BAND.bottom) / 2) * k;
       const toPx = (x: number, y: number) => ({ x: left + x * k, y: top + y * k });
@@ -448,7 +477,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         };
       });
       const mark = S_PIECES.map((piece) => piece.map(([x, y]) => toPx(x, y)));
-      construction = createConstruction({ letters, mark }, W, H);
+      construction = createConstruction({ letters, mark, markShades: S_PIECE_SHADES }, W, H);
 
       // The 3D logo is a mirrored S: seen from behind (turned half a turn) it
       // is the wordmark's S, so it starts there — same spot, same size — and
@@ -478,7 +507,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
 
     let introTimer = 0;
     const stopIntro = onIntroStart(() => {
-      introTimer = window.setTimeout(startConstruction, 150);
+      introTimer = window.setTimeout(startConstruction, 50);
     });
 
     // --- Input -------------------------------------------------------------
@@ -550,6 +579,10 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       }
 
       if (s.phase === 'done') {
+        // In the hero the logo sits a little low, clear of the headline;
+        // behind the next section there is no headline, so it glides up to
+        // the exact centre of the screen as it reassembles there
+        group.position.y = (view.y + OBJECT_Y) * (1 - together);
         // Idle spin, leaning toward the cursor
         s.rotY += (reduceMotion ? 0.0015 : 0.0042) * f;
         group.rotation.x += (s.rotX + MOUSE_TILT_X * s.mouseY - group.rotation.x) * ease(0.06);
@@ -566,7 +599,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         // A slight swell mid-turn, settling at both ends
         group.scale.setScalar(lerp(turnFrom.scale, view.scale * OBJECT_SCALE) * (1 + 0.05 * Math.sin(Math.PI * tilt)));
         group.visible = ct >= CONSTRUCT.to3dStart;
-        setWire(ramp(ct, CONSTRUCT.to3dStart, 0.2) * (1 - ramp(ct, CONSTRUCT.solidStart + 0.2, CONSTRUCT.solidDur)));
+        setWire(ramp(ct, CONSTRUCT.to3dStart, 0.15) * (1 - ramp(ct, CONSTRUCT.solidStart + 0.1, CONSTRUCT.solidDur * 0.8)));
         setSolid(easeInOutCubic(ramp(ct, CONSTRUCT.solidStart, CONSTRUCT.solidDur)));
       }
 
@@ -587,6 +620,30 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       if (showCursor !== s.cursorShown) {
         s.cursorShown = showCursor;
         heroEl.style.cursor = showCursor ? 'pointer' : '';
+      }
+
+      // Hover shake: eases in over the logo, out when the cursor leaves
+      const shakeTarget = s.hovered !== null && !s.holding ? 1 : 0;
+      s.shake += (shakeTarget - s.shake) * ease(shakeTarget ? SHAKE_EASE_IN : SHAKE_EASE_OUT);
+      if (s.shake > 0.002) {
+        const amp = SHAKE_HOVER * s.shake;
+        const sx = 0.6 * Math.sin(t * 67) + 0.4 * Math.sin(t * 113);
+        const sy = 0.6 * Math.cos(t * 59) + 0.4 * Math.sin(t * 97);
+        const sr = Math.sin(t * 41);
+        camera.position.x = amp * sx;
+        camera.position.y = amp * sy;
+        camera.rotation.z = amp * 0.25 * sr;
+        // The copy moves against the camera (as the scene appears to)
+        if (shakeEl) {
+          const px = amp * SHAKE_TEXT_PX;
+          shakeEl.style.transform = `translate3d(${(-sx * px).toFixed(2)}px, ${(sy * px).toFixed(2)}px, 0) rotate(${(-sr * amp * 6).toFixed(3)}deg)`;
+        }
+      } else if (camera.position.x !== 0 || camera.position.y !== 0) {
+        s.shake = 0;
+        camera.position.x = 0;
+        camera.position.y = 0;
+        camera.rotation.z = 0;
+        if (shakeEl) shakeEl.style.transform = '';
       }
 
       // Hold: a short charge, then the blast
@@ -631,10 +688,14 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         const br = s.breathAmp > 0.001 ? BREATH_DIST * s.breathAmp * breathAt(s.breathU - panel.wave * BREATH_WAVE) : 0;
         const bd = panel.dir;
         const ph = panel.part * ((2 * Math.PI) / 3);
+        // Hover jitter, each plate on its own phase
+        const jit = SHAKE_JITTER * s.shake;
+        const jx = jit ? Math.sin(t * 61 + 20 * panel.delay) * jit : 0;
+        const jy = jit ? Math.cos(t * 79 + 2 * panel.part) * jit : 0;
         const idle = 1 - p;
         panel.obj.position.set(
-          panel.home.x + panel.dir.x * fly + bd.x * br + 0.012 * Math.sin(0.4 * t + ph) * idle + 0.008 * s.mouseY * Math.cos(ph),
-          panel.home.y + panel.dir.y * fly + bd.y * br + 0.008 * Math.cos(0.35 * t + ph) * idle + 0.008 * s.mouseX * Math.sin(ph),
+          panel.home.x + panel.dir.x * fly + bd.x * br + jx + 0.012 * Math.sin(0.4 * t + ph) * idle + 0.008 * s.mouseY * Math.cos(ph),
+          panel.home.y + panel.dir.y * fly + bd.y * br + jy + 0.008 * Math.cos(0.35 * t + ph) * idle + 0.008 * s.mouseX * Math.sin(ph),
           panel.home.z + panel.dir.z * fly + bd.z * br + 0.006 * Math.sin(0.3 * t + 1.5 * ph) * idle
         );
         const spin = panel.spin * n * Math.PI;
@@ -747,6 +808,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
       hero.removeEventListener('contextmenu', onContextMenu);
       hero.style.cursor = '';
+      if (shakeEl) shakeEl.style.transform = '';
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.Points) {

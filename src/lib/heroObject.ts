@@ -31,6 +31,9 @@ export const S_PIECES: [number, number][][] = [
   // right stub, rising from the bottom bar
   [[90.054, 13.736], [94.151, 13.736], [94.151, 19.878], [90.054, 19.878]],
 ];
+/** Each piece's colour in the wordmark (gems.svg): white, but the diagonal
+ *  is grey (#A7A9AC) */
+export const S_PIECE_SHADES = ['#ffffff', '#ffffff', '#ffffff', '#a7a9ac', '#ffffff'];
 export const S_CENTER = { x: 82.55, y: 11.94 };
 /** The S's height in object space (it spans the wordmark's 23.879-unit band) */
 export const S_HEIGHT = 2.6;

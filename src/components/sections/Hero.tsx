@@ -156,7 +156,7 @@ export default function Hero({ children }: { children?: React.ReactNode }) {
 
       <section id="hero" className="relative z-10 w-full h-[170vh] h-[170svh] text-white select-none">
         <div className="sticky top-0 w-full h-screen h-[100svh] min-h-[560px] overflow-hidden">
-          <div ref={copyRef} className="absolute inset-0 z-10 pointer-events-none">
+          <div ref={copyRef} data-shake className="absolute inset-0 z-10 pointer-events-none">
             {/* Top left: headline + calls to action */}
             <div className="absolute left-5 right-5 sm:left-6 lg:left-8 top-24 sm:top-28">
               <h1 className="m-0 font-sans font-normal text-white tracking-[-0.045em] leading-[0.98] text-[clamp(2.6rem,6.2vw,6.4rem)]">
