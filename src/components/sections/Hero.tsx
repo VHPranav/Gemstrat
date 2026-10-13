@@ -156,7 +156,7 @@ export default function Hero({ children }: { children?: React.ReactNode }) {
 
       <section id="hero" className="relative z-10 w-full h-[170vh] h-[170svh] text-white select-none">
         <div className="sticky top-0 w-full h-screen h-[100svh] min-h-[560px] overflow-hidden">
-          <div ref={copyRef} data-shake className="absolute inset-0 z-10 pointer-events-none">
+          <div ref={copyRef} className="absolute inset-0 z-10 pointer-events-none">
             {/* Top left: headline + calls to action */}
             <div className="absolute left-5 right-5 sm:left-6 lg:left-8 top-24 sm:top-28">
               <h1 className="m-0 font-sans font-normal text-white tracking-[-0.045em] leading-[0.98] text-[clamp(2.6rem,6.2vw,6.4rem)]">
@@ -168,7 +168,7 @@ export default function Hero({ children }: { children?: React.ReactNode }) {
                         data-word
                         className="inline-block overflow-hidden align-top mr-[0.22em] pb-[0.14em] -mb-[0.14em]"
                       >
-                        <span className="hero-word-inner" style={{ animationDelay: `${0.15 + wordIndex++ * 0.1}s` }}>
+                        <span className="hero-word-inner" style={{ animationDelay: `${0.1 + wordIndex++ * 0.07}s` }}>
                           {word}
                         </span>
                       </span>
@@ -180,7 +180,7 @@ export default function Hero({ children }: { children?: React.ReactNode }) {
                             key={i}
                             aria-hidden="true"
                             className="hero-letter-in inline-block"
-                            style={{ animationDelay: `${0.75 + i * 0.09}s` }}
+                            style={{ animationDelay: `${0.5 + i * 0.07}s` }}
                           >
                             {ch}
                           </span>
@@ -195,19 +195,20 @@ export default function Hero({ children }: { children?: React.ReactNode }) {
                 data-fade
                 className="pointer-events-auto mt-8 sm:mt-10 flex flex-col sm:flex-row gap-4 sm:gap-4 max-w-[15rem] sm:max-w-none"
               >
-                <CtaLink href="#contact" delay={1.15}>
+                <CtaLink href="#contact" delay={0.75}>
                   Start a conversation
                 </CtaLink>
-                <CtaLink href="#about-intro" delay={1.25}>
+                <CtaLink href="#about-intro" delay={0.82}>
                   Our approach
                 </CtaLink>
               </div>
             </div>
 
-            {/* Bottom right: live local time across the regions */}
-            <div data-fade className="hidden md:block absolute right-6 lg:right-8 bottom-8 sm:bottom-10 w-[20rem] lg:w-[23rem]">
-              <div className="hero-fade-up" style={{ animationDelay: '1.45s' }}>
-                <RegionClock className="text-[17px] lg:text-[19px] leading-[1.3] tracking-[-0.01em] text-white/80" />
+            {/* Bottom right: live local time across the regions (on phones it
+                fills the bottom row beside the scroll cue) */}
+            <div data-fade className="absolute left-[3.75rem] right-5 md:left-auto md:right-6 lg:right-8 bottom-8 sm:bottom-10 md:w-[20rem] lg:w-[23rem]">
+              <div className="hero-fade-up" style={{ animationDelay: '0.95s' }}>
+                <RegionClock className="text-[14px] md:text-[17px] lg:text-[19px] leading-[1.3] tracking-[-0.01em] text-white/80" />
               </div>
             </div>
 
@@ -218,7 +219,7 @@ export default function Hero({ children }: { children?: React.ReactNode }) {
                 onClick={() => window.scrollTo({ top: window.innerHeight * 1.7, behavior: 'smooth' })}
                 aria-label="Scroll to next section"
                 className="hero-fade-up pointer-events-auto w-7 h-7 flex items-center justify-center rounded-full border border-white/40 text-white/80 hover:bg-white hover:text-black transition-colors"
-                style={{ animationDelay: '1.85s' }}
+                style={{ animationDelay: '1.15s' }}
               >
                 <svg
                   width="10"

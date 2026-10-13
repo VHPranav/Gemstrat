@@ -23,9 +23,9 @@ export interface ConstructionInput {
 
 // Guides: one starts every GUIDE_STAGGER seconds, in a shuffled order
 const GUIDE_FIRST = 0.05;
-const GUIDE_STAGGER = 0.025;
-const GUIDE_DUR = 0.55; // + up to GUIDE_DUR_VARY, to cross the screen
-const GUIDE_DUR_VARY = 0.15;
+const GUIDE_STAGGER = 0.015;
+const GUIDE_DUR = 0.35; // + up to GUIDE_DUR_VARY, to cross the screen
+const GUIDE_DUR_VARY = 0.1;
 const MAX_GUIDES = 30; // the wordmark's longest straight edges
 const MIN_EDGE = 16; // px: shorter straight segments get no guide
 const TAIL = 140; // px of the bright comet tail behind each guide's head
@@ -36,21 +36,21 @@ const FILL_STAGGER = 0.02; // s between letters starting to fill white (in a sca
 
 // Timeline, in seconds from the start of the construction (under 3s in all)
 export const CONSTRUCT = {
-  outlineStart: 0.6, // the letters trace themselves, left to right
-  outlineDur: 0.5,
-  fillStart: 1.25, // then fill solid white, letter by letter in a scattered order, like the real logo
-  fillDur: 0.3,
-  othersFadeStart: 2.0, // everything but the mark fades away
-  othersFadeDur: 0.3,
-  to3dStart: 2.05, // the mark turns 3D: swings round into the logo's place
-  to3dDur: 0.8,
-  solidStart: 2.35, // material and light fill the wireframe
-  solidDur: 0.5,
-  end: 2.95,
+  outlineStart: 0.4, // the letters trace themselves, left to right
+  outlineDur: 0.4,
+  fillStart: 1.0, // then fill solid white, letter by letter in a scattered order, like the real logo
+  fillDur: 0.25,
+  othersFadeStart: 2.2, // the finished logo holds ~0.8s, then everything but the mark fades away
+  othersFadeDur: 0.25,
+  to3dStart: 2.25, // the mark turns 3D: swings round into the logo's place
+  to3dDur: 0.6,
+  solidStart: 2.4, // material and light fill the wireframe
+  solidDur: 0.3,
+  end: 2.85,
 };
 // Shorter in-between fades, scaled to the timeline
-const MARK_HANDOFF = 0.35; // s: the mark's flat outline hands over to 3D
-const GUIDE_SETTLE = 0.4; // s: a guide dims to a hairline once across
+const MARK_HANDOFF = 0.25; // s: the mark's flat outline hands over to 3D
+const GUIDE_SETTLE = 0.3; // s: a guide dims to a hairline once across
 const FOCUS_DUR = 0.4; // s: guides step back as the letters trace
 const FILL_DELAY = 0.3; // s after a letter starts tracing, a faint fill fades in
 const FILL_DUR = 0.3;

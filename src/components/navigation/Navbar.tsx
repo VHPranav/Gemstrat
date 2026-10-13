@@ -139,7 +139,7 @@ export default function Navbar() {
             setOpen(false);
             scrollTo('#hero');
           }}
-          style={{ animationDelay: '1.25s' }}
+          style={{ animationDelay: '0.8s' }}
           className="nav-item-in pointer-events-auto flex items-center h-10 transition-opacity duration-300 hover:opacity-75"
           aria-label="Gemstrat home"
         >
@@ -161,7 +161,7 @@ export default function Navbar() {
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-controls="site-index"
-            style={{ animationDelay: '1.32s' }}
+            style={{ animationDelay: '0.86s' }}
             className={`nav-item-in pointer-events-auto group flex items-center justify-between ${NAV_BUTTON_WIDTH} h-10 pl-3.5 pr-3 border bg-transparent font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
               light
                 ? 'border-black text-black hover:bg-black hover:text-white'
@@ -200,7 +200,7 @@ export default function Navbar() {
               setOpen(false);
               scrollTo('#contact');
             }}
-            style={{ animationDelay: '1.38s' }}
+            style={{ animationDelay: '0.92s' }}
             className={`nav-item-in pointer-events-auto group flex items-center justify-between ${NAV_BUTTON_WIDTH} h-10 pl-3.5 pr-3 font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
               light ? 'bg-black text-white hover:bg-zinc-800' : 'bg-white text-black hover:bg-zinc-200'
             }`}

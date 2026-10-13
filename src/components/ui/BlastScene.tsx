@@ -32,12 +32,11 @@ const BG = 0x090909;
 // Hold to blast (seconds held)
 const CHARGE_TIME = 0.5; // s held before the blast
 
-// Hover shake: while the cursor is over the logo the scene trembles — the
-// camera shakes, the hero copy moves with it and the plates jitter. Eases in
-// and out; off while holding (the blast takes over)
-const SHAKE_HOVER = 0.03; // world units of camera shake at full strength
-const SHAKE_TEXT_PX = 140; // the hero copy's shake, px per world unit
-const SHAKE_JITTER = 0.012; // world units each plate jitters
+// Hover shake: while the cursor is over the logo, the logo alone trembles —
+// it shakes in place and its plates jitter; the rest of the page stays still.
+// Eases in and out; off while holding (the blast takes over)
+const SHAKE_HOVER = 0.015; // world units the logo shakes at full strength
+const SHAKE_JITTER = 0.006; // world units each plate jitters
 const SHAKE_EASE_IN = 0.12; // per-frame easing toward full shake
 const SHAKE_EASE_OUT = 0.1; // per-frame easing back to still
 const EXPLODE_DIST = 5.5; // how far panels fly at full blast
@@ -76,10 +75,13 @@ const REASSEMBLE_END = 1.7;
 
 // Camera framing per viewport width
 function framing(w: number) {
-  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: 0 };
-  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.02 };
-  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.035 };
-  return { fov: 36, z: 9.35, scale: 0.74, y: -0.45 };
+  // y: the logo's height in the hero, just under the headline (behind the
+  // next section it glides to the exact centre)
+  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: -0.35 };
+  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.35 };
+  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.35 };
+  // Phones: bigger, and lower, filling the space under the hero's buttons
+  return { fov: 36, z: 9.35, scale: 1.1, y: -0.92 };
 }
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -99,13 +101,12 @@ const ACCENT_EMISSIVE = 0x232427;
 // A little less metallic than the bars, so its own shade shows under the
 // lights instead of only reflecting the dark scene
 const ACCENT_METALNESS = 0.75;
-const OBJECT_Y = -0.35; // nudged down, clear of the headline
 const MOUSE_TILT_X = 0.06; // rad the logo tips toward the cursor vertically
 // The intro draws the whole wordmark this wide (fraction of the viewport, and
 // at most WORDMARK_MAX_PX), centred, before its S turns into the logo
-const WORDMARK_WIDTH = 0.5;
-const WORDMARK_WIDTH_MOBILE = 0.8; // under 768px wide, so it stays legible
-const WORDMARK_MAX_PX = 720;
+const WORDMARK_WIDTH = 0.4;
+const WORDMARK_WIDTH_MOBILE = 0.66; // under 768px wide, so it stays legible
+const WORDMARK_MAX_PX = 580;
 
 interface Panel {
   obj: THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial> | THREE.LineSegments;
@@ -238,8 +239,6 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       return;
     }
     const heroEl = hero;
-    // The hero copy shakes with the camera (marked by the Hero)
-    const shakeEl = hero.querySelector<HTMLElement>('[data-shake]');
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     // Play the construction intro unless the copy is already showing (the
@@ -385,7 +384,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     scene.add(group);
     const placeGroup = () => {
       group.scale.setScalar(view.scale * OBJECT_SCALE);
-      group.position.set(0, view.y + OBJECT_Y, 0);
+      group.position.set(0, view.y, 0); // the centre of the screen (lower on phones)
     };
     placeGroup();
 
@@ -408,6 +407,8 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       ct: 0, // construction time
       rotX: 0, // upright: no forward lean
       rotY: 0.4,
+      leanX: 0, // the logo's eased lean toward the cursor, added to the spin
+      leanY: 0,
       mouseX: 0,
       mouseY: 0,
       screenX: -9999,
@@ -447,6 +448,22 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     if (s.phase !== 'done') {
       group.visible = false;
       setSolid(0);
+    }
+
+    // Warm-up: draw the logo once, invisibly, before the intro, so its glass
+    // shaders compile (and the transmission buffer is made) now — not on the
+    // frame the 3D logo first appears, which would stall the turn
+    {
+      const wasVisible = group.visible;
+      const edgeOpacity = edgeMats.map((m) => m.opacity);
+      group.visible = true;
+      solidPanels.forEach((p) => (p.obj.visible = true));
+      edgeMats.forEach((m) => (m.opacity = 0));
+      renderer.compile(scene, camera);
+      renderer.render(scene, camera);
+      group.visible = wasVisible;
+      edgeMats.forEach((m, i) => (m.opacity = edgeOpacity[i]));
+      if (s.phase !== 'done') setSolid(0);
     }
 
     // Where the 3D logo starts its turn: exactly over the wordmark's S
@@ -572,6 +589,14 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       const together = easeInOutCubic(clamp01((norm - REASSEMBLE_START) / (REASSEMBLE_END - REASSEMBLE_START)));
       s.scrollP += (apart * (1 - together) - s.scrollP) * ease(0.06);
 
+      // Spin and cursor lean (the spin starts with the 3D turn, so the turn
+      // can hand over to it seamlessly)
+      if (s.phase === 'done' || (s.phase === 'building' && s.ct >= CONSTRUCT.to3dStart)) {
+        s.rotY += (reduceMotion ? 0.0015 : 0.0042) * f;
+      }
+      s.leanX += (MOUSE_TILT_X * s.mouseY - s.leanX) * ease(0.06);
+      s.leanY += (0.22 * s.mouseX - s.leanY) * ease(0.06);
+
       if (s.phase === 'building') {
         s.ct += dt;
         // Scrolling away (or the end of the timeline) skips to the result
@@ -579,14 +604,12 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       }
 
       if (s.phase === 'done') {
-        // In the hero the logo sits a little low, clear of the headline;
-        // behind the next section there is no headline, so it glides up to
-        // the exact centre of the screen as it reassembles there
-        group.position.y = (view.y + OBJECT_Y) * (1 - together);
+        // Phones hold the logo low in the hero; behind the next section it
+        // glides up to the exact centre as it reassembles there
+        group.position.y = view.y * (1 - together);
         // Idle spin, leaning toward the cursor
-        s.rotY += (reduceMotion ? 0.0015 : 0.0042) * f;
-        group.rotation.x += (s.rotX + MOUSE_TILT_X * s.mouseY - group.rotation.x) * ease(0.06);
-        group.rotation.y += (s.rotY + 0.22 * s.mouseX - group.rotation.y) * ease(0.06);
+        group.rotation.x = s.rotX + s.leanX;
+        group.rotation.y = s.rotY + s.leanY;
       } else if (s.phase === 'building') {
         // Flat → 3D: from the wordmark's S (seen from behind, half a turn
         // round) it swings into the idle pose while moving and growing into
@@ -594,8 +617,11 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         const ct = s.ct;
         const tilt = easeInOutCubic(ramp(ct, CONSTRUCT.to3dStart, CONSTRUCT.to3dDur));
         const lerp = (a: number, b: number) => a + (b - a) * tilt;
-        group.rotation.set(lerp(0, s.rotX + MOUSE_TILT_X * s.mouseY), lerp(Math.PI, s.rotY + 0.22 * s.mouseX), 0);
-        group.position.set(lerp(turnFrom.x, 0), lerp(turnFrom.y, view.y + OBJECT_Y), 0);
+        // Turns the same way as the idle spin (from -π, which looks the same
+        // as π) towards a pose that is already spinning, so it lands in the
+        // idle spin at full speed instead of stopping and starting again
+        group.rotation.set(lerp(0, s.rotX + s.leanX), lerp(-Math.PI, s.rotY + s.leanY), 0);
+        group.position.set(lerp(turnFrom.x, 0), lerp(turnFrom.y, view.y), 0);
         // A slight swell mid-turn, settling at both ends
         group.scale.setScalar(lerp(turnFrom.scale, view.scale * OBJECT_SCALE) * (1 + 0.05 * Math.sin(Math.PI * tilt)));
         group.visible = ct >= CONSTRUCT.to3dStart;
@@ -626,24 +652,15 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       const shakeTarget = s.hovered !== null && !s.holding ? 1 : 0;
       s.shake += (shakeTarget - s.shake) * ease(shakeTarget ? SHAKE_EASE_IN : SHAKE_EASE_OUT);
       if (s.shake > 0.002) {
+        // Offsets on top of the logo's own place and pose (set above)
         const amp = SHAKE_HOVER * s.shake;
-        const sx = 0.6 * Math.sin(t * 67) + 0.4 * Math.sin(t * 113);
-        const sy = 0.6 * Math.cos(t * 59) + 0.4 * Math.sin(t * 97);
-        const sr = Math.sin(t * 41);
-        camera.position.x = amp * sx;
-        camera.position.y = amp * sy;
-        camera.rotation.z = amp * 0.25 * sr;
-        // The copy moves against the camera (as the scene appears to)
-        if (shakeEl) {
-          const px = amp * SHAKE_TEXT_PX;
-          shakeEl.style.transform = `translate3d(${(-sx * px).toFixed(2)}px, ${(sy * px).toFixed(2)}px, 0) rotate(${(-sr * amp * 6).toFixed(3)}deg)`;
-        }
-      } else if (camera.position.x !== 0 || camera.position.y !== 0) {
+        group.position.x = amp * (0.6 * Math.sin(t * 67) + 0.4 * Math.sin(t * 113));
+        group.position.y += amp * (0.6 * Math.cos(t * 59) + 0.4 * Math.sin(t * 97));
+        group.rotation.z = amp * 0.25 * Math.sin(t * 41);
+      } else if (s.shake !== 0) {
         s.shake = 0;
-        camera.position.x = 0;
-        camera.position.y = 0;
-        camera.rotation.z = 0;
-        if (shakeEl) shakeEl.style.transform = '';
+        group.position.x = 0;
+        group.rotation.z = 0;
       }
 
       // Hold: a short charge, then the blast
@@ -808,7 +825,6 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       document.documentElement.removeEventListener('pointerleave', onPointerLeave);
       hero.removeEventListener('contextmenu', onContextMenu);
       hero.style.cursor = '';
-      if (shakeEl) shakeEl.style.transform = '';
       renderer.domElement.removeEventListener('webglcontextlost', onContextLost);
       scene.traverse((obj) => {
         if (obj instanceof THREE.Mesh || obj instanceof THREE.Line || obj instanceof THREE.Points) {
