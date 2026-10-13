@@ -95,8 +95,9 @@ function layout(W: number, H: number) {
   return {
     box,
     rows: [0, 1, 2, 3, 4].map((i) => ({ left: left + i * stagger, y: top + i * rowH })),
-    // The wireframe Z: centred (on phones, centred below the links)
-    z: mobile ? { x: W / 2, y: H - 30 - zHeight / 2 - 40, h: zHeight } : { x: W / 2, y: H / 2, h: zHeight },
+    // The wireframe Z: on the right, centred top to bottom (on phones, below
+    // the links)
+    z: mobile ? { x: W * 0.74, y: H - 30 - zHeight / 2 - 40, h: zHeight } : { x: W * 0.72, y: H / 2, h: zHeight },
   };
 }
 
