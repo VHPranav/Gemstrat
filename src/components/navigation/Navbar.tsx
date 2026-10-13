@@ -25,7 +25,6 @@ const MENU_LINKS = [
   { label: 'Leadership', href: '#leadership' },
   { label: 'Voices', href: '#reviews' },
 ];
-const REGIONS = 'USA · Canada · India · Middle East · Africa';
 const LETS_TALK_WIDTH = 'w-[6.75rem] sm:w-[9rem]';
 
 type MenuState = 'closed' | 'open' | 'closing';
@@ -112,7 +111,6 @@ export default function Navbar() {
           open={menu === 'open'}
           target={target}
           trigger={trigger}
-          footer={REGIONS}
           onSelect={(href) => close(href)}
           onRequestClose={() => close(null)}
           onClosed={() => {
@@ -160,7 +158,7 @@ export default function Navbar() {
             aria-controls="site-menu"
             aria-label={menu === 'open' ? 'Close menu' : 'Open menu'}
             style={{ animationDelay: '0.86s' }}
-            className={`nav-item-in pointer-events-auto relative flex items-center justify-center w-10 h-10 border bg-transparent transition-colors duration-300 ${
+            className={`nav-item-in pointer-events-auto relative flex items-center justify-center w-10 h-10 cursor-pointer border bg-transparent transition-colors duration-300 ${
               light ? 'border-black text-black hover:bg-black/5' : 'border-white text-white hover:bg-white/10'
             }`}
           >

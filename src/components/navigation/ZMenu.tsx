@@ -14,7 +14,7 @@ import { ZPieceGlyph } from '@/components/navigation/ZIcon';
 // button, trembles, and blasts apart: each of its five pieces lands beside
 // one of the five links, in a cascade that follows the Z's diagonal, while a
 // faint wireframe of the Z stays where it was. Hovering a link flips its
-// piece and draws a guide line back to where it sits in the Z. Choosing a
+// piece and lights up where it sits in the wireframe Z. Choosing a
 // link (or closing) sends the pieces home, the Z shrinks back into the
 // button, and the page moves to the section.
 //
@@ -37,7 +37,6 @@ interface ZMenuProps {
   target: string | null;
   /** The navbar button the Z comes out of and goes back into */
   trigger: HTMLElement | null;
-  footer?: string;
   onSelect: (href: string) => void;
   onRequestClose: () => void;
   /** The closing has finished */
@@ -57,7 +56,6 @@ const FLY_STAGGER = 0.06;
 const LABEL_DELAY = 0.4; // after its piece sets off, a link fades in
 const LABEL_DUR = 0.5;
 const GHOST_AT = 0.5; // the wireframe Z left behind
-const FOOTER_AT = 1;
 // Closing timeline (s)
 const RETURN_AT = 0.08;
 const RETURN = 0.5;
@@ -101,11 +99,10 @@ function layout(W: number, H: number) {
   };
 }
 
-export default function ZMenu({ links, open, target, trigger, footer, onSelect, onRequestClose, onClosed }: ZMenuProps) {
+export default function ZMenu({ links, open, target, trigger, onSelect, onRequestClose, onClosed }: ZMenuProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLParagraphElement>(null);
   const rowRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const glyphRefs = useRef<(HTMLSpanElement | null)[]>([]);
   // Hovered row (-1: none), and the turn each piece flips toward
@@ -136,7 +133,7 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
     let L = layout(W, H);
 
     // --- Channels: every animated value, 0-1 ---------------------------------
-    const v = { backdrop: 0, arrive: 0, ghost: 0, footer: 0, u: [0, 0, 0, 0, 0], label: [0, 0, 0, 0, 0] };
+    const v = { backdrop: 0, arrive: 0, ghost: 0, u: [0, 0, 0, 0, 0], label: [0, 0, 0, 0, 0] };
     let from = structuredClone(v);
     let phase: 'closed' | 'open' | 'closing' = 'closed';
     let phaseStart = 0;
@@ -208,12 +205,6 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
       });
       scene.add(ghost);
 
-      // A construction guide from the hovered piece back to its place in the Z
-      const guideGeo = new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
-      const guideMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
-      const guide = new THREE.Line(guideGeo, guideMat);
-      scene.add(guide);
-
       // Tumble axes, one per piece
       const axes = pieces.map(() => new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize());
 
@@ -233,7 +224,6 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
       const qB = new THREE.Quaternion();
       const qSpin = new THREE.Quaternion();
       const euler = new THREE.Euler();
-      const tmp = new THREE.Vector3();
 
       render = (t) => {
         moveZGlints(glints, t);
@@ -260,7 +250,6 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
         ghost.scale.setScalar((L.z.h * wpp) / S_HEIGHT);
         ghost.visible = v.ghost > 0.001;
 
-        let guideOn = false;
         pieces.forEach((p, part) => {
           const row = ROW_PIECE.indexOf(part);
           const u = v.u[row];
@@ -291,19 +280,7 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
           p.mesh.visible = present > 0.002;
 
           ghostMats[part].opacity = v.ghost * (GHOST_OPACITY + 0.55 * hoverAmt[row]);
-
-          // The guide back to its place in the Z
-          if (hoverAmt[row] > 0.01 && u > 0.5) {
-            guideOn = true;
-            const g = guideGeo.attributes.position as THREE.BufferAttribute;
-            g.setXYZ(0, p.mesh.position.x, p.mesh.position.y, 0);
-            tmp.copy(p.home).applyQuaternion(ghost.quaternion).multiplyScalar(ghost.scale.x).add(ghost.position);
-            g.setXYZ(1, tmp.x, tmp.y, 0);
-            g.needsUpdate = true;
-            guideMat.opacity = 0.3 * hoverAmt[row] * v.label[row];
-          }
         });
-        guide.visible = guideOn;
 
         r.render(scene, camera);
       };
@@ -362,14 +339,12 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
         v.backdrop = channel(from.backdrop, 1, t, 0, 0.35, easeOutCubic);
         v.arrive = channel(from.arrive, 1, t, 0, ARRIVE, easeOutCubic);
         v.ghost = channel(from.ghost, 1, t, GHOST_AT, 0.35);
-        v.footer = channel(from.footer, 1, t, FOOTER_AT, 0.5);
         for (let i = 0; i < 5; i++) {
           const d = BLAST_AT + i * FLY_STAGGER;
           v.u[i] = channel(from.u[i], 1, t, d, FLY, easeOutQuart);
           v.label[i] = channel(from.label[i], 1, t, d + LABEL_DELAY, LABEL_DUR, easeOutCubic);
         }
       } else if (phase === 'closing') {
-        v.footer = channel(from.footer, 0, t, 0, 0.2);
         v.ghost = channel(from.ghost, 0, t, 0.35, 0.25);
         v.arrive = channel(from.arrive, 0, t, SHRINK_AT, SHRINK, easeInCubic);
         v.backdrop = channel(from.backdrop, 0, t, SHRINK_AT, SHRINK);
@@ -403,7 +378,6 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
 
       // The HTML
       backdropEl.style.opacity = String(v.backdrop);
-      if (footerRef.current) footerRef.current.style.opacity = String(v.footer);
       rowRefs.current.forEach((row, i) => {
         if (!row) return;
         const k = v.label[i];
@@ -542,15 +516,6 @@ export default function ZMenu({ links, open, target, trigger, footer, onSelect, 
         ))}
       </nav>
 
-      {footer && (
-        <p
-          ref={footerRef}
-          className="absolute left-5 sm:left-6 lg:left-8 bottom-6 sm:bottom-8 m-0 text-[11px] sm:text-xs uppercase tracking-[0.14em] text-white/45"
-          style={{ opacity: 0 }}
-        >
-          {footer}
-        </p>
-      )}
     </div>
   );
 }
