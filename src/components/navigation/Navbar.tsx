@@ -1,18 +1,24 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { onScrollFrame } from '@/lib/scrollFrame';
+import { ZIcon } from '@/components/navigation/ZIcon';
+
+// The Z menu (three.js) loads on its own, the first time the button is
+// hovered, focused or pressed
+const ZMenu = dynamic(() => import('@/components/navigation/ZMenu'), { ssr: false });
 
 // ---------------------------------------------------------------------------
 // Navbar
-// Minimal fixed header: Gemstrat logo on the left; on the right a "Chapters"
-// button (white-bordered, transparent) that opens a full-screen list of the
-// page's sections, and the "Let's talk" button. Square-cornered to match the
-// hero. Switches to dark-on-light while it sits over the white sections.
+// Minimal fixed header: Gemstrat logo on the left; on the right the menu
+// button — the logo's Z, which flies out and blasts into the menu (ZMenu) —
+// and the "Let's talk" button. Square-cornered to match the hero. Switches to
+// dark-on-light while it sits over the white sections.
 // ---------------------------------------------------------------------------
 
-const INDEX_LINKS = [
+const MENU_LINKS = [
   { label: 'Approach', href: '#about-intro' },
   { label: 'Focus areas', href: '#focus-areas' },
   { label: 'Advantage', href: '#advantage' },
@@ -20,12 +26,19 @@ const INDEX_LINKS = [
   { label: 'Voices', href: '#reviews' },
 ];
 const REGIONS = 'USA · Canada · India · Middle East · Africa';
-// Chapters and Let's talk share one width, label left and icon right
-const NAV_BUTTON_WIDTH = 'w-[6.75rem] sm:w-[9rem]';
+const LETS_TALK_WIDTH = 'w-[6.75rem] sm:w-[9rem]';
+
+type MenuState = 'closed' | 'open' | 'closing';
 
 export default function Navbar() {
   const [isLight, setIsLight] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [menu, setMenu] = useState<MenuState>('closed');
+  const [target, setTarget] = useState<string | null>(null);
+  // The menu is mounted ahead of the first click, so its 3D is ready
+  const [armed, setArmed] = useState(false);
+  const [hoverZ, setHoverZ] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
 
   // Light theme while the top of the viewport overlaps a white section
   useEffect(() => {
@@ -50,95 +63,70 @@ export default function Navbar() {
     return onScrollFrame(handleScroll);
   }, []);
 
-  // While the index is open: no page scrolling behind it, and Escape closes it
+  // Escape closes the menu
   useEffect(() => {
-    if (!open) return;
-    const root = document.documentElement;
-    root.classList.add('index-open');
+    if (menu !== 'open') return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key !== 'Escape') return;
+      setTarget(null);
+      setMenu('closing');
     };
     window.addEventListener('keydown', onKey);
-    return () => {
-      root.classList.remove('index-open');
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menu]);
 
+  const arm = () => {
+    if (armed) return;
+    setTrigger(buttonRef.current);
+    setArmed(true);
+  };
+  const close = (href: string | null) => {
+    setTarget(href);
+    setMenu('closing');
+  };
+  const toggle = () => {
+    arm();
+    if (menu === 'open') close(null);
+    else setMenu('open');
+  };
   const scrollTo = (href: string) => {
     document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
   };
+  // Logo and Let's talk: straight there, or via the menu's closing if it's up
   const go = (href: string) => (e: React.MouseEvent) => {
     e.preventDefault();
-    setOpen(false);
-    // Let the index fade before the page starts moving
-    window.setTimeout(() => scrollTo(href), 250);
+    if (menu === 'open') close(href);
+    else scrollTo(href);
   };
 
-  // Over a white section the bar goes dark-on-light — unless the index is
-  // open, which is always dark
-  const light = isLight && !open;
+  // Over a white section the bar goes dark-on-light — unless the menu is
+  // up, which is always dark
+  const light = isLight && menu === 'closed';
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[900] pointer-events-none">
-      {/* Full-screen index (below the bar, so the bar's buttons stay on top) */}
-      <div
-        id="site-index"
-        data-lenis-prevent
-        aria-hidden={!open}
-        className={`fixed inset-0 bg-[#090909]/95 backdrop-blur-md text-white transition-opacity duration-500 ease-out ${
-          open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <nav
-          aria-label="Site index"
-          className="h-full flex flex-col justify-between px-5 sm:px-6 lg:px-8 pt-28 sm:pt-32 pb-8 sm:pb-10"
-        >
-          <ol className="m-0 p-0 list-none">
-            {INDEX_LINKS.map((link, i) => (
-              <li
-                key={link.href}
-                className="border-t border-white/10 last:border-b transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{
-                  opacity: open ? 1 : 0,
-                  transform: open ? 'translateY(0)' : 'translateY(24px)',
-                  transitionDelay: open ? `${0.08 + i * 0.06}s` : '0s',
-                }}
-              >
-                <a
-                  href={link.href}
-                  onClick={go(link.href)}
-                  tabIndex={open ? 0 : -1}
-                  className="group flex items-baseline gap-5 sm:gap-8 py-3 sm:py-4 text-white/85 hover:text-white transition-colors"
-                >
-                  <span className="w-8 text-[11px] sm:text-xs tracking-[0.12em] text-white/40 tabular-nums">
-                    {String(i + 1).padStart(2, '0')}
-                  </span>
-                  <span className="text-[clamp(2rem,5vw,4.2rem)] leading-[1] tracking-[-0.035em] transition-transform duration-500 ease-out group-hover:translate-x-3">
-                    {link.label}
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
-          <p
-            className="m-0 text-[11px] sm:text-xs uppercase tracking-[0.14em] text-white/45 transition-opacity duration-700"
-            style={{ opacity: open ? 1 : 0, transitionDelay: open ? '0.4s' : '0s' }}
-          >
-            {REGIONS}
-          </p>
-        </nav>
-      </div>
+      {/* The menu sits below the bar, so the bar's buttons stay on top */}
+      {armed && (
+        <ZMenu
+          links={MENU_LINKS}
+          open={menu === 'open'}
+          target={target}
+          trigger={trigger}
+          footer={REGIONS}
+          onSelect={(href) => close(href)}
+          onRequestClose={() => close(null)}
+          onClosed={() => {
+            setMenu('closed');
+            setTarget(null);
+          }}
+        />
+      )}
 
       <div className="relative w-full px-5 sm:px-6 py-5 flex items-start justify-between">
         {/* Left: logo */}
         <a
           href="#hero"
-          onClick={(e) => {
-            e.preventDefault();
-            setOpen(false);
-            scrollTo('#hero');
-          }}
+          onClick={go('#hero')}
           style={{ animationDelay: '0.8s' }}
           className="nav-item-in pointer-events-auto flex items-center h-10 transition-opacity duration-300 hover:opacity-75"
           aria-label="Gemstrat home"
@@ -155,53 +143,52 @@ export default function Navbar() {
         </a>
 
         <div className="flex items-start gap-2 sm:gap-3">
-          {/* Chapters: opens the full-screen list of sections */}
+          {/* Menu: the logo's Z. It eases apart on hover; opening, it flies
+              out as the 3D Z (ZMenu) and a close mark takes its place */}
           <button
+            ref={buttonRef}
             type="button"
-            onClick={() => setOpen((o) => !o)}
-            aria-expanded={open}
-            aria-controls="site-index"
+            onClick={toggle}
+            onPointerEnter={() => {
+              arm();
+              setHoverZ(true);
+            }}
+            onPointerLeave={() => setHoverZ(false)}
+            onPointerDown={arm}
+            onFocus={arm}
+            aria-expanded={menu === 'open'}
+            aria-controls="site-menu"
+            aria-label={menu === 'open' ? 'Close menu' : 'Open menu'}
             style={{ animationDelay: '0.86s' }}
-            className={`nav-item-in pointer-events-auto group flex items-center justify-between ${NAV_BUTTON_WIDTH} h-10 pl-3.5 pr-3 border bg-transparent font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
-              light
-                ? 'border-black text-black hover:bg-black hover:text-white'
-                : 'border-white text-white hover:bg-white hover:text-black'
+            className={`nav-item-in pointer-events-auto relative flex items-center justify-center w-10 h-10 border bg-transparent transition-colors duration-300 ${
+              light ? 'border-black text-black hover:bg-black/5' : 'border-white text-white hover:bg-white/10'
             }`}
           >
-            <span className="relative block overflow-hidden h-[1.2em] leading-[1.2em]">
-              <span
-                className="block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{ transform: open ? 'translateY(-50%)' : 'translateY(0)' }}
-              >
-                <span className="block">Chapters</span>
-                <span className="block" aria-hidden="true">
-                  Close
-                </span>
-              </span>
+            <span
+              className="absolute inset-0 flex items-center justify-center transition-[opacity,transform] duration-300"
+              style={{ opacity: menu === 'closed' ? 1 : 0, transform: menu === 'closed' ? 'scale(1)' : 'scale(0.6)' }}
+            >
+              <ZIcon className="w-[18px] h-[18px]" apart={hoverZ && menu === 'closed'} />
             </span>
-            {/* Two lines that cross into an × when open */}
-            <span className="relative block w-[14px] h-[14px]" aria-hidden="true">
-              <span
-                className="absolute left-0 right-0 h-[1.3px] bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{ top: '4px', transform: open ? 'translateY(3px) rotate(45deg)' : 'none' }}
-              />
-              <span
-                className="absolute left-0 right-0 h-[1.3px] bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-                style={{ top: '10px', transform: open ? 'translateY(-3px) rotate(-45deg)' : 'none' }}
-              />
+            {/* Close: two lines crossing */}
+            <span
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+              style={{ opacity: menu === 'open' ? 1 : 0 }}
+              aria-hidden="true"
+            >
+              <span className="relative block w-[14px] h-[14px]">
+                <span className="absolute left-0 right-0 top-[6.35px] h-[1.3px] bg-current rotate-45" />
+                <span className="absolute left-0 right-0 top-[6.35px] h-[1.3px] bg-current -rotate-45" />
+              </span>
             </span>
           </button>
 
           {/* Let's talk */}
           <a
             href="#contact"
-            onClick={(e) => {
-              e.preventDefault();
-              setOpen(false);
-              scrollTo('#contact');
-            }}
+            onClick={go('#contact')}
             style={{ animationDelay: '0.92s' }}
-            className={`nav-item-in pointer-events-auto group flex items-center justify-between ${NAV_BUTTON_WIDTH} h-10 pl-3.5 pr-3 font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
+            className={`nav-item-in pointer-events-auto group flex items-center justify-between ${LETS_TALK_WIDTH} h-10 pl-3.5 pr-3 font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
               light ? 'bg-black text-white hover:bg-zinc-800' : 'bg-white text-black hover:bg-zinc-200'
             }`}
           >

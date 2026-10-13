@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader.js';
 import { createHeroObject, S_CENTER, S_HEIGHT, S_PIECE_SHADES, S_PIECES } from '@/lib/heroObject';
+import { addZLights, applyZShade, createZMaterial, createZReflections, moveZGlints, Z_BG } from '@/lib/zLook';
 import { WORDMARK_BAND, WORDMARK_PATHS, WORDMARK_VIEWBOX } from '@/lib/wordmark';
 import { onIntroStart } from '@/lib/intro';
 import { CONSTRUCT, createConstruction } from '@/components/ui/construction';
@@ -27,7 +28,7 @@ import { setLite } from '@/lib/perf';
 //   spin. Release and they reassemble.
 // ---------------------------------------------------------------------------
 
-const BG = 0x090909;
+const BG = Z_BG;
 
 // Hold to blast (seconds held)
 const CHARGE_TIME = 0.5; // s held before the blast
@@ -93,14 +94,6 @@ const EDGE_OPACITY = [0.08, 0.05];
 const WIRE_COLOR = new THREE.Color(0xe8e8e8);
 const SOLID_OPACITY = 0.88;
 const OBJECT_SCALE = 0.72; // the logo's size in the frame
-// Two-tone glass, like the logo (white bars, grey diagonal): the pieces that
-// aren't white in the wordmark get a charcoal — still black, a shade lighter
-// than the near-black bars
-const ACCENT_COLOR = 0x4a4c50;
-const ACCENT_EMISSIVE = 0x232427;
-// A little less metallic than the bars, so its own shade shows under the
-// lights instead of only reflecting the dark scene
-const ACCENT_METALNESS = 0.75;
 const MOUSE_TILT_X = 0.06; // rad the logo tips toward the cursor vertically
 // The intro draws the whole wordmark this wide (fraction of the viewport, and
 // at most WORDMARK_MAX_PX), centred, before its S turns into the logo
@@ -264,33 +257,8 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     const camera = new THREE.PerspectiveCamera(view.fov, W / H, 0.1, 200);
     camera.position.set(0, 0, view.z);
 
-    // Monochrome: grey rim lights from every side, plus white point lights
-    // that orbit and throw moving glints across the glass
-    scene.add(new THREE.AmbientLight(0x2e2e2e, 2.8 * Math.PI));
-    (
-      [
-        [0xffffff, 1.6, [4, 5, 4]],
-        [0x999999, 0.8, [-4, 1, -2]],
-        [0xdddddd, 1.5, [0, -3, -5]],
-        [0x999999, 1, [-3, 2, 6]],
-        [0xbbbbbb, 1, [0, 8, 2]],
-        [0x777777, 1.2, [0, 0, -8]],
-        [0x777777, 1, [-8, 0, 0]],
-        [0x777777, 1, [8, 0, 0]],
-        [0x777777, 1, [0, -8, 0]],
-      ] as const
-    ).forEach(([color, intensity, [x, y, z]]) => {
-      const light = new THREE.DirectionalLight(color, intensity * Math.PI);
-      light.position.set(x, y, z);
-      scene.add(light);
-    });
-    const glint1 = new THREE.PointLight(0xffffff, 7 * Math.PI, 22, 1);
-    const glint2 = new THREE.PointLight(0xd8d8d8, 5 * Math.PI, 20, 1);
-    const glint3 = new THREE.PointLight(0xeeeeee, 3.5 * Math.PI, 14, 1);
-    glint1.position.set(3, -1, 3);
-    glint2.position.set(-3, 2, -2);
-    glint3.position.set(0, 4, 3);
-    scene.add(glint1, glint2, glint3);
+    // Monochrome studio lights with orbiting glints (lib/zLook)
+    const glints = addZLights(scene);
 
     // Faint dust drifting in the background
     const dustPos = new Float32Array(600);
@@ -302,60 +270,12 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     dust.visible = W >= 768;
     scene.add(dust);
 
-    // The object reflects the scene itself (lights, dust)
-    const cubeRT = new THREE.WebGLCubeRenderTarget(256, {
-      generateMipmaps: true,
-      minFilter: THREE.LinearMipmapLinearFilter,
-    });
-    const cubeCamera = new THREE.CubeCamera(0.1, 100, cubeRT);
-    scene.add(cubeCamera);
-
-    // A dim studio backdrop only the reflection probe sees (layer 1): soft
-    // grey gradient with a few softboxes, so the metal facets catch light
-    // while the visible background stays black
-    const studio = document.createElement('canvas');
-    studio.width = 512;
-    studio.height = 256;
-    const sctx = studio.getContext('2d')!;
-    const grad = sctx.createLinearGradient(0, 0, 0, 256);
-    grad.addColorStop(0, '#404040');
-    grad.addColorStop(0.45, '#0e0e0e');
-    grad.addColorStop(0.6, '#0b0b0b');
-    grad.addColorStop(1, '#1e1e1e');
-    sctx.fillStyle = grad;
-    sctx.fillRect(0, 0, 512, 256);
-    sctx.fillStyle = 'rgba(225,225,225,0.55)';
-    sctx.fillRect(60, 40, 70, 90);
-    sctx.fillRect(300, 30, 120, 26);
-    sctx.fillStyle = 'rgba(160,160,160,0.3)';
-    sctx.fillRect(420, 150, 50, 60);
-    const studioTex = new THREE.CanvasTexture(studio);
-    studioTex.colorSpace = THREE.SRGBColorSpace;
-    const studioDome = new THREE.Mesh(
-      new THREE.SphereGeometry(50, 32, 16),
-      new THREE.MeshBasicMaterial({ map: studioTex, side: THREE.BackSide, toneMapped: false })
-    );
-    studioDome.layers.set(1);
-    scene.add(studioDome);
-    cubeCamera.children.forEach((cam) => cam.layers.enable(1));
+    // The object reflects the scene itself (lights, dust) and a dim studio
+    // backdrop (lib/zLook)
+    const reflections = createZReflections(scene);
 
     // --- The object --------------------------------------------------------
-    const material = new THREE.MeshPhysicalMaterial({
-      color: 0x3c3c3c,
-      emissive: new THREE.Color(0x1c1c1c),
-      emissiveIntensity: 0.15,
-      metalness: 1,
-      roughness: 0.08,
-      transmission: 0.35,
-      ior: 2.4,
-      transparent: true,
-      opacity: 0.88,
-      clearcoat: 1,
-      clearcoatRoughness: 0.05,
-      envMap: cubeRT.texture,
-      envMapIntensity: 3,
-      side: THREE.DoubleSide,
-    });
+    const material = createZMaterial(reflections.texture);
     const edgeMats = EDGE_OPACITY.map(
       (opacity) => new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity })
     );
@@ -369,11 +289,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     const solidMeshes = panels.filter((p) => !p.edge).map((p) => p.obj);
     // The logo's grey piece (the diagonal) in its own shade of glass
     panels.forEach((p) => {
-      if (p.edge || (S_PIECE_SHADES[p.part] ?? '#ffffff').toLowerCase() === '#ffffff') return;
-      const m = (p.obj as THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial>).material;
-      m.color.setHex(ACCENT_COLOR);
-      m.emissive.setHex(ACCENT_EMISSIVE);
-      m.metalness = ACCENT_METALNESS;
+      if (!p.edge) applyZShade((p.obj as THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial>).material, p.part);
     });
     // Each panel's turn in the breath wave: ranked top left → bottom right and
     // spaced evenly from 0 (first) to 1 (last), so they go strictly one by one
@@ -732,14 +648,13 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         }
       });
 
-      glint1.position.set(4 * Math.sin(0.6 * t), 2 * Math.cos(0.4 * t), 3 * Math.cos(0.5 * t) + 2);
-      glint2.position.set(4 * Math.cos(0.5 * t), 2 * Math.sin(0.7 * t), 3 * Math.sin(0.3 * t) - 1);
+      moveZGlints(glints, t);
 
       // Reflections: once up front, then every 6th frame while blasting
       if (!s.envReady || (s.frame % 6 === 0 && (s.burst > 0.01 || s.holding))) {
         const visible = group.visible;
         group.visible = false;
-        cubeCamera.update(renderer, scene);
+        reflections.update(renderer);
         group.visible = visible;
         s.envReady = true;
       }
@@ -833,8 +748,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         }
       });
       material.dispose();
-      studioTex.dispose();
-      cubeRT.dispose();
+      reflections.dispose();
       renderer.dispose();
       renderer.domElement.remove();
     };
