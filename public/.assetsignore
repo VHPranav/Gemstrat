@@ -1,0 +1,3 @@
+# Files in out/ that Cloudflare should not upload
+.DS_Store
+**/.DS_Store
