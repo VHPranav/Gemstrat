@@ -13,8 +13,9 @@ export interface ConstructionInput {
   /** The wordmark's letters other than the mark: screen-space polygons to
    *  trace (outlines and holes, curves finely sampled) and the letter's truly
    *  straight segments, which the guides run along. `small` letters (the
-   *  tagline) get no guides. */
-  letters: { polys: P[][]; edges: [P, P][]; small: boolean }[];
+   *  tagline) get no guides. `shape` is the letter's exact outline (true
+   *  curves, screen space), used for its white fill so the bends stay sharp. */
+  letters: { polys: P[][]; edges: [P, P][]; small: boolean; shape?: Path2D }[];
   /** The mark (the S that becomes the 3D logo), screen-space polygons */
   mark: P[][];
   /** Each mark polygon's fill colour, as in the real logo (default white) */
@@ -34,23 +35,24 @@ const WHITE = 'rgb(245,245,245)'; // the letters' fill
 const LETTER_STAGGER = 0.025; // s between letters starting to trace
 const FILL_STAGGER = 0.02; // s between letters starting to fill white (in a scattered order)
 
-// Timeline, in seconds from the start of the construction (under 3s in all)
+// Timeline, in seconds from the start of the construction
 export const CONSTRUCT = {
   outlineStart: 0.4, // the letters trace themselves, left to right
   outlineDur: 0.4,
   fillStart: 1.0, // then fill solid white, letter by letter in a scattered order, like the real logo
   fillDur: 0.25,
-  othersFadeStart: 2.2, // the finished logo holds ~0.8s, then everything but the mark fades away
+  othersFadeStart: 2.5, // the finished logo (white by ~1.5s) holds 1s, then everything but the mark fades away
   othersFadeDur: 0.25,
-  to3dStart: 2.25, // the mark turns 3D: swings round into the logo's place
+  to3dStart: 2.55, // the mark turns 3D: swings round into the logo's place
   to3dDur: 0.6,
-  solidStart: 2.4, // material and light fill the wireframe
-  solidDur: 0.3,
-  end: 2.85,
+  solidStart: 2.55, // the glass fades in as the turn starts, crossing over from the flat mark
+  solidDur: 0.25,
+  end: 3.15,
 };
 // Shorter in-between fades, scaled to the timeline
 const MARK_HANDOFF = 0.25; // s: the mark's flat outline hands over to 3D
 const GUIDE_SETTLE = 0.3; // s: a guide dims to a hairline once across
+const GUIDES_OUT = 0.45; // s: the guides fade out as the letters fill white
 const FOCUS_DUR = 0.4; // s: guides step back as the letters trace
 const FILL_DELAY = 0.3; // s after a letter starts tracing, a faint fill fades in
 const FILL_DUR = 0.3;
@@ -145,8 +147,8 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
   // scattered order — each letter at its own moment
   const minX = (polys: P[][]) => Math.min(...polys.flat().map((p) => p.x));
   const sorted = [
-    ...letters.map((l) => ({ polys: l.polys, isMark: false, small: l.small })),
-    { polys: mark, isMark: true, small: false },
+    ...letters.map((l) => ({ polys: l.polys, isMark: false, small: l.small, shape: l.shape })),
+    { polys: mark, isMark: true, small: false, shape: undefined },
   ].sort((m, n) => minX(m.polys) - minX(n.polys));
   const fillOrder = sorted.map((_, i) => i);
   for (let i = fillOrder.length - 1; i > 0; i--) {
@@ -177,8 +179,8 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
   }
 
   function draw(ctx: CanvasRenderingContext2D, t: number) {
-    // Everything but the mark fades away; the mark's own outline hands over
-    // to the 3D wireframe as that swings round
+    // Everything but the mark fades away; the flat mark hands over to the 3D
+    // glass as that swings round
     const othersFade = 1 - easeInOutCubic(ramp(t, CONSTRUCT.othersFadeStart, CONSTRUCT.othersFadeDur));
     const markFade = 1 - easeInOutCubic(ramp(t, CONSTRUCT.to3dStart + 0.05, MARK_HANDOFF));
     if (othersFade <= 0 && markFade <= 0) return;
@@ -186,13 +188,15 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
     ctx.globalCompositeOperation = 'lighter';
     ctx.lineCap = 'round';
 
-    // Once the letters start tracing, the guides step back so they read first
+    // Once the letters start tracing, the guides step back so they read first;
+    // once they start filling white, the guides fade out, leaving the logo
     const focus = 1 - 0.55 * easeInOutCubic(ramp(t, CONSTRUCT.outlineStart, FOCUS_DUR));
+    const guidesFade = othersFade * (1 - easeInOutCubic(ramp(t, CONSTRUCT.fillStart, GUIDES_OUT)));
 
     // Guides: a comet glides across the screen, easing in and out, drawing
     // the line behind it as the line drifts sideways into place; once there it
     // settles to a faint hairline
-    if (othersFade > 0) {
+    if (guidesFade > 0) {
       for (const g of guides) {
         const k = ramp(t, g.start, g.dur);
         if (k <= 0) continue;
@@ -203,7 +207,7 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
         const hx = ax + (g.b.x - g.a.x) * e;
         const hy = ay + (g.b.y - g.a.y) * e;
         const settle = easeOutCubic(ramp(t, g.start + g.dur * 0.7, GUIDE_SETTLE));
-        const alpha = (0.5 - 0.32 * settle) * focus * othersFade;
+        const alpha = (0.5 - 0.32 * settle) * focus * guidesFade;
         stroke(
           ctx,
           () => {
@@ -222,7 +226,7 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
           const glow = Math.sin(Math.PI * k); // brightest mid-flight
           const grad = ctx.createLinearGradient(tx, ty, hx, hy);
           grad.addColorStop(0, 'rgba(240,240,240,0)');
-          grad.addColorStop(1, `rgba(255,255,255,${0.85 * glow * othersFade})`);
+          grad.addColorStop(1, `rgba(255,255,255,${0.85 * glow * guidesFade})`);
           ctx.globalAlpha = 1;
           ctx.strokeStyle = grad;
           ctx.lineWidth = LINE_WIDTH * 1.6;
@@ -244,14 +248,19 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
       const fade = letter.isMark ? markFade : othersFade;
       const k = easeInOutCubic(ramp(t, letter.start, CONSTRUCT.outlineDur));
       if (k <= 0 || fade <= 0) continue;
-      letter.polys.forEach((poly, i) => {
-        const len = letter.lens[i];
-        ctx.setLineDash([len * k, len]);
-        stroke(ctx, () => polyPath(poly), 0.9 * fade, LINE_WIDTH * (letter.small ? 1 : 1.5));
-        ctx.setLineDash([]);
-      });
       const faint = 0.05 * easeInOutCubic(ramp(t, letter.start + FILL_DELAY, FILL_DUR));
       const solid = easeInOutCubic(ramp(t, letter.fillAt, CONSTRUCT.fillDur));
+      // The traced outline (and its glow) fades as the letter turns white,
+      // so the white letter's edge is the crisp fill alone
+      const outline = 0.9 * fade * (1 - solid);
+      if (outline > 0.002) {
+        letter.polys.forEach((poly, i) => {
+          const len = letter.lens[i];
+          ctx.setLineDash([len * k, len]);
+          stroke(ctx, () => polyPath(poly), outline, LINE_WIDTH * (letter.small ? 1 : 1.5));
+          ctx.setLineDash([]);
+        });
+      }
       const fill = Math.max(faint, solid) * fade;
       if (fill > 0) {
         ctx.globalAlpha = fill;
@@ -265,11 +274,15 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
             ctx.fill();
           });
         } else {
-          // The whole letter as one path, even-odd, so its holes stay open
+          // The whole letter as one path, even-odd, so its holes stay open;
+          // its exact curves when we have them
           ctx.fillStyle = WHITE;
-          ctx.beginPath();
-          letter.polys.forEach(polyPath);
-          ctx.fill('evenodd');
+          if (letter.shape) ctx.fill(letter.shape, 'evenodd');
+          else {
+            ctx.beginPath();
+            letter.polys.forEach(polyPath);
+            ctx.fill('evenodd');
+          }
         }
       }
     }

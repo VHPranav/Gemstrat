@@ -10,13 +10,14 @@ import { ZPieceGlyph } from '@/components/navigation/ZIcon';
 
 // ---------------------------------------------------------------------------
 // ZMenu
-// The site menu is the logo. Opening it, the 3D Z flies out of the navbar
-// button, trembles, and blasts apart: each of its five pieces lands beside
-// one of the five links, in a cascade that follows the Z's diagonal, while a
-// faint wireframe of the Z stays where it was. Hovering a link flips its
-// piece and lights up where it sits in the wireframe Z. Choosing a
-// link (or closing) sends the pieces home, the Z shrinks back into the
-// button, and the page moves to the section.
+// The site menu is the logo. Opening it, the logo's 3D S (the way round it
+// is in the wordmark; the hero shows it mirrored, as a Z) flies out of the
+// navbar button, trembles, and blasts apart: each of its five pieces lands
+// beside one of the five links, in a cascade that follows the S's diagonal,
+// while a faint wireframe of the S stays where it was. Hovering a link flips
+// its piece and lights up where it sits in the wireframe. Choosing a link (or
+// closing) sends the pieces home, the S shrinks back into the button, and
+// the page moves to the section.
 //
 // The navbar mounts this early (on first hover/focus of the button) so the
 // 3D is ready by the click; while closed it renders nothing and runs no loop.
@@ -175,6 +176,10 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
 
       // The pieces, each centred on itself so it can tumble in place
       const pieces = createHeroObject().parts.map((geo, part) => {
+        // The hero's logo is the mirrored S (a Z); seen from behind — half a
+        // turn round — it is the S. (A mirror would turn the faces inside
+        // out and break their lighting; a turn keeps them right.)
+        geo.rotateY(Math.PI);
         geo.computeBoundingBox();
         const home = new THREE.Vector3();
         const size = new THREE.Vector3();

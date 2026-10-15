@@ -16,9 +16,9 @@ import { setLite } from '@/lib/perf';
 // The hero's WebGL layer:
 // - Intro: construction guides glide in and draw the whole Gemstrat wordmark;
 //   the other letters fade, and the S swings round into the 3D logo (it is a
-//   mirrored S, so seen from behind it is the wordmark's S) as a glowing
-//   wireframe that material and light fill. construction.ts draws the 2D
-//   part. The hero copy waits for it.
+//   mirrored S, so seen from behind it is the wordmark's S), the glass
+//   fading in as it turns. construction.ts draws the 2D part. The hero copy
+//   waits for it.
 // - The centre object (lib/heroObject) is shattered into panels — its
 //   triangles grouped by face direction — so one value, `p`, blows it apart
 //   (each panel flies along its own direction and spins) and back together.
@@ -78,9 +78,9 @@ const REASSEMBLE_END = 1.7;
 function framing(w: number) {
   // y: the logo's height in the hero, just under the headline (behind the
   // next section it glides to the exact centre)
-  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: -0.35 };
-  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.35 };
-  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.35 };
+  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: -0.5 };
+  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.5 };
+  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.5 };
   // Phones: bigger, and lower, filling the space under the hero's buttons
   return { fov: 36, z: 9.35, scale: 1.1, y: -0.92 };
 }
@@ -91,7 +91,6 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2
 
 const EDGE_COLOR = new THREE.Color(0x3a3a3a);
 const EDGE_OPACITY = [0.08, 0.05];
-const WIRE_COLOR = new THREE.Color(0xe8e8e8);
 const SOLID_OPACITY = 0.88;
 const OBJECT_SCALE = 0.72; // the logo's size in the frame
 const MOUSE_TILT_X = 0.06; // rad the logo tips toward the cursor vertically
@@ -356,11 +355,6 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         (p.obj as THREE.Mesh<THREE.BufferGeometry, THREE.MeshPhysicalMaterial>).material.opacity = SOLID_OPACITY * k;
         p.obj.visible = k > 0.003;
       });
-    const setWire = (k: number) =>
-      edgeMats.forEach((m, i) => {
-        m.color.copy(EDGE_COLOR).lerp(WIRE_COLOR, k);
-        m.opacity = EDGE_OPACITY[i] + (i === 0 ? 0.8 : 0.35) * k;
-      });
     if (s.phase !== 'done') {
       group.visible = false;
       setSolid(0);
@@ -394,13 +388,18 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       const toPx = (x: number, y: number) => ({ x: left + x * k, y: top + y * k });
 
       const svg = `<svg xmlns="http://www.w3.org/2000/svg">${WORDMARK_PATHS.map((p) => `<path d="${p.d}"/>`).join('')}</svg>`;
+      const toPxMatrix = new DOMMatrix([k, 0, 0, k, left, top]);
       const letters = new SVGLoader().parse(svg).paths.map((path, i) => {
         // Each shape's outline and holes, as one list of paths
         const paths = SVGLoader.createShapes(path).flatMap((shape): THREE.Path[] => [shape, ...shape.holes]);
+        // The letter's exact outline in px, for a sharp white fill
+        const shape = new Path2D();
+        shape.addPath(new Path2D(WORDMARK_PATHS[i].d), toPxMatrix);
         return {
           small: WORDMARK_PATHS[i].small,
+          shape,
           // Curves finely sampled, so they trace smoothly
-          polys: paths.map((p) => p.getPoints(24).map((v) => toPx(v.x, v.y))),
+          polys: paths.map((p) => p.getPoints(48).map((v) => toPx(v.x, v.y))),
           // Only the truly straight segments carry guides
           edges: paths.flatMap((p) =>
             p.curves
@@ -433,7 +432,6 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       group.visible = true;
       placeGroup();
       setSolid(1);
-      setWire(0);
       onIntroDone?.();
     }
     if (s.phase === 'done') onIntroDone?.();
@@ -529,7 +527,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
       } else if (s.phase === 'building') {
         // Flat → 3D: from the wordmark's S (seen from behind, half a turn
         // round) it swings into the idle pose while moving and growing into
-        // its own place, as a glowing wireframe that material and light fill
+        // its own place, the glass fading in as the flat mark fades out
         const ct = s.ct;
         const tilt = easeInOutCubic(ramp(ct, CONSTRUCT.to3dStart, CONSTRUCT.to3dDur));
         const lerp = (a: number, b: number) => a + (b - a) * tilt;
@@ -541,7 +539,6 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         // A slight swell mid-turn, settling at both ends
         group.scale.setScalar(lerp(turnFrom.scale, view.scale * OBJECT_SCALE) * (1 + 0.05 * Math.sin(Math.PI * tilt)));
         group.visible = ct >= CONSTRUCT.to3dStart;
-        setWire(ramp(ct, CONSTRUCT.to3dStart, 0.15) * (1 - ramp(ct, CONSTRUCT.solidStart + 0.1, CONSTRUCT.solidDur * 0.8)));
         setSolid(easeInOutCubic(ramp(ct, CONSTRUCT.solidStart, CONSTRUCT.solidDur)));
       }
 

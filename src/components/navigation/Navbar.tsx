@@ -162,11 +162,13 @@ export default function Navbar() {
               light ? 'border-black text-black hover:bg-black/5' : 'border-white text-white hover:bg-white/10'
             }`}
           >
+            {/* Fades only: scaling it would leave the browser holding a
+                blurry low-resolution copy of the icon */}
             <span
-              className="absolute inset-0 flex items-center justify-center transition-[opacity,transform] duration-300"
-              style={{ opacity: menu === 'closed' ? 1 : 0, transform: menu === 'closed' ? 'scale(1)' : 'scale(0.6)' }}
+              className="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
+              style={{ opacity: menu === 'closed' ? 1 : 0 }}
             >
-              <ZIcon className="w-[18px] h-[18px]" apart={hoverZ && menu === 'closed'} />
+              <ZIcon className="w-[22px] h-[22px]" apart={hoverZ && menu === 'closed'} />
             </span>
             {/* Close: two lines crossing */}
             <span
