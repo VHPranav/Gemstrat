@@ -24,10 +24,10 @@ export interface ConstructionInput {
 
 // Guides: one starts every GUIDE_STAGGER seconds, in a shuffled order
 const GUIDE_FIRST = 0.05;
-const GUIDE_STAGGER = 0.015;
-const GUIDE_DUR = 0.35; // + up to GUIDE_DUR_VARY, to cross the screen
-const GUIDE_DUR_VARY = 0.1;
-const MAX_GUIDES = 30; // the wordmark's longest straight edges
+const GUIDE_STAGGER = 0.01;
+const GUIDE_DUR = 0.25; // + up to GUIDE_DUR_VARY, to cross the screen
+const GUIDE_DUR_VARY = 0.07;
+const MAX_GUIDES = 18; // the wordmark's longest straight edges
 const MIN_EDGE = 16; // px: shorter straight segments get no guide
 const TAIL = 140; // px of the bright comet tail behind each guide's head
 const LINE_WIDTH = 0.6;
@@ -41,18 +41,22 @@ export const CONSTRUCT = {
   outlineDur: 0.4,
   fillStart: 1.0, // then fill solid white, letter by letter in a scattered order, like the real logo
   fillDur: 0.25,
-  othersFadeStart: 2.5, // the finished logo (white by ~1.5s) holds 1s, then everything but the mark fades away
+  othersFadeStart: 2.7, // the finished logo (white by ~1.5s) holds 1.2s, then everything but the mark fades away
   othersFadeDur: 0.25,
-  to3dStart: 2.55, // the mark turns 3D: swings round into the logo's place
+  to3dStart: 2.75, // the mark turns 3D: swings round into the logo's place
   to3dDur: 0.6,
-  solidStart: 2.55, // the glass fades in as the turn starts, crossing over from the flat mark
+  solidStart: 2.75, // the glass fades in as the turn starts, crossing over from the flat mark
   solidDur: 0.25,
-  end: 3.15,
+  end: 3.35,
 };
 // Shorter in-between fades, scaled to the timeline
 const MARK_HANDOFF = 0.25; // s: the mark's flat outline hands over to 3D
 const GUIDE_SETTLE = 0.3; // s: a guide dims to a hairline once across
-const GUIDES_OUT = 0.45; // s: the guides fade out as the letters fill white
+// As the letters start tracing their outlines the guides retract: each pulls
+// back along itself into the end it drew to, like a tape measure snapping
+// shut (a guide still drawing finishes first)
+const RETRACT = 0.3; // s per guide
+const RETRACT_SPREAD = 0.15; // s: guides start retracting at random within this
 const FOCUS_DUR = 0.4; // s: guides step back as the letters trace
 const FILL_DELAY = 0.3; // s after a letter starts tracing, a faint fill fades in
 const FILL_DUR = 0.3;
@@ -65,10 +69,12 @@ interface Guide {
   slide: number; // px the line drifts across while it draws
   start: number;
   dur: number;
+  retractAt: number; // s after it may start retracting
 }
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInCubic = (t: number) => t * t * t;
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const ramp = (t: number, start: number, dur: number) => clamp01((t - start) / dur);
 
@@ -141,6 +147,7 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
     ...l,
     start: GUIDE_FIRST + i * GUIDE_STAGGER,
     dur: GUIDE_DUR + rand() * GUIDE_DUR_VARY,
+    retractAt: rand() * RETRACT_SPREAD,
   }));
 
   // Letters (and the mark) trace left to right, then fill white in a
@@ -189,9 +196,9 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
     ctx.lineCap = 'round';
 
     // Once the letters start tracing, the guides step back so they read first;
-    // once they start filling white, the guides fade out, leaving the logo
+    // as the letters start tracing, they retract (see RETRACT)
     const focus = 1 - 0.55 * easeInOutCubic(ramp(t, CONSTRUCT.outlineStart, FOCUS_DUR));
-    const guidesFade = othersFade * (1 - easeInOutCubic(ramp(t, CONSTRUCT.fillStart, GUIDES_OUT)));
+    const guidesFade = othersFade;
 
     // Guides: a comet glides across the screen, easing in and out, drawing
     // the line behind it as the line drifts sideways into place; once there it
@@ -199,7 +206,8 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
     if (guidesFade > 0) {
       for (const g of guides) {
         const k = ramp(t, g.start, g.dur);
-        if (k <= 0) continue;
+        const back = easeInCubic(ramp(t, Math.max(CONSTRUCT.outlineStart, g.start + g.dur) + g.retractAt, RETRACT));
+        if (k <= 0 || back >= 1) continue;
         const e = easeInOutCubic(k);
         const off = g.slide * (1 - easeOutCubic(ramp(t, g.start, g.dur * 1.3)));
         const ax = g.a.x + g.nx * off;
@@ -208,10 +216,13 @@ export function createConstruction({ letters, mark, markShades }: ConstructionIn
         const hy = ay + (g.b.y - g.a.y) * e;
         const settle = easeOutCubic(ramp(t, g.start + g.dur * 0.7, GUIDE_SETTLE));
         const alpha = (0.5 - 0.32 * settle) * focus * guidesFade;
+        // Retracting: the tail runs up the line to the head
+        const tx0 = ax + (hx - ax) * back;
+        const ty0 = ay + (hy - ay) * back;
         stroke(
           ctx,
           () => {
-            ctx.moveTo(ax, ay);
+            ctx.moveTo(tx0, ty0);
             ctx.lineTo(hx, hy);
           },
           alpha,

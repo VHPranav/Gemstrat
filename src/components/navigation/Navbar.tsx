@@ -25,7 +25,7 @@ const MENU_LINKS = [
   { label: 'Leadership', href: '#leadership' },
   { label: 'Voices', href: '#reviews' },
 ];
-const LETS_TALK_WIDTH = 'w-[6.75rem] sm:w-[9rem]';
+const LETS_TALK_WIDTH = 'w-[6rem] sm:w-[7.5rem]';
 
 type MenuState = 'closed' | 'open' | 'closing';
 
@@ -35,7 +35,6 @@ export default function Navbar() {
   const [target, setTarget] = useState<string | null>(null);
   // The menu is mounted ahead of the first click, so its 3D is ready
   const [armed, setArmed] = useState(false);
-  const [hoverZ, setHoverZ] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
 
@@ -141,24 +140,20 @@ export default function Navbar() {
         </a>
 
         <div className="flex items-start gap-2 sm:gap-3">
-          {/* Menu: the logo's Z. It eases apart on hover; opening, it flies
-              out as the 3D Z (ZMenu) and a close mark takes its place */}
+          {/* Menu: the logo's S. Opening, it flies out as the 3D S (ZMenu)
+              and a close mark takes its place */}
           <button
             ref={buttonRef}
             type="button"
             onClick={toggle}
-            onPointerEnter={() => {
-              arm();
-              setHoverZ(true);
-            }}
-            onPointerLeave={() => setHoverZ(false)}
+            onPointerEnter={arm}
             onPointerDown={arm}
             onFocus={arm}
             aria-expanded={menu === 'open'}
             aria-controls="site-menu"
             aria-label={menu === 'open' ? 'Close menu' : 'Open menu'}
             style={{ animationDelay: '0.86s' }}
-            className={`nav-item-in pointer-events-auto relative flex items-center justify-center w-10 h-10 cursor-pointer border bg-transparent transition-colors duration-300 ${
+            className={`nav-item-in pointer-events-auto relative flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 cursor-pointer border bg-transparent transition duration-300 ease-out hover:scale-105 active:scale-95 ${
               light ? 'border-black text-black hover:bg-black/5' : 'border-white text-white hover:bg-white/10'
             }`}
           >
@@ -168,7 +163,7 @@ export default function Navbar() {
               className="absolute inset-0 flex items-center justify-center transition-opacity duration-300"
               style={{ opacity: menu === 'closed' ? 1 : 0 }}
             >
-              <ZIcon className="w-[22px] h-[22px]" apart={hoverZ && menu === 'closed'} />
+              <ZIcon className="w-[16px] h-[16px] sm:w-[18px] sm:h-[18px]" />
             </span>
             {/* Close: two lines crossing */}
             <span
@@ -176,9 +171,9 @@ export default function Navbar() {
               style={{ opacity: menu === 'open' ? 1 : 0 }}
               aria-hidden="true"
             >
-              <span className="relative block w-[14px] h-[14px]">
-                <span className="absolute left-0 right-0 top-[6.35px] h-[1.3px] bg-current rotate-45" />
-                <span className="absolute left-0 right-0 top-[6.35px] h-[1.3px] bg-current -rotate-45" />
+              <span className="relative block w-[12px] h-[12px] sm:w-[14px] sm:h-[14px]">
+                <span className="absolute left-0 right-0 top-[5.35px] sm:top-[6.35px] h-[1.3px] bg-current rotate-45" />
+                <span className="absolute left-0 right-0 top-[5.35px] sm:top-[6.35px] h-[1.3px] bg-current -rotate-45" />
               </span>
             </span>
           </button>
@@ -188,14 +183,14 @@ export default function Navbar() {
             href="#contact"
             onClick={go('#contact')}
             style={{ animationDelay: '0.92s' }}
-            className={`nav-item-in pointer-events-auto group flex items-center justify-between ${LETS_TALK_WIDTH} h-10 pl-3.5 pr-3 font-sans text-[11px] sm:text-xs uppercase tracking-[0.04em] transition-colors duration-300 ${
+            className={`nav-item-in pointer-events-auto group flex items-center justify-between ${LETS_TALK_WIDTH} h-7 sm:h-8 pl-3 pr-2.5 sm:pl-3.5 sm:pr-3 font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.04em] transition-colors duration-300 ${
               light ? 'bg-black text-white hover:bg-zinc-800' : 'bg-white text-black hover:bg-zinc-200'
             }`}
           >
             <span>Let&apos;s talk</span>
             <svg
-              width="14"
-              height="14"
+              width="12"
+              height="12"
               viewBox="0 0 14 14"
               fill="none"
               stroke="currentColor"

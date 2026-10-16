@@ -16,18 +16,7 @@ const HEIGHT = 23.879;
 const points = (piece: [number, number][]) => piece.map(([x, y]) => `${x},${y}`).join(' ');
 const fillOf = (part: number) => (S_PIECE_SHADES[part].toLowerCase() === '#ffffff' ? 'currentColor' : S_PIECE_SHADES[part]);
 
-// Each piece's nudge outward (in the S's own units), used
-// for the hover hint on the menu button: the S eases apart a little
-const DIAGONAL = 3; // S_PIECES index of the diagonal
-const NUDGE: [number, number][] = [
-  [0, -1.6], // top bar
-  [0, 1.6], // bottom bar
-  [-1.6, 0], // left stub
-  [0, 0], // diagonal
-  [1.6, 0], // right stub
-];
-
-export function ZIcon({ className = '', apart = false }: { className?: string; apart?: boolean }) {
+export function ZIcon({ className = '' }: { className?: string }) {
   return (
     <svg
       viewBox={`${MIN_X - 2} -2 ${MAX_X - MIN_X + 4} ${HEIGHT + 4}`}
@@ -41,11 +30,6 @@ export function ZIcon({ className = '', apart = false }: { className?: string; a
             key={i}
             points={points(piece)}
             fill={fillOf(i)}
-            // Straight pieces snap to whole pixels so they stay sharp at icon
-            // size; the diagonal stays smoothly anti-aliased
-            shapeRendering={i === DIAGONAL ? 'geometricPrecision' : 'crispEdges'}
-            className="transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-            style={{ transform: apart ? `translate(${NUDGE[i][0]}px, ${NUDGE[i][1]}px)` : 'none' }}
           />
         ))}
       </g>

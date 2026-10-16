@@ -78,9 +78,9 @@ const REASSEMBLE_END = 1.7;
 function framing(w: number) {
   // y: the logo's height in the hero, just under the headline (behind the
   // next section it glides to the exact centre)
-  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: -0.5 };
-  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.5 };
-  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.5 };
+  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: -0.42 };
+  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.42 };
+  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.42 };
   // Phones: bigger, and lower, filling the space under the hero's buttons
   return { fov: 36, z: 9.35, scale: 1.1, y: -0.92 };
 }
