@@ -36,6 +36,9 @@ interface SubPageProps {
   /** Keep the hero pinned for this many extra screens of scroll, while its
    *  words blur out (the Approach page's S transition plays over it) */
   pinned?: number;
+  /** No hero of its own: the page's first section opens the page instead
+   *  (Focus areas, whose statue stage carries the headline) */
+  bare?: boolean;
   children: React.ReactNode;
 }
 
@@ -94,7 +97,7 @@ function CtaLink({ href, children, delay, down }: { href: string; children: Reac
   );
 }
 
-export default function SubPage({ eyebrow, title, intro, next, aside, centered, pinned = 0, children }: SubPageProps) {
+export default function SubPage({ eyebrow, title, intro, next, aside, centered, pinned = 0, bare, children }: SubPageProps) {
   const copyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -140,88 +143,90 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
 
   return (
     <main className="bg-[#090909] text-white min-h-screen">
-      <header className="relative w-full" style={pinned ? { height: `${100 + pinned * 100}vh` } : undefined}>
-        <div className="sticky top-0 w-full h-screen h-[100svh] min-h-[620px] overflow-hidden">
-          {aside && <div className="absolute inset-0 pointer-events-none">{aside}</div>}
+      {!bare && (
+        <header className="relative w-full" style={pinned ? { height: `${100 + pinned * 100}vh` } : undefined}>
+          <div className="sticky top-0 w-full h-screen h-[100svh] min-h-[620px] overflow-hidden">
+            {aside && <div className="absolute inset-0 pointer-events-none">{aside}</div>}
 
-          <div ref={copyRef} className="relative z-10 h-full pointer-events-none">
-            <div
-              className={
-                centered
-                  ? // Centred from tablets up; on phones it stays near the top,
-                    // clear of the S below it
-                    'absolute left-5 right-5 sm:left-6 lg:left-8 top-24 sm:top-28 md:top-0 md:bottom-0 md:flex md:flex-col md:justify-center lg:max-w-[52%]'
-                  : 'absolute left-5 right-5 sm:left-6 lg:left-8 top-24 sm:top-28 lg:max-w-[52%]'
-              }
-            >
-              {eyebrow && (
-                <p className="sub-fade font-sans text-[11px] uppercase tracking-[0.12em] text-white/50 mb-6 m-0">{eyebrow}</p>
-              )}
-              <h1 className="m-0 font-sans font-normal text-white tracking-[-0.045em] leading-[0.98] text-[clamp(2.6rem,6.2vw,6.4rem)]">
-                {title.map((line, li) => (
-                  <span key={li} className="block">
-                    {line.split(' ').map((word, wi) => (
-                      <span key={wi} data-word className="inline-block mr-[0.22em]">
-                        <span
-                          className="sub-word inline-block"
-                          style={{
-                            animationDelay: `${0.05 + wordIndex++ * 0.09}s`,
-                          }}
-                        >
-                          {word}
+            <div ref={copyRef} className="relative z-10 h-full pointer-events-none">
+              <div
+                className={
+                  centered
+                    ? // Centred from tablets up; on phones it stays near the top,
+                      // clear of the S below it
+                      'absolute left-5 right-5 sm:left-6 lg:left-8 top-24 sm:top-28 md:top-0 md:bottom-0 md:flex md:flex-col md:justify-center lg:max-w-[52%]'
+                    : 'absolute left-5 right-5 sm:left-6 lg:left-8 top-24 sm:top-28 lg:max-w-[52%]'
+                }
+              >
+                {eyebrow && (
+                  <p className="sub-fade font-sans text-[11px] uppercase tracking-[0.12em] text-white/50 mb-6 m-0">{eyebrow}</p>
+                )}
+                <h1 className="m-0 font-sans font-normal text-white tracking-[-0.045em] leading-[0.98] text-[clamp(2.6rem,6.2vw,6.4rem)]">
+                  {title.map((line, li) => (
+                    <span key={li} className="block">
+                      {line.split(' ').map((word, wi) => (
+                        <span key={wi} data-word className="inline-block mr-[0.22em]">
+                          <span
+                            className="sub-word inline-block"
+                            style={{
+                              animationDelay: `${0.05 + wordIndex++ * 0.09}s`,
+                            }}
+                          >
+                            {word}
+                          </span>
                         </span>
-                      </span>
-                    ))}
-                  </span>
-                ))}
-              </h1>
+                      ))}
+                    </span>
+                  ))}
+                </h1>
 
-              <div data-fade>
-                <p
-                  className="sub-fade mt-8 max-w-[34rem] font-archivo text-[clamp(1rem,1.3vw,19px)] leading-[1.5] tracking-[-0.01em] text-white/65"
-                  style={{ animationDelay: '0.75s' }}
-                >
-                  {intro}
-                </p>
+                <div data-fade>
+                  <p
+                    className="sub-fade mt-8 max-w-[34rem] font-archivo text-[clamp(1rem,1.3vw,19px)] leading-[1.5] tracking-[-0.01em] text-white/65"
+                    style={{ animationDelay: '0.75s' }}
+                  >
+                    {intro}
+                  </p>
+                </div>
+
+                {!centered && (
+                  <div data-fade className="pointer-events-auto mt-8 flex flex-col sm:flex-row gap-4 max-w-[15rem] sm:max-w-none">
+                    <CtaLink href="#contact" delay={0.9}>
+                      Start a conversation
+                    </CtaLink>
+                    <CtaLink href={next.href} delay={0.98} down>
+                      {next.label}
+                    </CtaLink>
+                  </div>
+                )}
               </div>
 
-              {!centered && (
-                <div data-fade className="pointer-events-auto mt-8 flex flex-col sm:flex-row gap-4 max-w-[15rem] sm:max-w-none">
-                  <CtaLink href="#contact" delay={0.9}>
-                    Start a conversation
-                  </CtaLink>
-                  <CtaLink href={next.href} delay={0.98} down>
-                    {next.label}
-                  </CtaLink>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom left: scroll cue */}
-            <div data-fade className="absolute left-5 sm:left-6 lg:left-8 bottom-8 sm:bottom-10">
-              <button
-                type="button"
-                onClick={() => goTo(next.href)}
-                aria-label="Scroll to next section"
-                className="sub-fade pointer-events-auto w-7 h-7 flex items-center justify-center rounded-full border border-white/40 text-white/80 hover:bg-white hover:text-black transition-colors"
-                style={{ animationDelay: '1.2s' }}
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 16 16"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  aria-hidden="true"
+              {/* Bottom left: scroll cue */}
+              <div data-fade className="absolute left-5 sm:left-6 lg:left-8 bottom-8 sm:bottom-10">
+                <button
+                  type="button"
+                  onClick={() => goTo(next.href)}
+                  aria-label="Scroll to next section"
+                  className="sub-fade pointer-events-auto w-7 h-7 flex items-center justify-center rounded-full border border-white/40 text-white/80 hover:bg-white hover:text-black transition-colors"
+                  style={{ animationDelay: '1.2s' }}
                 >
-                  <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" />
-                </svg>
-              </button>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    aria-hidden="true"
+                  >
+                    <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      )}
 
       {children}
 

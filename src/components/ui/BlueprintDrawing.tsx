@@ -28,6 +28,40 @@ interface Props {
   src: string;
   progress: React.RefObject<number>;
   label: string;
+  /** Show the construction lines (default true); without them it's just the
+   *  outline drawing in and the ink */
+  guides?: boolean;
+  /** Draw the outline as this many fragments scattered round it, which grow
+   *  through the Design stage until they join (instead of one stroke); the
+   *  straight edges then follow in the second half */
+  fragments?: number;
+}
+
+/** The dash pattern (for a path of length 1) that shows `count` fragments
+ *  centred at `centres`, each `len` long, merged where they overlap */
+function fragmentDash(centres: number[], len: number): { dash: string; offset: number } | null {
+  const iv = centres.map((c) => [c - len / 2, c + len / 2]).sort((a, b) => a[0] - b[0]);
+  const merged: number[][] = [];
+  for (const [a, b] of iv) {
+    const last = merged[merged.length - 1];
+    if (last && a <= last[1]) last[1] = Math.max(last[1], b);
+    else merged.push([a, b]);
+  }
+  // Wrapping round the end of the path into the first fragment
+  const first = merged[0];
+  const lastIv = merged[merged.length - 1];
+  if (merged.length > 1 && lastIv[1] - 1 >= first[0]) {
+    first[0] = lastIv[0] - 1;
+    merged.pop();
+  }
+  const covered = merged.reduce((sum, [a, b]) => sum + (b - a), 0);
+  if (covered >= 1) return null;
+  const parts: number[] = [];
+  merged.forEach(([a, b], i) => {
+    const next = i + 1 < merged.length ? merged[i + 1][0] : merged[0][0] + 1;
+    parts.push(b - a, Math.max(0, next - b));
+  });
+  return { dash: parts.map((x) => x.toFixed(5)).join(' '), offset: -first[0] };
 }
 
 const MASK_W = 384;
@@ -55,7 +89,7 @@ function makeNoise(seed: number) {
   };
 }
 
-export default function BlueprintDrawing({ data, src, progress, label }: Props) {
+export default function BlueprintDrawing({ data, src, progress, label, guides = true, fragments = 0 }: Props) {
   const boxRef = useRef<HTMLDivElement>(null);
   const guideRefs = useRef<(SVGLineElement | null)[]>([]);
   const lineRefs = useRef<(SVGLineElement | null)[]>([]);
@@ -67,6 +101,11 @@ export default function BlueprintDrawing({ data, src, progress, label }: Props) 
   const { w, h } = data;
   const guideLines = blueprintGuides(data);
   const groundY = data.ground[1];
+  // Where the outline's fragments sit, evenly round it with a little scatter
+  const fragCentres = Array.from({ length: fragments }, (_, k) => {
+    const j = Math.sin(k * 91.7 + 3.1) * 43758.5453;
+    return (k + 0.5 + (j - Math.floor(j) - 0.5) * 0.5) / Math.max(1, fragments);
+  });
   // Straight edges draw from the ground up, with a little shuffle
   const lineOrder = data.lines.map((l, i) => clamp01((1 - Math.max(l[1], l[3]) / groundY) * 0.85 + ((i * 0.618) % 1) * 0.15));
 
@@ -187,7 +226,7 @@ export default function BlueprintDrawing({ data, src, progress, label }: Props) 
         const shown = handed ? guideHandoff.reveal : f > 0 ? 1 : 0;
         el.setAttribute('x2', String(g.x1 + (g.x2 - g.x1) * f));
         el.setAttribute('y2', String(g.y1 + (g.y2 - g.y1) * f));
-        el.style.opacity = String(shown * (0.32 - sustain * 0.22));
+        el.style.opacity = guides ? String(shown * (0.32 - sustain * 0.22)) : '0';
       });
 
       // Straight edges: verticals grow from their foot, horizontals from
@@ -195,7 +234,9 @@ export default function BlueprintDrawing({ data, src, progress, label }: Props) 
       data.lines.forEach((l, i) => {
         const el = lineRefs.current[i];
         if (!el) return;
-        const f = ease(clamp01((design - lineOrder[i] * 0.6) / 0.4));
+        // (With fragments, the edges wait for the border to come together)
+        const lineDesign = fragments ? clamp01((design - 0.5) / 0.5) : design;
+        const f = ease(clamp01((lineDesign - lineOrder[i] * 0.6) / 0.4));
         if (l[0] === l[2]) {
           const foot = Math.max(l[1], l[3]);
           const len = Math.abs(l[3] - l[1]);
@@ -213,6 +254,18 @@ export default function BlueprintDrawing({ data, src, progress, label }: Props) 
       // Outline: one stroke around the whole silhouette
       outlineRefs.current.forEach((el) => {
         if (!el) return;
+        if (fragments) {
+          // Fragments here and there round the outline, growing until they
+          // join (at about 80% of Design)
+          const g = clamp01(design / 0.8);
+          // grows slowly at first, so the border stays in pieces for a while
+          const len = (0.06 + 0.94 * g * g) * (1.5 / fragments);
+          const pattern = g > 0 ? fragmentDash(fragCentres, len) : null;
+          el.style.strokeDasharray = pattern ? pattern.dash : 'none';
+          el.style.strokeDashoffset = pattern ? String(pattern.offset) : '0';
+          el.style.opacity = String(g > 0 ? 0.9 - deliver * 0.3 - sustain * 0.3 : 0);
+          return;
+        }
         const f = ease(clamp01((design - 0.1) / 0.85));
         el.style.strokeDashoffset = String(1 - f);
         el.style.opacity = String(f > 0 ? 0.9 - deliver * 0.3 - sustain * 0.3 : 0);
@@ -259,7 +312,7 @@ export default function BlueprintDrawing({ data, src, progress, label }: Props) 
     };
     // The drawing's data is static for the life of the component
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [progress, src]);
+  }, [progress, src, guides, fragments]);
 
   return (
     <div ref={boxRef} data-blueprint-box className="relative w-full" style={{ aspectRatio: `${w} / ${h}` }}>

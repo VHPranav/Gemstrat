@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import SubPage from '@/components/pages/SubPage';
-import FocusSteps from '@/components/pages/FocusSteps';
+import FocusStage from '@/components/pages/FocusStage';
 
 export const metadata: Metadata = {
   title: 'Focus areas — Gemstrat',
@@ -30,15 +30,16 @@ const AREAS = [
   },
 ];
 
+const TITLE = ['Five disciplines.', 'One connected', 'practice.'];
+const INTRO =
+  'Strategy, technology and brand usually live in separate firms. We bring them under one roof, so the plan, the systems and the story are built to work together.';
+
 export default function FocusAreasPage() {
+  // The statue stage opens the page itself: its headline sits centred over
+  // the statue (FocusStage), so the page has no separate hero
   return (
-    <SubPage
-      eyebrow="Focus areas"
-      title={['Five disciplines.', 'One connected', 'practice.']}
-      next={{ label: 'See the five', href: '#areas' }}
-      intro="Strategy, technology and brand usually live in separate firms. We bring them under one roof, so the plan, the systems and the story are built to work together."
-    >
-      <FocusSteps steps={AREAS.map((a, i) => ({ n: `0${i + 1}`, title: a.title, body: a.body }))} />
+    <SubPage bare title={TITLE} intro={INTRO} next={{ label: 'See the five', href: '#areas' }}>
+      <FocusStage title={TITLE} intro={INTRO} areas={AREAS} />
     </SubPage>
   );
 }

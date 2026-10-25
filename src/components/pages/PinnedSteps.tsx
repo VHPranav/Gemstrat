@@ -10,8 +10,7 @@ import { onScrollFrame } from '@/lib/scrollFrame';
 // left: each blurs in and rises when its turn comes and blurs out as the next
 // arrives. Invisible markers, one per step, carry the scroll; `progress` runs
 // 0 → steps.length. On phones the drawing pins across the top and the steps
-// sit under it. Used by the Approach (Taj Mahal) and Focus areas (Statue of
-// Liberty) pages.
+// sit under it. Used by the Approach page's "How we work" (the Taj Mahal).
 // ---------------------------------------------------------------------------
 
 export interface PinnedStep {
