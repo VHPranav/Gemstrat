@@ -7,6 +7,9 @@ import { addZLights, applyZShade, createZMaterial, createZReflections, moveZGlin
 import { getGpuTier } from '@/lib/device';
 import { getPerfMode } from '@/lib/perf';
 import { ZPieceGlyph } from '@/components/navigation/ZIcon';
+import { goTo } from '@/lib/navigate';
+import { zSpot, Z_CAMERA, Z_FOV, Z_GHOST_OPACITY, Z_TILT } from '@/lib/zSpot';
+import { HANDOFF_DONE, HANDOFF_PAGE, HANDOFF_TARGET, type HandoffTarget } from '@/lib/handoff';
 
 // ---------------------------------------------------------------------------
 // ZMenu
@@ -65,15 +68,24 @@ const SHRINK_AT = 0.62; // the Z shrinks back into the button, the page shows
 const SHRINK = 0.3;
 const CLOSE_END = SHRINK_AT + SHRINK + 0.03;
 
-const GHOST_OPACITY = 0.16;
+const GHOST_OPACITY = Z_GHOST_OPACITY;
+// Handing over to a page (see lib/handoff): the menu goes to the page, the
+// skeleton glides to the page's own Z (on the Approach page it is already
+// there), then fades as the page's takes over
+const SKELETON_OPACITY = GHOST_OPACITY;
+const H_NAV = 0.55; // when the page changes underneath
+const H_MOVE = 0.65; // the skeleton's glide to the page's Z
+const H_FADE = 0.5; // the menu fading away
+const H_TIMEOUT = 2.4; // the page hasn't shown: fade anyway
+const H_NO_Z = 0.6; // the page has shown but has no Z: fade
 // Landed, each piece lights up into the flat logo's colours (white bars,
 // grey diagonal); in flight it is the hero's dark glass
 const LIT = { color: 0xe6e6e6, emissive: 0x6a6a6a, metalness: 0.55 };
 const LIT_ACCENT = { color: 0x9a9ca0, emissive: 0x3a3b3e, metalness: 0.55 };
 const SPIN = 2.6; // rad of tumble mid-flight
-const TILT = 0.35; // rad the assembled Z is turned, to show its depth
-const FOV = 30;
-const CAMERA_Z = 12;
+const TILT = Z_TILT; // rad the assembled Z is turned, to show its depth
+const FOV = Z_FOV;
+const CAMERA_Z = Z_CAMERA;
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -92,13 +104,11 @@ function layout(W: number, H: number) {
   const top = mobile ? Math.max(120, H * 0.17) : H / 2 - 2 * rowH;
   const left = mobile ? 20 : Math.max(32, W * 0.08);
   const stagger = mobile ? 10 : Math.min(W * 0.022, 34); // the cascade follows the Z's diagonal
-  const zHeight = mobile ? Math.min(H * 0.2, 170) : Math.min(H * 0.56, 460);
   return {
     box,
     rows: [0, 1, 2, 3, 4].map((i) => ({ left: left + i * stagger, y: top + i * rowH })),
-    // The wireframe Z: on the right, centred top to bottom (on phones, below
-    // the links)
-    z: mobile ? { x: W * 0.74, y: H - 30 - zHeight / 2 - 40, h: zHeight } : { x: W * 0.72, y: H / 2, h: zHeight },
+    // The wireframe Z (shared with the Approach hero: lib/zSpot)
+    z: zSpot(W, H),
   };
 }
 
@@ -136,9 +146,17 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
     let L = layout(W, H);
 
     // --- Channels: every animated value, 0-1 ---------------------------------
-    const v = { backdrop: 0, arrive: 0, ghost: 0, u: [0, 0, 0, 0, 0], label: [0, 0, 0, 0, 0] };
+    const v = { backdrop: 0, arrive: 0, ghost: 0, solid: 1, glow: 0, u: [0, 0, 0, 0, 0], label: [0, 0, 0, 0, 0] };
     let from = structuredClone(v);
-    let phase: 'closed' | 'open' | 'closing' = 'closed';
+    let phase: 'closed' | 'open' | 'closing' | 'handoff' = 'closed';
+    // Handoff state: where the page's Z is, when it arrived, the glide, and
+    // when the fade began (-1: not yet)
+    let handoffTarget: HandoffTarget | null = null;
+    let targetAt = -1;
+    let fadeAt = -1;
+    let move = 0;
+    let pageAt = -1; // when the new page rendered (its backdrop fade)
+    let pageShown = false;
     let phaseStart = 0;
     let navigated = false;
     // Smoothed hover, per row and overall
@@ -223,6 +241,7 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
       r.compile(scene, camera);
 
       const zPos = new THREE.Vector3();
+      const ghostAt = new THREE.Vector3();
       const spot = new THREE.Vector3();
       const start = new THREE.Vector3();
       const posA = new THREE.Vector3();
@@ -252,9 +271,14 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
         qZ.setFromEuler(euler.set(lean.x * a, (TILT + lean.y) * a, 0));
 
         // The wireframe stays on the spot, at full size
-        ghost.position.copy(spot);
+        // (handing over, it glides to the page's own Z)
+        const ht = handoffTarget;
+        const gx = ht ? L.z.x + (ht.x - L.z.x) * move : L.z.x;
+        const gy = ht ? L.z.y + (ht.y - L.z.y) * move : L.z.y;
+        const gh = ht ? L.z.h + (ht.h - L.z.h) * move : L.z.h;
+        ghost.position.copy(toWorld(gx, gy, ghostAt));
         ghost.quaternion.setFromEuler(euler.set(lean.x, TILT + lean.y, 0));
-        ghost.scale.setScalar((L.z.h * wpp) / S_HEIGHT);
+        ghost.scale.setScalar((gh * wpp) / S_HEIGHT);
         ghost.visible = v.ghost > 0.001;
 
         pieces.forEach((p, part) => {
@@ -278,15 +302,15 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
           // other pieces dim while one is hovered
           const present = clamp01(a / 0.12);
           const dim = 1 - 0.6 * hoverMix * (1 - hoverAmt[row]);
-          p.mesh.material.opacity = 0.88 * present * dim;
+          p.mesh.material.opacity = 0.88 * present * dim * v.solid;
           // Lights up as it lands (and dims again leaving)
           const glow = easeInCubic(u);
           p.mesh.material.color.lerpColors(p.dark.color, p.lit.color, glow);
           p.mesh.material.emissive.lerpColors(p.dark.emissive, p.lit.emissive, glow);
           p.mesh.material.metalness = p.dark.metalness + (p.lit.metalness - p.dark.metalness) * glow;
-          p.mesh.visible = present > 0.002;
+          p.mesh.visible = present > 0.002 && v.solid > 0.002;
 
-          ghostMats[part].opacity = v.ghost * (GHOST_OPACITY + 0.55 * hoverAmt[row]);
+          ghostMats[part].opacity = v.ghost * (GHOST_OPACITY + (SKELETON_OPACITY - GHOST_OPACITY) * v.glow + 0.55 * hoverAmt[row]);
         });
 
         r.render(scene, camera);
@@ -364,12 +388,54 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
           navigated = true;
           html.classList.remove('menu-open');
           const href = propsRef.current.target;
-          if (href) document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
+          if (href) goTo(href);
         }
         if (t >= CLOSE_END) {
           setClosed();
           propsRef.current.onClosed();
           return;
+        }
+      }
+
+      if (phase === 'handoff') {
+        // The links go, the pieces fly back into the Z and fade, and the
+        // skeleton brightens
+        for (let i = 0; i < 5; i++) {
+          v.label[i] = channel(from.label[i], 0, t, 0, 0.22);
+          v.u[i] = channel(from.u[i], 0, t, 0.05 + (4 - i) * 0.04, 0.5);
+        }
+        v.solid = channel(1, 0, t, 0.42, 0.3);
+        v.glow = channel(from.glow, 1, t, 0.35, 0.35);
+        // The page changes underneath
+        if (t >= H_NAV && !navigated) {
+          navigated = true;
+          html.classList.remove('menu-open');
+          html.dataset.handoff = 'z';
+          const href = propsRef.current.target;
+          if (href) goTo(href);
+        }
+        // The skeleton glides to the page's Z (or, with none, just fades)
+        if (navigated && fadeAt < 0) {
+          if (handoffTarget) {
+            if (targetAt < 0) targetAt = t;
+            move = channel(0, 1, t, targetAt, H_MOVE);
+            if (t >= targetAt + H_MOVE) fadeAt = t;
+          } else if (pageAt >= 0 ? t >= pageAt + H_NO_Z : t >= H_TIMEOUT) fadeAt = t;
+          if (fadeAt >= 0) window.dispatchEvent(new Event(HANDOFF_DONE));
+        }
+        // The backdrop goes as soon as the page is there (no black gap)
+        if (pageShown && pageAt < 0) pageAt = t;
+        if (pageAt >= 0) v.backdrop = channel(1, 0, t, pageAt, 0.35, easeOutCubic);
+        if (fadeAt >= 0) {
+          v.backdrop = Math.min(v.backdrop, channel(1, 0, t, fadeAt, H_FADE));
+          v.ghost = channel(1, 0, t, fadeAt, H_FADE);
+          if (t >= fadeAt + H_FADE) {
+            delete html.dataset.handoff;
+            handoffTarget = null;
+            setClosed();
+            propsRef.current.onClosed();
+            return;
+          }
         }
       }
 
@@ -413,12 +479,25 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
       from = structuredClone(v);
       phaseStart = time;
       navigated = false;
+      handoffTarget = null;
+      targetAt = -1;
+      fadeAt = -1;
+      move = 0;
+      pageAt = -1;
+      pageShown = false;
       if (toOpen) {
         phase = 'open';
+        v.solid = 1;
+        v.glow = 0;
         rootEl.style.visibility = 'visible';
         html.classList.add('menu-open');
         hoverRef.current = -1;
-      } else phase = 'closing';
+      } else {
+        // A page of its own (not this one) hands over; a section closes
+        const href = propsRef.current.target;
+        const page = href?.startsWith('/') && href !== window.location.pathname;
+        phase = page ? 'handoff' : 'closing';
+      }
       if (!raf) {
         last = performance.now();
         raf = requestAnimationFrame(frame);
@@ -426,6 +505,15 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
     };
     // Already asked to open (the button was clicked before this mounted)
     if (propsRef.current.open) phaseRef.current(true);
+
+    const onTarget = (e: Event) => {
+      if (phase === 'handoff') handoffTarget = (e as CustomEvent<HandoffTarget>).detail;
+    };
+    window.addEventListener(HANDOFF_TARGET, onTarget);
+    const onPage = () => {
+      if (phase === 'handoff') pageShown = true;
+    };
+    window.addEventListener(HANDOFF_PAGE, onPage);
 
     const onPointerMove = (e: PointerEvent) => {
       lean.ty = ((e.clientX / W) * 2 - 1) * 0.25;
@@ -451,6 +539,8 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
       cancelAnimationFrame(resizeRaf);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener(HANDOFF_TARGET, onTarget);
+      window.removeEventListener(HANDOFF_PAGE, onPage);
       html.classList.remove('menu-open');
       phaseRef.current = null;
       dispose3d?.();

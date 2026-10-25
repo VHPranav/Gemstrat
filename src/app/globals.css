@@ -390,3 +390,39 @@ html[data-perf="lite"] *::after {
   -webkit-backdrop-filter: none !important;
   mix-blend-mode: normal !important;
 }
+
+/* ---------- Sub pages (src/components/pages/SubPage.tsx) ---------- */
+.sub-rise {
+  opacity: 0;
+  transform: translate3d(0, 24px, 0);
+  animation: subRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes subRise {
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sub-rise { animation: none; opacity: 1; transform: none; }
+}
+
+/* Sub page hero copy: each word blurs in, the rest fades up. Held until
+   `page-in` (SubPage), so a page opened from the menu waits for the handoff */
+.sub-word {
+  opacity: 0;
+  filter: blur(14px);
+  transform: translate3d(0, 0.18em, 0);
+  animation: subWordIn 1.1s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes subWordIn {
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+.sub-fade {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  animation: subRise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+html:not(.page-in) :is(.sub-word, .sub-fade) {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sub-word, .sub-fade { animation: none; opacity: 1; filter: none; transform: none; }
+}

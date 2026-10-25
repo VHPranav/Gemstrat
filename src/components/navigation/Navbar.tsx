@@ -5,6 +5,8 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { onScrollFrame } from '@/lib/scrollFrame';
 import { ZIcon } from '@/components/navigation/ZIcon';
+import { useRouter } from 'next/navigation';
+import { goTo, setRouterPush } from '@/lib/navigate';
 
 // The Z menu (three.js) loads on its own, the first time the button is
 // hovered, focused or pressed
@@ -19,8 +21,8 @@ const ZMenu = dynamic(() => import('@/components/navigation/ZMenu'), { ssr: fals
 // ---------------------------------------------------------------------------
 
 const MENU_LINKS = [
-  { label: 'Approach', href: '#about-intro' },
-  { label: 'Focus areas', href: '#focus-areas' },
+  { label: 'Approach', href: '/approach' },
+  { label: 'Focus areas', href: '/focus-areas' },
   { label: 'Advantage', href: '#advantage' },
   { label: 'Leadership', href: '#leadership' },
   { label: 'Voices', href: '#reviews' },
@@ -37,6 +39,11 @@ export default function Navbar() {
   const [armed, setArmed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
+  const router = useRouter();
+  useEffect(() => {
+    setRouterPush((href) => router.push(href));
+    return () => setRouterPush(null);
+  }, [router]);
 
   // Light theme while the top of the viewport overlaps a white section
   useEffect(() => {
@@ -54,7 +61,9 @@ export default function Navbar() {
       setIsLight(
         (overlapsTop(focusAreas) && !pastFocus) ||
           overlapsTop(document.getElementById('advantage')) ||
-          overlapsTop(document.getElementById('leadership'))
+          overlapsTop(document.getElementById('leadership')) ||
+          // White sections on the other pages
+          Array.from(document.querySelectorAll<HTMLElement>('[data-nav-light]')).some(overlapsTop)
       );
     };
 
@@ -75,6 +84,10 @@ export default function Navbar() {
 
   const arm = () => {
     if (armed) return;
+    // Get the menu's pages (and the Approach hero's 3D) ready ahead of the
+    // click, so changing page doesn't wait on them
+    MENU_LINKS.forEach((l) => l.href.startsWith('/') && router.prefetch(l.href));
+    void import('@/components/ui/SkeletonMorph');
     setTrigger(buttonRef.current);
     setArmed(true);
   };
@@ -87,9 +100,7 @@ export default function Navbar() {
     if (menu === 'open') close(null);
     else setMenu('open');
   };
-  const scrollTo = (href: string) => {
-    document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollTo = goTo;
   // Logo and Let's talk: straight there, or via the menu's closing if it's up
   const go = (href: string) => (e: React.MouseEvent) => {
     e.preventDefault();
