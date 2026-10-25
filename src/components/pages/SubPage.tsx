@@ -225,10 +225,10 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
 
       {children}
 
-      {/* Closing: on the page's black, set off by a hairline */}
+      {/* Closing: on the page's black */}
       <section
         id="contact"
-        className="bg-[#090909] text-white border-t border-white/10 px-6 sm:px-10 lg:px-16 xl:px-20 py-24 sm:py-36 flex flex-col sm:flex-row sm:items-end justify-between gap-10"
+        className="bg-[#090909] text-white px-6 sm:px-10 lg:px-16 xl:px-20 py-24 sm:py-36 flex flex-col sm:flex-row sm:items-end justify-between gap-10"
       >
         <h2 className="font-sans text-[clamp(2.2rem,5.4vw,84px)] font-normal tracking-[-0.045em] leading-[1] m-0">
           Solving what matters,

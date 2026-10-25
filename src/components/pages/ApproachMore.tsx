@@ -2,12 +2,14 @@
 
 import React, { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { onScrollFrame } from '@/lib/scrollFrame';
+import taj from '@/data/blueprint/taj-mahal.json';
+import LineMap, { cityLandsAt, MAP_CITIES, MAP_H, MAP_W } from '@/components/ui/LineMap';
 
 // ---------------------------------------------------------------------------
-// The Approach page's sections after "How we work": a statement whose words
-// light up as you scroll, the ways to work with Gemstrat, and the regions
-// with their live local time. Everything blurs in and rises as it comes into
-// view, like the steps above.
+// The Approach page's sections after "How we work": a statement in outlined
+// letters that the Taj's ink soaks into as you scroll, and the regions on a
+// line map that draws itself (LineMap), with their live local times. The rest
+// blurs in and rises as it comes into view, like the steps above.
 // ---------------------------------------------------------------------------
 
 const PAD = 'px-5 sm:px-6 lg:px-8';
@@ -27,7 +29,7 @@ function Reveal({ children, delay = 0, className = '' }: { children: React.React
           io.disconnect();
         }
       },
-      { rootMargin: '0px 0px -12% 0px' }
+      { rootMargin: '0px 0px -12% 0px' },
     );
     io.observe(el);
     return () => io.disconnect();
@@ -54,97 +56,120 @@ function Reveal({ children, delay = 0, className = '' }: { children: React.React
 const STATEMENT =
   'We don’t stop at advice. We stay until the plan is running, the numbers are moving, and your team owns what we built together.';
 
-/** Pinned while you scroll past it; its words light up one after another */
+const WORDS = STATEMENT.split(' ');
+
+// The ink: the Taj blueprint's shaded drawing (white ink on clear)
+const INK_SRC = `/images/blueprint/taj-mahal.webp?v=${taj.v}`;
+const INK_RATIO = taj.w / taj.h;
+
+/** A fixed pseudo-random number for word i, slot k (same on every visit) */
+const seeded = (i: number, k: number) => {
+  const x = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453;
+  return x - Math.floor(x);
+};
+
+/** Pinned while you scroll past it. Its words are outlines, like the
+ *  blueprint's lines; one after another, the Taj's ink soaks into them from
+ *  two points that spread like blots. The ink is one drawing laid across the
+ *  whole sentence, so together the words show the Taj. */
 function Statement() {
   const ref = useRef<HTMLElement>(null);
-  const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const words = STATEMENT.split(' ');
+  const textRef = useRef<HTMLParagraphElement>(null);
+  const inkRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const words = WORDS;
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      wordRefs.current.forEach((el) => el && (el.style.opacity = '1'));
-      return;
-    }
-    return onScrollFrame(() => {
+    const text = textRef.current;
+    if (!text) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Lay the one drawing across the sentence: each word shows its own part
+    const place = () => {
+      // Covering the whole sentence (on phones it's taller than wide)
+      const box = text.getBoundingClientRect();
+      const iw = Math.max(box.width, box.height * INK_RATIO);
+      const ih = iw / INK_RATIO;
+      const ox = (box.width - iw) / 2;
+      const oy = (box.height - ih) / 2;
+      inkRefs.current.forEach((ink) => {
+        if (!ink) return;
+        const r = ink.getBoundingClientRect();
+        ink.style.backgroundSize = `${iw}px ${ih}px, 100% 100%`;
+        ink.style.backgroundPosition = `${box.left - r.left + ox}px ${box.top - r.top + oy}px, 0 0`;
+      });
+    };
+    const ro = new ResizeObserver(place);
+    ro.observe(text);
+    document.fonts?.ready.then(place);
+
+    // Two blot centres per word
+    const blots = words.map((_, i) => [
+      [15 + seeded(i, 1) * 70, 20 + seeded(i, 2) * 60],
+      [15 + seeded(i, 3) * 70, 20 + seeded(i, 4) * 60],
+    ]);
+    const last: number[] = words.map(() => -1);
+    const stop = onScrollFrame(() => {
       const el = ref.current;
       if (!el) return;
       const r = el.getBoundingClientRect();
       const run = r.height - window.innerHeight;
       const p = Math.min(1, Math.max(0, -r.top / (run || 1)));
-      wordRefs.current.forEach((w, i) => {
-        if (!w) return;
-        const at = (i / words.length) * 0.8;
-        const k = Math.min(1, Math.max(0, (p - at) / 0.12));
-        w.style.opacity = String(0.14 + 0.86 * k);
+      inkRefs.current.forEach((ink, i) => {
+        if (!ink) return;
+        const at = (i / words.length) * 0.72;
+        const raw = reduced ? 1 : Math.min(1, Math.max(0, (p - at) / 0.18));
+        const k = Math.round(raw * 200) / 200;
+        if (k === last[i]) return;
+        last[i] = k;
+        // Each blot grows from nothing to past the word's corners, with a
+        // soft edge; the second starts a little later
+        const blot = ([x, y]: number[], t: number) => {
+          const rad = Math.max(0, t) * 150;
+          return `radial-gradient(circle at ${x}% ${y}%, #000 ${rad}%, transparent ${rad + 22}%)`;
+        };
+        const [b1, b2] = blots[i];
+        const mask = `${blot(b1, k)}, ${blot(b2, (k - 0.25) / 0.75)}`;
+        ink.style.maskImage = mask;
+        ink.style.webkitMaskImage = mask;
+        ink.style.opacity = k > 0 ? '1' : '0';
       });
     });
-  }, [words.length]);
+    return () => {
+      stop();
+      ro.disconnect();
+    };
+  }, [words]);
 
   return (
-    <section ref={ref} className="relative h-[180vh] border-t border-white/10">
+    <section ref={ref} className="relative h-[220vh]">
       <div className={`sticky top-0 h-screen h-[100svh] flex items-center ${PAD}`}>
-        <p className="m-0 max-w-[1100px] font-sans font-normal tracking-[-0.04em] leading-[1.08] text-[clamp(2rem,4.6vw,68px)] text-white">
+        <p
+          ref={textRef}
+          className="m-0 w-full lg:max-w-[75%] font-sans font-medium tracking-[-0.04em] leading-[1.06] text-[clamp(1.9rem,4.3vw,76px)]"
+        >
           {words.map((w, i) => (
-            <span
-              key={i}
-              ref={(el) => {
-                wordRefs.current[i] = el;
-              }}
-              style={{ opacity: 0.14 }}
-            >
-              {w}{' '}
-            </span>
+            <React.Fragment key={i}>
+              <span className="relative inline-block">
+                {/* The outline */}
+                <span className="text-transparent [-webkit-text-stroke:1px_rgba(255,255,255,0.4)]">{w}</span>
+                {/* The ink, soaking in */}
+                <span
+                  ref={(el) => {
+                    inkRefs.current[i] = el;
+                  }}
+                  aria-hidden="true"
+                  className="absolute inset-0 text-transparent bg-clip-text [-webkit-background-clip:text] bg-no-repeat"
+                  style={{
+                    backgroundImage: `url(${INK_SRC}), linear-gradient(rgba(255,255,255,0.24), rgba(255,255,255,0.24))`,
+                    opacity: 0,
+                  }}
+                >
+                  {w}
+                </span>
+              </span>{' '}
+            </React.Fragment>
           ))}
         </p>
-      </div>
-    </section>
-  );
-}
-
-// --- Ways to work with us ----------------------------------------------------
-
-const MODELS = [
-  {
-    name: 'Strategy sprint',
-    span: 'Weeks',
-    body: 'A sharp diagnosis and a clear plan: the priorities that matter, the roadmap to get there and the business case behind it, ready for the board.',
-  },
-  {
-    name: 'Transformation programme',
-    span: 'Months',
-    body: 'We lead delivery alongside your teams — systems, automation, brand and growth — in short cycles, so results show up early and keep compounding.',
-  },
-  {
-    name: 'Embedded partner',
-    span: 'Ongoing',
-    body: 'A senior Gemstrat lead inside your leadership rhythm, keeping momentum, decisions and the numbers honest long after launch.',
-  },
-];
-
-function Models() {
-  return (
-    <section className={`${PAD} py-24 sm:py-36 border-t border-white/10`}>
-      <Reveal>
-        <h2 className={HEADING}>
-          Ways to work
-          <br />
-          <span className="text-white/40">with us.</span>
-        </h2>
-      </Reveal>
-      <div className="mt-16 sm:mt-24 grid gap-px bg-white/10 md:grid-cols-3">
-        {MODELS.map((m, i) => (
-          <Reveal key={m.name} delay={0.1 * i} className="bg-[#090909]">
-            <div className="h-full flex flex-col gap-10 py-8 md:py-10 md:px-8 md:first:pl-0">
-              <span className="font-sans text-[11px] uppercase tracking-[0.12em] text-white/40">{m.span}</span>
-              <div>
-                <h3 className="m-0 font-sans font-normal tracking-[-0.03em] text-[clamp(1.6rem,2.4vw,34px)] leading-[1.05]">
-                  {m.name}
-                </h3>
-                <p className="mt-4 m-0 font-archivo text-[16px] leading-[1.55] text-white/60 max-w-[34rem]">{m.body}</p>
-              </div>
-            </div>
-          </Reveal>
-        ))}
       </div>
     </section>
   );
@@ -177,44 +202,105 @@ const getMinute = () => (nowMinute ||= Math.floor(Date.now() / 60000));
 function LocalTime({ tz }: { tz: string }) {
   const minute = useSyncExternalStore(subscribeClock, getMinute, () => 0);
   if (!minute) return <span>--:--</span>;
-  const time = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: tz }).format(new Date(minute * 60000));
+  const time = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: tz }).format(
+    new Date(minute * 60000),
+  );
   return <span>{time}</span>;
 }
 
+// Where each city's label sits beside its pin (the close pairs, Toronto and
+// New York, Dubai and Mumbai, face away from each other)
+const LABEL_SIDE: Record<string, string> = {
+  Toronto: 'translate(calc(-100% - 12px), calc(-100% - 6px))',
+  'New York': 'translate(12px, 6px)',
+  Dubai: 'translate(calc(-100% - 12px), calc(-100% - 4px))',
+  Mumbai: 'translate(12px, -30%)',
+  Nairobi: 'translate(12px, 4px)',
+};
+// On phones the map is zoomed in, so the labels at its edges tuck in
+const LABEL_SIDE_PHONE: Record<string, string> = {
+  ...LABEL_SIDE,
+  Toronto: 'translate(-35%, calc(-100% - 10px))',
+  Mumbai: 'translate(-75%, 10px)',
+};
+
+/** Pinned while you scroll past it: the world sweeps in as dots, the five
+ *  cities are joined by arcs drawn one after another, and each city's label
+ *  (with its live time) comes in as its arc lands */
 function Regions() {
+  const ref = useRef<HTMLElement>(null);
+  const progress = useRef(0);
+  const labelRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    return onScrollFrame(() => {
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const run = r.height - window.innerHeight;
+      const p = Math.min(1, Math.max(0, -r.top / (run || 1)));
+      progress.current = p;
+      MAP_CITIES.forEach((c, i) => {
+        const label = labelRefs.current[i];
+        if (!label) return;
+        const k = Math.min(1, Math.max(0, (p - cityLandsAt(c.name)) / 0.06));
+        label.style.opacity = String(k);
+        label.style.filter = k < 1 ? `blur(${((1 - k) * 8).toFixed(1)}px)` : '';
+      });
+    });
+  }, []);
+
   return (
-    <section className={`${PAD} py-24 sm:py-36 border-t border-white/10`}>
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,3fr)_minmax(0,7fr)] lg:gap-12 xl:gap-16">
-        <Reveal>
-          <h2 className={HEADING}>
-            Five regions.
-            <br />
-            <span className="text-white/40">One team.</span>
-          </h2>
-          <p className="mt-8 m-0 font-archivo text-[16px] lg:text-[17px] leading-[1.55] text-white/60 max-w-[30rem]">
-            A boutique bench with partners where our clients grow — close enough to be in the room, connected enough to bring
-            what works elsewhere.
-          </p>
-        </Reveal>
-        <ul className="list-none p-0 m-0 border-t border-white/10">
-          {REGIONS.map((r, i) => (
-            <li key={r.region} className="border-b border-white/10">
-              <Reveal delay={0.06 * i}>
-                <div className="flex items-baseline justify-between gap-6 py-6 sm:py-7">
-                  <span className="font-sans font-normal tracking-[-0.03em] text-[clamp(1.5rem,2.6vw,38px)] leading-none">
-                    {r.region}
-                  </span>
-                  <span className="flex items-baseline gap-4 sm:gap-8 font-sans text-[12px] uppercase tracking-[0.1em] text-white/50 whitespace-nowrap">
-                    <span className="hidden sm:inline">{r.city}</span>
-                    <span className="text-white/85 tabular-nums">
-                      <LocalTime tz={r.tz} />
+    <section ref={ref} className="relative h-[260vh]">
+      <div className={`sticky top-0 h-screen h-[100svh] flex items-center overflow-hidden ${PAD}`}>
+        <div className="w-full grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,7fr)] lg:gap-12 xl:gap-16 items-center">
+          <Reveal>
+            <h2 className={HEADING}>
+              Five regions.
+              <br />
+              <span className="text-white/40">One team.</span>
+            </h2>
+            <p className="mt-8 m-0 font-archivo text-[16px] lg:text-[17px] leading-[1.55] text-white/60 max-w-[30rem]">
+              A boutique bench with partners where our clients grow — close enough to be in the room, connected enough to bring
+              what works elsewhere.
+            </p>
+          </Reveal>
+
+          {/* On phones, zoomed to the band the cities sit in (the Americas to
+              India), so their labels have room */}
+          <div className="relative w-full max-lg:w-[175%] max-lg:-ml-[36%]" style={{ aspectRatio: `${MAP_W} / ${MAP_H}` }}>
+            <LineMap progress={progress} />
+            {MAP_CITIES.map((c, i) => {
+              const info = REGIONS.find((r) => r.city === c.name);
+              return (
+                <div
+                  key={c.name}
+                  className="absolute left-0 top-0 pointer-events-none"
+                  style={{ left: `${(c.x / MAP_W) * 100}%`, top: `${(c.y / MAP_H) * 100}%` }}
+                >
+                  <div
+                    ref={(el) => {
+                      labelRefs.current[i] = el;
+                    }}
+                    className="whitespace-nowrap font-sans uppercase tracking-[0.1em] text-[9px] sm:text-[11px] leading-[1.4] [transform:var(--side-phone)] lg:[transform:var(--side)]"
+                    style={
+                      {
+                        '--side': LABEL_SIDE[c.name],
+                        '--side-phone': LABEL_SIDE_PHONE[c.name],
+                        opacity: 0,
+                      } as React.CSSProperties
+                    }
+                  >
+                    <span className="block text-white/40">{info?.region}</span>
+                    <span className="block text-white/90">
+                      {c.name} <span className="tabular-nums text-white/60">{info && <LocalTime tz={info.tz} />}</span>
                     </span>
-                  </span>
+                  </div>
                 </div>
-              </Reveal>
-            </li>
-          ))}
-        </ul>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -224,7 +310,6 @@ export default function ApproachMore() {
   return (
     <>
       <Statement />
-      <Models />
       <Regions />
     </>
   );
