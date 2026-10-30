@@ -1,0 +1,123 @@
+[
+  {
+    "id": "01",
+    "slug": "angular-convergence",
+    "name": "Angular convergence",
+    "page": 3,
+    "description": "Nested corners converge into two precise junctions.",
+    "src": "/images/abstract/angular-convergence.svg",
+    "width": 651.968,
+    "height": 580,
+    "format": "svg"
+  },
+  {
+    "id": "02",
+    "slug": "contour-ribbon",
+    "name": "Contour ribbon",
+    "page": 4,
+    "description": "A continuous ribbon shaped by sweeping contours.",
+    "src": "/images/abstract/contour-ribbon.svg",
+    "width": 461.96799999999996,
+    "height": 765.354,
+    "format": "svg"
+  },
+  {
+    "id": "03",
+    "slug": "interlocking-loops",
+    "name": "Interlocking loops",
+    "page": 5,
+    "description": "Layered loops interlock across a horizontal axis.",
+    "src": "/images/abstract/interlocking-loops.svg",
+    "width": 555,
+    "height": 160,
+    "format": "svg"
+  },
+  {
+    "id": "04",
+    "slug": "contour-sculpture",
+    "name": "Contour sculpture",
+    "page": 6,
+    "description": "Fine contours fold into a sculptural surface.",
+    "src": "/images/abstract/contour-sculpture.webp",
+    "width": 525,
+    "height": 585,
+    "format": "webp"
+  },
+  {
+    "id": "05",
+    "slug": "wire-figure",
+    "name": "Wire figure",
+    "page": 7,
+    "description": "An angular figure composed of connected facets.",
+    "src": "/images/abstract/wire-figure.svg",
+    "width": 207,
+    "height": 495,
+    "format": "svg"
+  },
+  {
+    "id": "06",
+    "slug": "folded-surface",
+    "name": "Folded surface",
+    "page": 7,
+    "description": "A softly shaded surface with an open, folded centre.",
+    "src": "/images/abstract/folded-surface.webp",
+    "width": 230,
+    "height": 190,
+    "format": "webp"
+  },
+  {
+    "id": "07",
+    "slug": "wave-bands",
+    "name": "Wave bands",
+    "page": 9,
+    "description": "Parallel bands bend into an undulating landscape.",
+    "src": "/images/abstract/wave-bands.svg",
+    "width": 651.968,
+    "height": 315,
+    "format": "svg"
+  },
+  {
+    "id": "08",
+    "slug": "profile-flow",
+    "name": "Profile flow",
+    "page": 10,
+    "description": "Alternating bands form a flowing human profile.",
+    "src": "/images/abstract/profile-flow.svg",
+    "width": 290,
+    "height": 571,
+    "format": "svg"
+  },
+  {
+    "id": "09",
+    "slug": "radial-framework",
+    "name": "Radial framework",
+    "page": 11,
+    "description": "An architectural framework opens around a central void.",
+    "src": "/images/abstract/radial-framework.svg",
+    "width": 548,
+    "height": 229,
+    "format": "svg"
+  },
+  {
+    "id": "10",
+    "slug": "vanishing-grid",
+    "name": "Vanishing grid",
+    "page": 11,
+    "description": "An intricate field of lines converges on the horizon.",
+    "src": "/images/abstract/vanishing-grid.svg",
+    "width": 548,
+    "height": 105,
+    "format": "svg"
+  },
+  {
+    "id": "11",
+    "slug": "geometric-lattice",
+    "name": "Geometric lattice",
+    "page": 14,
+    "description": "An interwoven lattice of angular geometric forms.",
+    "src": "/images/abstract/geometric-lattice.svg",
+    "width": 375,
+    "height": 485,
+    "format": "svg"
+  }
+]

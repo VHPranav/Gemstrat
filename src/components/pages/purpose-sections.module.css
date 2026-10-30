@@ -1,0 +1,76 @@
+.root { background: #090909; color: #f5f5f5; }
+.mission, .principles, .contact { position: relative; z-index: 1; }
+.purpose, .mission, .principles, .contact { padding: 88px 32px 112px; scroll-margin-top: 70px; }
+.purpose { height: 340vh; margin-top: -100vh; padding: 0; position: relative; }
+.purposePin { position: sticky; top: 0; z-index: 21; height: 100vh; min-height: 620px; display: flex; flex-direction: column; justify-content: center; padding: 88px 32px 112px; }
+.statement { max-width: 1080px; font-size: clamp(36px, 5vw, 76px); font-weight: 400; letter-spacing: -.045em; line-height: 1.08; margin: 0; }
+.word { display: inline-block; white-space: pre; }
+.purposeNote { display: flex; align-items: flex-start; gap: 28px; max-width: 480px; margin: 64px 0 0 auto; color: #999; }
+.purposeNote p { font-size: 17px; line-height: 1.6; margin: 0; }
+.rule { height: 1px; min-width: 64px; margin-top: 14px; background: #777; }
+@media (prefers-reduced-motion: no-preference) {
+  .purposeStatement .word, .purposeNote .word { opacity: 0; filter: blur(12px); transform: translateY(20px); }
+}
+.mission { background: #fff; color: #111; overflow: hidden; }
+.missionGrid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 5%; align-items: center; min-height: min(100svh, 900px); }
+.missionCopy { position: relative; z-index: 10; }
+.heading { font-size: clamp(42px, 5.4vw, 82px); font-weight: 400; line-height: 1.03; letter-spacing: -.045em; margin: 0; }
+.missionCopy p { max-width: 430px; font-size: 18px; line-height: 1.6; color: #555; margin-top: 30px; }
+.missionFootnote { display: block; border-top: 1px solid #0003; padding-top: 20px; margin-top: 48px; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #666; }
+.artwork { position: relative; height: min(100svh, 900px); min-height: 620px; margin: -88px -32px -112px 0; overflow: hidden; background: white; }
+.artwork :global(.animationFrame) { width: 100%; height: 100%; }
+.ribbon { display: block; width: 100%; height: 100%; object-fit: contain; transform: scale(.88); transform-origin: 58% 50%; mix-blend-mode: multiply; }
+.principles { padding-bottom: 40px; }
+.principles .heading { margin-bottom: 70px; }
+.principle { display: grid; grid-template-columns: .45fr 3fr 2fr; gap: 40px; align-items: start; border-top: 1px solid #ffffff30; padding: 44px 0 55px; }
+.number { font-size: 12px; color: #777; padding-top: 8px; font-variant-numeric: tabular-nums; }
+.principle h3 { font-size: clamp(30px, 3.6vw, 54px); font-weight: 400; letter-spacing: -.035em; line-height: 1.08; margin: 0; }
+.principle p { font-size: 16px; line-height: 1.65; color: #999; max-width: 370px; }
+.contact { padding-top: 50px; }
+.contact .heading { max-width: 1200px; }
+.muted { color: #777; }
+.contactBottom { display: flex; align-items: end; justify-content: space-between; gap: 40px; margin-top: 60px; }
+.contactBottom p { font-size: 15px; color: #999; }
+.contactLink { display: inline-flex; justify-content: space-between; align-items: center; gap: 70px; padding: 14px 0; border-bottom: 1px solid #777; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+.contactLink span { font-size: 28px; transition: transform .3s; }
+.contactLink:hover span { transform: translate(3px, -3px); }
+.related { display: flex; justify-content: space-between; gap: 30px; margin-top: 90px; border-top: 1px solid #ffffff30; padding-top: 24px; font-size: 12px; color: #999; }
+.related a { display: flex; gap: 40px; align-items: center; }
+.root a:focus-visible { outline: 1px solid currentColor; outline-offset: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .motionReady [data-reveal] .word { opacity: 0; filter: blur(7px); transform: translateY(16px); transition: opacity .8s, filter .9s, transform .9s cubic-bezier(.2,.7,.2,1); transition-delay: var(--word-delay, 0ms); }
+  .motionReady [data-reveal]:not(:has(.word)) { opacity: 0; transform: translateY(16px); transition: opacity .9s, transform .9s; }
+  .motionReady [data-reveal].shown .word, .motionReady [data-reveal].shown:not(:has(.word)) { opacity: 1; filter: none; transform: none; }
+}
+@media (max-width: 760px) {
+  .purpose, .mission, .principles, .contact { padding: 60px 20px 72px; }
+  .purpose { height: 340vh; margin-top: -100vh; padding: 0; }
+  .purposePin { padding: 60px 20px 72px; }
+  .statement { font-size: clamp(30px, 6.5vw, 46px); }
+  .purposeStatement { max-width: 440px; }
+  .purposeNote { gap: 20px; margin-top: 40px; max-width: 360px; }
+  .rule { min-width: 32px; }
+  .purposeNote p { font-size: 15px; }
+  .missionGrid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; min-height: 100svh; }
+  .missionCopy { padding: 32px 0; }
+  .heading { font-size: clamp(36px, 8vw, 56px); }
+  .missionCopy p { font-size: 16px; margin-top: 24px; }
+  .missionFootnote { margin-top: 32px; }
+  .artwork { height: 100svh; min-height: 620px; margin: -60px -20px -72px 0; }
+  .ribbon { transform: scale(.94); transform-origin: 60% 50%; }
+  .principles .heading { margin-bottom: 40px; }
+  .principle { grid-template-columns: 28px 1fr; column-gap: 16px; row-gap: 22px; padding: 32px 0 40px; }
+  .principle h3 { font-size: clamp(28px, 6vw, 38px); }
+  .principle p { grid-column: 2; font-size: 15px; }
+  .contact { padding-top: 0; }
+  .contactBottom { align-items: flex-start; flex-direction: column; gap: 24px; margin-top: 36px; }
+  .contactLink { width: 100%; }
+  .related { margin-top: 60px; font-size: 11px; }
+  .related a { gap: 14px; }
+}
+@media (max-width: 520px) {
+  .missionGrid { grid-template-columns: 1fr; gap: 0; padding-top: 40px; }
+  .missionCopy { padding: 0 0 24px; }
+  .artwork { height: 68svh; min-height: 430px; margin: 0 -20px -72px 4vw; }
+  .ribbon { transform: scale(.9); transform-origin: 58% 50%; }
+}

@@ -33,31 +33,24 @@ interface SubPageProps {
   /** Headline block centred top to bottom, with no links under it (the
    *  scroll cue stays) */
   centered?: boolean;
-  /** Keep the hero pinned for this many extra screens of scroll, while its
-   *  words blur out (the Approach page's S transition plays over it) */
+  /** Keep the hero pinned for this many extra screens of scroll while its
+   *  words blur away and its visual moves */
   pinned?: number;
   /** No hero of its own: the page's first section opens the page instead
    *  (Focus areas, whose statue stage carries the headline) */
   bare?: boolean;
-  children: React.ReactNode;
+  /** A complete page containing only the hero. */
+  heroOnly?: boolean;
+  closing?: boolean;
+  children?: React.ReactNode;
 }
 
 // The headline blurs out over this much scroll (screens), every word
-// in a scattered order, each over WORD_WINDOW of it — as the homepage hero
-const DISSOLVE = 0.5;
+// in a scattered order, each over WORD_WINDOW of it — like the homepage hero.
+const DISSOLVE = 1;
 const WORD_WINDOW = 0.4;
-
-/** A fixed scattered order for n words (same on every visit) */
-function scatter(n: number) {
-  const order = Array.from({ length: n }, (_, i) => i);
-  let seed = 7;
-  for (let i = n - 1; i > 0; i--) {
-    seed = (seed * 9301 + 49297) % 233280;
-    const j = Math.floor((seed / 233280) * (i + 1));
-    [order[i], order[j]] = [order[j], order[i]];
-  }
-  return order;
-}
+// Match the homepage hero's scattered exit order for this six-word headline.
+const HERO_DISSOLVE_ORDER = [3, 1, 5, 0, 4, 2];
 
 function Arrow({ down }: { down?: boolean }) {
   return (
@@ -97,7 +90,7 @@ function CtaLink({ href, children, delay, down }: { href: string; children: Reac
   );
 }
 
-export default function SubPage({ eyebrow, title, intro, next, aside, centered, pinned = 0, bare, children }: SubPageProps) {
+export default function SubPage({ eyebrow, title, intro, next, aside, centered, pinned = 0, bare, heroOnly, closing = true, children }: SubPageProps) {
   const copyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,16 +113,17 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
   // As the page scrolls on, every word of the headline blurs out, in a
   // scattered order, like the homepage hero; the rest (intro included) fades
   useEffect(() => {
+    if (heroOnly) return;
     const copy = copyRef.current;
     if (!copy) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const words = Array.from(copy.querySelectorAll<HTMLElement>('[data-word]'));
     const fades = Array.from(copy.querySelectorAll<HTMLElement>('[data-fade]'));
-    const rank = scatter(words.length);
     return onScrollFrame(() => {
       const p = Math.min(1, Math.max(0, window.scrollY / window.innerHeight / DISSOLVE));
       words.forEach((el, i) => {
-        const start = (rank[i] / Math.max(1, words.length - 1)) * (1 - WORD_WINDOW);
+        const rank = HERO_DISSOLVE_ORDER.indexOf(i);
+        const start = ((rank === -1 ? i : rank) / Math.max(1, words.length - 1)) * (1 - WORD_WINDOW);
         const wp = Math.min(1, Math.max(0, (p - start) / WORD_WINDOW));
         setWordStyle(el, 1 - wp, wp * 12, -wp * 14);
       });
@@ -137,14 +131,14 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
         el.style.opacity = (1 - p).toFixed(3);
       });
     });
-  }, []);
+  }, [heroOnly]);
 
   let wordIndex = 0;
 
   return (
     <main className="bg-[#090909] text-white min-h-screen">
       {!bare && (
-        <header className="relative w-full" style={pinned ? { height: `${100 + pinned * 100}vh` } : undefined}>
+        <header className="relative z-[1] w-full" style={pinned ? { height: `${100 + pinned * 100}vh` } : undefined}>
           <div className="sticky top-0 w-full h-screen h-[100svh] min-h-[620px] overflow-hidden">
             {aside && <div className="absolute inset-0 pointer-events-none">{aside}</div>}
 
@@ -202,7 +196,7 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
               </div>
 
               {/* Bottom left: scroll cue */}
-              <div data-fade className="absolute left-5 sm:left-6 lg:left-8 bottom-8 sm:bottom-10">
+              {!heroOnly && <div data-fade className="absolute left-5 sm:left-6 lg:left-8 bottom-8 sm:bottom-10">
                 <button
                   type="button"
                   onClick={() => goTo(next.href)}
@@ -222,7 +216,7 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
                     <path d="M8 2v11M3.5 8.5 8 13l4.5-4.5" />
                   </svg>
                 </button>
-              </div>
+              </div>}
             </div>
           </div>
         </header>
@@ -231,7 +225,7 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
       {children}
 
       {/* Closing: on the page's black */}
-      <section
+      {!heroOnly && closing && <section
         id="contact"
         className="bg-[#090909] text-white px-6 sm:px-10 lg:px-16 xl:px-20 py-24 sm:py-36 flex flex-col sm:flex-row sm:items-end justify-between gap-10"
       >
@@ -249,7 +243,7 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
             →
           </span>
         </Link>
-      </section>
+      </section>}
     </main>
   );
 }

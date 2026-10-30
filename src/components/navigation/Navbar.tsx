@@ -2,11 +2,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { onScrollFrame } from '@/lib/scrollFrame';
 import { ZIcon } from '@/components/navigation/ZIcon';
 import { useRouter } from 'next/navigation';
 import { goTo, setRouterPush } from '@/lib/navigate';
+import type { ZMenuLink } from './ZMenu';
 
 // The Z menu (three.js) loads on its own, the first time the button is
 // hovered, focused or pressed
@@ -20,12 +22,16 @@ const ZMenu = dynamic(() => import('@/components/navigation/ZMenu'), { ssr: fals
 // dark-on-light while it sits over the white sections.
 // ---------------------------------------------------------------------------
 
-const MENU_LINKS = [
-  { label: 'Approach', href: '/approach' },
-  { label: 'Focus areas', href: '/focus-areas' },
-  { label: 'Advantage', href: '#advantage' },
-  { label: 'Leadership', href: '#leadership' },
-  { label: 'Voices', href: '#reviews' },
+const MENU_LINKS: ZMenuLink[] = [
+  { label: 'Who we are', children: [
+    { label: 'Our purpose', href: '/our-purpose' },
+    { label: 'Our approach', href: '#about-intro' },
+    { label: 'Leadership', href: '#leadership' },
+  ] },
+  { label: 'Theory of Gemstrat', href: '#statement' },
+  { label: 'Our global presence', href: '/our-global-presence' },
+  { label: 'What we do', href: '/focus-areas' },
+  { label: 'Contact', href: '#contact' },
 ];
 const LETS_TALK_WIDTH = 'w-[6rem] sm:w-[7.5rem]';
 
@@ -86,7 +92,9 @@ export default function Navbar() {
     if (armed) return;
     // Get the menu's pages (and the Approach hero's 3D) ready ahead of the
     // click, so changing page doesn't wait on them
-    MENU_LINKS.forEach((l) => l.href.startsWith('/') && router.prefetch(l.href));
+    MENU_LINKS.flatMap<ZMenuLink>((link) => link.children ?? [link]).forEach((link) => {
+      if (link.href?.startsWith('/')) router.prefetch(link.href);
+    });
     void import('@/components/ui/SkeletonMorph');
     setTrigger(buttonRef.current);
     setArmed(true);
@@ -126,14 +134,15 @@ export default function Navbar() {
           onClosed={() => {
             setMenu('closed');
             setTarget(null);
+            buttonRef.current?.focus();
           }}
         />
       )}
 
       <div className="relative w-full px-5 sm:px-6 py-5 flex items-start justify-between">
         {/* Left: logo */}
-        <a
-          href="#hero"
+        <Link
+          href="/#hero"
           onClick={go('#hero')}
           style={{ animationDelay: '0.8s' }}
           className="nav-item-in pointer-events-auto flex items-center h-10 transition-opacity duration-300 hover:opacity-75"
@@ -148,7 +157,7 @@ export default function Navbar() {
             priority
             className={`h-5 sm:h-6 w-auto shrink-0 transition-[filter] duration-300 ${light ? 'invert' : ''}`}
           />
-        </a>
+        </Link>
 
         <div className="flex items-start gap-2 sm:gap-3">
           {/* Menu: the logo's S. Opening, it flies out as the 3D S (ZMenu)
@@ -190,8 +199,8 @@ export default function Navbar() {
           </button>
 
           {/* Let's talk */}
-          <a
-            href="#contact"
+          <Link
+            href="/#contact"
             onClick={go('#contact')}
             style={{ animationDelay: '0.92s' }}
             className={`nav-item-in pointer-events-auto group flex items-center justify-between ${LETS_TALK_WIDTH} h-7 sm:h-8 pl-3 pr-2.5 sm:pl-3.5 sm:pr-3 font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.04em] transition-colors duration-300 ${
@@ -211,7 +220,7 @@ export default function Navbar() {
             >
               <path d="M7 1v12M1 7h12" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
     </header>

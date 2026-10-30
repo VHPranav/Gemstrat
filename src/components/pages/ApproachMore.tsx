@@ -227,7 +227,7 @@ const LABEL_SIDE_PHONE: Record<string, string> = {
 /** Pinned while you scroll past it: the world sweeps in as dots, the five
  *  cities are joined by arcs drawn one after another, and each city's label
  *  (with its live time) comes in as its arc lands */
-function Regions() {
+export function Regions() {
   const ref = useRef<HTMLElement>(null);
   const progress = useRef(0);
   const labelRefs = useRef<(HTMLDivElement | null)[]>([]);

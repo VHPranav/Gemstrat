@@ -29,7 +29,8 @@ import { HANDOFF_DONE, HANDOFF_PAGE, HANDOFF_TARGET, type HandoffTarget } from '
 
 export interface ZMenuLink {
   label: string;
-  href: string;
+  href?: string;
+  children?: { label: string; href: string }[];
 }
 
 interface ZMenuProps {
@@ -116,7 +117,7 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
   const rootRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
   const canvasWrapRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<(HTMLAnchorElement | null)[]>([]);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const glyphRefs = useRef<(HTMLSpanElement | null)[]>([]);
   // Hovered row (-1: none), and the turn each piece flips toward
   const hoverRef = useRef(-1);
@@ -577,16 +578,10 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
 
       <nav aria-label="Site">
         {links.slice(0, 5).map((link, i) => (
-          <a
-            key={link.href}
+          <div
+            key={link.label}
             ref={(el) => {
               rowRefs.current[i] = el;
-            }}
-            href={link.href}
-            tabIndex={open ? 0 : -1}
-            onClick={(e) => {
-              e.preventDefault();
-              onSelect(link.href);
             }}
             onPointerEnter={() => hover(i)}
             onPointerLeave={() => unhover(i)}
@@ -603,13 +598,16 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
             >
               <ZPieceGlyph part={ROW_PIECE[i]} className="w-full h-full" />
             </span>
-            <span className="text-[2.2rem] md:text-[clamp(2.4rem,4.6vw,4.4rem)] leading-none tracking-[-0.035em] whitespace-nowrap">
-              {link.label}
+            <div className="group/row relative flex items-center gap-5 md:gap-8 text-[clamp(1.25rem,4.6vw,2.2rem)] md:text-[clamp(2.4rem,4.6vw,4.4rem)] leading-none tracking-[-0.035em] whitespace-nowrap">
+              {link.href ? <a href={link.href.startsWith('#') ? `/${link.href}` : link.href} tabIndex={open ? 0 : -1} onClick={(e) => { e.preventDefault(); onSelect(link.href!); }} className="focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-8">{link.label}</a> : <button type="button" id="who-we-are-label" aria-controls="who-we-are-submenu" aria-haspopup="true" tabIndex={open ? 0 : -1} className="cursor-pointer text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-8">{link.label}</button>}
               <sup className="ml-2 text-[10px] md:text-xs tracking-[0.12em] text-white/40 align-super tabular-nums">
                 {String(i + 1).padStart(2, '0')}
               </sup>
-            </span>
-          </a>
+              {link.children && <ul id="who-we-are-submenu" aria-labelledby="who-we-are-label" className="invisible pointer-events-none absolute left-full top-1/2 flex -translate-y-1/2 flex-col py-3 pl-5 text-[13px] sm:text-[14px] md:text-[16px] tracking-normal leading-none text-white/65 opacity-0 transition-opacity duration-200 group-hover/row:visible group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:visible group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
+                {link.children.map((child) => <li key={child.href}><a href={child.href.startsWith('#') ? `/${child.href}` : child.href} tabIndex={open ? 0 : -1} onClick={(e) => { e.preventDefault(); onSelect(child.href); }} className="block py-2 pr-4 hover:text-white focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 transition-colors">{child.label}</a></li>)}
+              </ul>}
+            </div>
+          </div>
         ))}
       </nav>
 

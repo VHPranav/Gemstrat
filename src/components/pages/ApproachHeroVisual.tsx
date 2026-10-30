@@ -12,8 +12,8 @@ const SkeletonMorph = dynamic(() => import('@/components/ui/SkeletonMorph'), { s
 // size, which comes apart on scroll and flies onto the blueprint's
 // construction lines below (SkeletonMorph). In lite mode, as in the menu,
 // there's none, and the blueprint draws its construction lines itself.
-export default function ApproachHeroVisual() {
+export default function ApproachHeroVisual({ heroOnly = false, centerOnScroll = false }: { heroOnly?: boolean; centerOnScroll?: boolean }) {
   const lite = usePerfLite();
   if (lite) return null;
-  return <SkeletonMorph data={taj as BlueprintData} />;
+  return <SkeletonMorph data={taj as BlueprintData} heroOnly={heroOnly} centerOnScroll={centerOnScroll} />;
 }

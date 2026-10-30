@@ -10,6 +10,7 @@ import { onIntroStart } from '@/lib/intro';
 import { CONSTRUCT, createConstruction } from '@/components/ui/construction';
 import { getGpuTier } from '@/lib/device';
 import { setLite } from '@/lib/perf';
+import { heroZFraming as framing, HERO_Z_SCALE as OBJECT_SCALE } from '@/lib/zSpot';
 
 // ---------------------------------------------------------------------------
 // BlastScene
@@ -75,16 +76,6 @@ const REASSEMBLE_START = 1.15;
 const REASSEMBLE_END = 1.7;
 
 // Camera framing per viewport width
-function framing(w: number) {
-  // y: the logo's height in the hero, just under the headline (behind the
-  // next section it glides to the exact centre)
-  if (w > 1440) return { fov: 42, z: 6, scale: 1, y: -0.42 };
-  if (w >= 1024) return { fov: 40, z: 6.28, scale: 0.9, y: -0.42 };
-  if (w >= 768) return { fov: 38, z: 7.55, scale: 0.84, y: -0.42 };
-  // Phones: bigger, and lower, filling the space under the hero's buttons
-  return { fov: 36, z: 9.35, scale: 1.1, y: -0.92 };
-}
-
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 const ramp = (t: number, start: number, dur: number) => clamp01((t - start) / dur);
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -92,7 +83,6 @@ const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2
 const EDGE_COLOR = new THREE.Color(0x3a3a3a);
 const EDGE_OPACITY = [0.08, 0.05];
 const SOLID_OPACITY = 0.88;
-const OBJECT_SCALE = 0.72; // the logo's size in the frame
 const MOUSE_TILT_X = 0.06; // rad the logo tips toward the cursor vertically
 // The intro draws the whole wordmark this wide (fraction of the viewport, and
 // at most WORDMARK_MAX_PX), centred, before its S turns into the logo
@@ -259,17 +249,7 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
     // Monochrome studio lights with orbiting glints (lib/zLook)
     const glints = addZLights(scene);
 
-    // Faint dust drifting in the background
-    const dustPos = new Float32Array(600);
-    for (let i = 0; i < dustPos.length; i++) dustPos[i] = (Math.random() - 0.5) * 20;
-    const dustGeo = new THREE.BufferGeometry();
-    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
-    const dustMat = new THREE.PointsMaterial({ color: 0xbdbdbd, size: 0.022, transparent: true, opacity: 0.25 });
-    const dust = new THREE.Points(dustGeo, dustMat);
-    dust.visible = W >= 768;
-    scene.add(dust);
-
-    // The object reflects the scene itself (lights, dust) and a dim studio
+    // The object reflects the scene's lights and a dim studio
     // backdrop (lib/zLook)
     const reflections = createZReflections(scene);
 
@@ -707,7 +687,6 @@ export default function BlastScene({ className, onIntroDone }: BlastSceneProps) 
         camera.updateProjectionMatrix();
         renderer.setPixelRatio(pixelRatio());
         renderer.setSize(W, H);
-        dust.visible = W >= 768;
         placeGroup();
         sizeLineCanvas();
       });

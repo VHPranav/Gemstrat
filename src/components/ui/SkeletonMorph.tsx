@@ -3,7 +3,8 @@
 import { useEffect } from 'react';
 import * as THREE from 'three';
 import { createHeroObject, S_HEIGHT } from '@/lib/heroObject';
-import { zSpot, Z_CAMERA, Z_FOV, Z_GHOST_OPACITY, Z_TILT } from '@/lib/zSpot';
+import { addZLights, applyZShade, createZMaterial, createZReflections } from '@/lib/zLook';
+import { zSpot, heroZFraming, HERO_Z_SCALE, Z_CAMERA, Z_FOV, Z_GHOST_OPACITY, Z_TILT } from '@/lib/zSpot';
 import { HANDOFF_DONE, HANDOFF_TARGET, isHandoffPending, type HandoffTarget } from '@/lib/handoff';
 import { blueprintGuides, guideHandoff, type BlueprintData } from '@/lib/blueprintGuides';
 
@@ -62,14 +63,14 @@ interface Line {
   order: number; // 0 → 1, for the stagger
 }
 
-export default function SkeletonMorph({ data }: { data: BlueprintData }) {
+export default function SkeletonMorph({ data, heroOnly = false, centerOnScroll = false }: { data: BlueprintData; heroOnly?: boolean; centerOnScroll?: boolean }) {
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
-    Object.assign(canvas.style, { position: 'fixed', left: '0', top: '0', pointerEvents: 'none', zIndex: '20' });
+    Object.assign(canvas.style, { position: 'fixed', left: '0', top: '0', pointerEvents: 'none', zIndex: '0' });
     document.body.appendChild(canvas);
     const ctx = canvas.getContext('2d')!;
-    guideHandoff.active = true;
+    guideHandoff.active = !heroOnly;
     guideHandoff.reveal = 0;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -93,10 +94,46 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
     camera.position.set(0, 0, Z_CAMERA);
     camera.updateMatrixWorld();
     const ghost = new THREE.Object3D();
+    const heroPosition = new THREE.Vector3();
     let W = 0;
     let H = 0;
     let dpr = 1;
+    let heroScale = 1;
+    let centeredScale = 1;
     let lines: Line[] = [];
+    const glassScene = new THREE.Scene();
+    const glassRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+    glassRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+    glassRenderer.setSize(W, H);
+    glassRenderer.setClearColor(0x000000, 0);
+    glassRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    glassRenderer.toneMappingExposure = 1.1;
+    Object.assign(glassRenderer.domElement.style, { position: 'fixed', left: '0', top: '0', width: '100vw', height: '100vh', pointerEvents: 'none', zIndex: '0' });
+    document.body.appendChild(glassRenderer.domElement);
+    const glassGlints = addZLights(glassScene);
+    if (heroOnly && centerOnScroll) glassGlints.forEach((light) => { light.intensity = 0; });
+    const reflections = createZReflections(glassScene);
+    const glassMaterial = createZMaterial(reflections.texture);
+    const glassGroup = new THREE.Group();
+    const glassGeometries: THREE.BufferGeometry[] = [];
+    const glassMaterials: THREE.MeshPhysicalMaterial[] = [];
+    createHeroObject().parts.forEach((geometry, part) => {
+      const material = glassMaterial.clone();
+      applyZShade(material, part);
+      if (heroOnly && centerOnScroll) {
+        // Hide rear edges showing through the Purpose page's solid logo.
+        material.transmission = 0;
+        material.opacity = 1;
+        material.transparent = false;
+      }
+      glassMaterials.push(material);
+      glassGeometries.push(geometry);
+      glassGroup.add(new THREE.Mesh(geometry, material));
+    });
+    glassScene.add(glassGroup);
+    glassGroup.visible = false;
+    reflections.update(glassRenderer);
+    glassGroup.visible = true;
     const v = new THREE.Vector3();
     const project = (p: THREE.Vector3, out: [number, number]) => {
       v.copy(p).applyMatrix4(ghost.matrixWorld).project(camera);
@@ -162,10 +199,18 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
       camera.aspect = W / H;
       camera.updateProjectionMatrix();
       camera.updateMatrixWorld();
+      glassRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, W < 768 ? 1 : 1.5));
+      glassRenderer.setSize(W, H);
       const wpp = (2 * Z_CAMERA * Math.tan(THREE.MathUtils.degToRad(Z_FOV / 2))) / H;
       const spot = zSpot(W, H);
       ghost.position.set((spot.x - W / 2) * wpp, -(spot.y - H / 2) * wpp, 0);
-      ghost.scale.setScalar((spot.h * wpp) / S_HEIGHT);
+      heroPosition.copy(ghost.position);
+      heroScale = (spot.h * wpp) / S_HEIGHT;
+      const home = heroZFraming(W);
+      centeredScale = HERO_Z_SCALE * home.scale *
+        (Z_CAMERA * Math.tan(THREE.MathUtils.degToRad(Z_FOV / 2))) /
+        (home.z * Math.tan(THREE.MathUtils.degToRad(home.fov / 2)));
+      ghost.scale.setScalar(heroScale);
       choose();
     };
     window.addEventListener('resize', resize);
@@ -184,6 +229,7 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
     // Lean towards the pointer, as in the menu
     const lean = { x: 0, y: 0, tx: 0, ty: 0 };
     const onPointer = (e: PointerEvent) => {
+      if (heroOnly && centerOnScroll) return;
       lean.ty = ((e.clientX / window.innerWidth) * 2 - 1) * 0.25;
       lean.tx = ((e.clientY / window.innerHeight) * 2 - 1) * 0.12;
     };
@@ -201,6 +247,8 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
     };
     let raf = 0;
     let last = performance.now();
+    let centerSpin = 0;
+    let heroTextReady = false;
     let cleared = false;
     let sSmooth = window.scrollY / window.innerHeight;
     let sVel = 0;
@@ -217,7 +265,21 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
 
       // The scroll, softened by a critically damped spring, so the lines
       // glide rather than step with each scroll tick
-      const target = window.scrollY / H;
+      const target = heroOnly ? 0 : window.scrollY / H;
+      let centerProgress = 0;
+      if (centerOnScroll) {
+        const hero = document.querySelector<HTMLElement>('main > header');
+        const heroBottom = hero?.getBoundingClientRect().bottom ?? H * 2;
+        const enterAt = window.scrollY + heroBottom - H;
+        const progress = (window.scrollY - enterAt) / H;
+        centerProgress = clamp01(progress / 0.55);
+        const move = ease(centerProgress);
+        ghost.position.set(heroPosition.x * (1 - move), heroPosition.y * (1 - move), heroPosition.z);
+        ghost.scale.setScalar(heroScale + (centeredScale - heroScale) * move);
+        canvas.style.opacity = '1';
+      } else if (heroOnly) {
+        canvas.style.opacity = String(Math.max(0, 1 - window.scrollY / H / 0.6));
+      }
       if (reduced || Math.abs(target - sSmooth) > 1.5) {
         sSmooth = target;
         sVel = 0;
@@ -226,7 +288,7 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
         sVel += ((target - sSmooth) * k - sVel * 2 * Math.sqrt(k)) * dt;
         sSmooth += sVel * dt;
       }
-      const s = sSmooth;
+      const s = heroOnly ? 0 : sSmooth;
 
       const reveal = clamp01((s - land) / HANDOVER);
       guideHandoff.reveal = reveal;
@@ -247,8 +309,33 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
 
       // TURN: to face on (and it stops leaning)
       const turn = reduced ? 1 : ease(s / TURN_END);
-      ghost.rotation.set(lean.x * (1 - turn), (Z_TILT + lean.y) * (1 - turn), 0);
+      if (heroOnly && centerOnScroll) {
+        // Wait for the hero's text entrance, including any menu handoff pause.
+        if (!heroTextReady && shownAt >= 0) {
+          const hero = document.querySelector('main > header');
+          heroTextReady = !!hero && Array.from(hero.querySelectorAll('.sub-word, .sub-fade'))
+            .every((element) => element.getAnimations().every((animation) => animation.playState === 'finished'));
+        }
+        if (!reduced && heroTextReady) centerSpin += dt * 60 * 0.0042;
+        const arrivalTurn = 0.4 * ease(centerProgress);
+        ghost.rotation.set(0, arrivalTurn + centerSpin, 0);
+      } else {
+        ghost.rotation.set(lean.x * (1 - turn), (Z_TILT + lean.y) * (1 - turn), 0);
+      }
       ghost.updateMatrixWorld(true);
+      glassGroup.position.copy(ghost.position);
+      glassGroup.rotation.copy(ghost.rotation);
+      glassGroup.scale.copy(ghost.scale);
+      if (heroOnly && centerOnScroll) glassGroup.scale.x *= -1;
+      glassRenderer.render(glassScene, camera);
+
+      // The purpose page uses the homepage's solid glass Z without the
+      // construction wireframe drawn by the canvas layer.
+      if (heroOnly && centerOnScroll) {
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        return;
+      }
 
       // Where the blueprint will be once pinned (until then it scrolls up
       // 1:1), so everything settles where it will stay
@@ -334,10 +421,16 @@ export default function SkeletonMorph({ data }: { data: BlueprintData }) {
       window.removeEventListener(HANDOFF_DONE, onDone);
       window.removeEventListener('pointermove', onPointer);
       canvas.remove();
+      glassRenderer.domElement.remove();
+      glassGeometries.forEach((geometry) => geometry.dispose());
+      glassMaterials.forEach((material) => material.dispose());
+      glassMaterial.dispose();
+      reflections.dispose();
+      glassRenderer.dispose();
       guideHandoff.active = false;
       guideHandoff.reveal = 0;
     };
-  }, [data]);
+  }, [data, heroOnly, centerOnScroll]);
 
   return null;
 }

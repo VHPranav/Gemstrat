@@ -1,50 +1,12 @@
-import type { Metadata } from 'next';
-import SubPage from '@/components/pages/SubPage';
-import ApproachSteps from '@/components/pages/ApproachSteps';
-import ApproachHeroVisual from '@/components/pages/ApproachHeroVisual';
-import ApproachMore from '@/components/pages/ApproachMore';
+'use client';
 
-export const metadata: Metadata = {
-  title: 'Approach — Gemstrat',
-  description:
-    'How Gemstrat works: diagnose, design, deliver and sustain. Senior-led strategy that goes all the way to execution.',
-};
+import { useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-const STEPS = [
-  {
-    n: '01',
-    title: 'Diagnose',
-    body: 'We start by listening — to leadership, to teams, to customers and to the numbers. Interviews, data reviews and operating walkthroughs show where value is leaking and what is really holding growth back.',
-  },
-  {
-    n: '02',
-    title: 'Design',
-    body: 'Together we shape a clear direction: the few bets worth making, the architecture to support them and the order to do things in. Every recommendation is tied to an owner, a cost and a measurable outcome.',
-  },
-  {
-    n: '03',
-    title: 'Deliver',
-    body: 'We work alongside your teams to build what was designed — systems, automation, brand, campaigns — in short cycles, so results show up early and the plan keeps learning from them.',
-  },
-  {
-    n: '04',
-    title: 'Sustain',
-    body: 'Lasting change needs people who own it. We hand over playbooks, dashboards and skills, then check in so momentum doesn’t fade once we step back.',
-  },
-];
-
-export default function ApproachPage() {
-  return (
-    <SubPage
-      title={['Clarity first.', 'Then execution.', 'Then momentum.']}
-      next={{ label: 'How we work', href: '#how-we-work' }}
-      aside={<ApproachHeroVisual />}
-      centered
-      pinned={0.6}
-      intro="Gemstrat is a boutique strategic consultancy. We help leadership teams see their business clearly, decide what matters most, and turn that decision into results that last."
-    >
-      <ApproachSteps steps={STEPS} />
-      <ApproachMore />
-    </SubPage>
-  );
+// Client-side redirect also works with the site's static export.
+export default function FormerApproachPage() {
+  const router = useRouter();
+  useEffect(() => { router.replace('/our-purpose'); }, [router]);
+  return <main className="min-h-screen bg-[#090909] px-6 pt-32 text-white"><Link href="/our-purpose">Continue to Our Purpose →</Link></main>;
 }
