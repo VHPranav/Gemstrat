@@ -417,7 +417,10 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
         }
         // The skeleton glides to the page's Z (or, with none, just fades)
         if (navigated && fadeAt < 0) {
-          if (handoffTarget) {
+          if (handoffTarget?.hideSkeleton && pageShown) {
+            targetAt = t;
+            fadeAt = t;
+          } else if (handoffTarget) {
             if (targetAt < 0) targetAt = t;
             move = channel(0, 1, t, targetAt, H_MOVE);
             if (t >= targetAt + H_MOVE) fadeAt = t;
@@ -429,7 +432,7 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
         if (pageAt >= 0) v.backdrop = channel(1, 0, t, pageAt, 0.35, easeOutCubic);
         if (fadeAt >= 0) {
           v.backdrop = Math.min(v.backdrop, channel(1, 0, t, fadeAt, H_FADE));
-          v.ghost = channel(1, 0, t, fadeAt, H_FADE);
+          v.ghost = handoffTarget?.hideSkeleton ? 0 : channel(1, 0, t, fadeAt, H_FADE);
           if (t >= fadeAt + H_FADE) {
             delete html.dataset.handoff;
             handoffTarget = null;

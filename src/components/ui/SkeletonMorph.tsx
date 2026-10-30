@@ -220,7 +220,9 @@ export default function SkeletonMorph({ data, heroOnly = false, centerOnScroll =
     const start = performance.now();
     let shownAt = handoff ? -1 : 0;
     resize();
-    if (handoff) window.dispatchEvent(new CustomEvent<HandoffTarget>(HANDOFF_TARGET, { detail: zSpot(W, H) }));
+    if (handoff) window.dispatchEvent(new CustomEvent<HandoffTarget>(HANDOFF_TARGET, {
+      detail: { ...zSpot(W, H), hideSkeleton: heroOnly && centerOnScroll },
+    }));
     const onDone = () => {
       if (shownAt < 0) shownAt = (performance.now() - start) / 1000;
     };

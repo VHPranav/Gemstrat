@@ -20,6 +20,8 @@ export interface HandoffTarget {
   x: number;
   y: number;
   h: number;
+  /** The page supplies its own Z and should not show the menu wireframe over it. */
+  hideSkeleton?: boolean;
 }
 
 export const HANDOFF_PAGE = 'gemstrat:handoff-page';
