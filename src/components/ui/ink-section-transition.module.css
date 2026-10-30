@@ -1,0 +1,7 @@
+.stage { position: relative; }
+.ready { margin-top: -100vh; height: calc(var(--ink-panel-height) + 100vh); }
+.ready .panel { position: sticky; top: 0; mask-size: 100% 100%; mask-repeat: no-repeat; }
+@media (prefers-reduced-motion: reduce) {
+  .ready { margin-top: 0; height: auto; }
+  .ready .panel { position: relative; mask-image: none !important; visibility: visible !important; }
+}

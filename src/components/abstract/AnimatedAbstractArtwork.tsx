@@ -8,9 +8,9 @@ import styles from './abstract-gallery.module.css';
 
 export const ANIMATED_ARTWORKS = ['angular-convergence', 'contour-ribbon', 'radial-framework'];
 
-type Drawing = { viewBox: string; paths: string[]; width: number };
+type Drawing = { viewBox: string; paths: string[]; width: number; src: string };
 
-export default function AnimatedAbstractArtwork({ name, className, showReplay = true }: { name: string; className: string; showReplay?: boolean }) {
+export default function AnimatedAbstractArtwork({ name, className, showReplay = true, transparentBackground = false }: { name: string; className: string; showReplay?: boolean; transparentBackground?: boolean }) {
   const artwork = artworks.find((item) => item.slug === name)!;
   const maskId = useId().replace(/:/g, '');
   const frame = useRef<HTMLDivElement>(null);
@@ -44,11 +44,19 @@ export default function AnimatedAbstractArtwork({ name, className, showReplay = 
             (path.getAttribute('d') ?? '').match(/M[^M]+/g) ?? []);
           if (name === 'contour-ribbon') paths.reverse();
         }
-        setDrawing({ viewBox: svg.getAttribute('viewBox')!, paths, width: name === 'radial-framework' ? 38 : name === 'contour-ribbon' ? 6 : 3 });
+        if (transparentBackground) {
+          Array.from(svg.children).forEach((element) => {
+            if (element.tagName.toLowerCase() === 'rect' && ['white', '#fff', '#ffffff'].includes((element.getAttribute('fill') ?? '').toLowerCase())) element.remove();
+          });
+        }
+        const src = transparentBackground
+          ? `data:image/svg+xml;charset=utf-8,${encodeURIComponent(new XMLSerializer().serializeToString(svg))}`
+          : artwork.src;
+        setDrawing({ viewBox: svg.getAttribute('viewBox')!, paths, width: name === 'radial-framework' ? 38 : name === 'contour-ribbon' ? 6 : 3, src });
       })
       .catch(() => { /* Keep the original image if an animation cannot load. */ });
     return () => controller.abort();
-  }, [artwork.src, name]);
+  }, [artwork.src, name, transparentBackground]);
 
   useEffect(() => {
     const container = frame.current;
@@ -89,7 +97,8 @@ export default function AnimatedAbstractArtwork({ name, className, showReplay = 
       cancel();
       if (reduce.matches) return;
       started = true;
-      const stagger = name === 'angular-convergence' ? 65 : 48;
+      const baseStagger = name === 'angular-convergence' ? 65 : 48;
+      const stagger = transparentBackground ? Math.min(baseStagger, 1000 / Math.max(1, strokes.length)) : baseStagger;
       const duration = 1450;
       animations.current = strokes.map((stroke, i) => stroke.animate(
         [{ strokeDashoffset: 1 }, { strokeDashoffset: 0 }],
@@ -117,7 +126,7 @@ export default function AnimatedAbstractArtwork({ name, className, showReplay = 
       cancel();
       replay.current = () => {};
     };
-  }, [drawing, imageReady, name]);
+  }, [drawing, imageReady, name, transparentBackground]);
 
   const [x, y, width, height] = drawing?.viewBox.split(/\s+/).map(Number) ?? [0, 0, artwork.width, artwork.height];
 
@@ -131,8 +140,8 @@ export default function AnimatedAbstractArtwork({ name, className, showReplay = 
                 <rect x={x} y={y} width={width} height={height} fill="white" />
             </mask>
           </defs>
-          <rect x={x} y={y} width={width} height={height} fill="white" />
-          <image href={artwork.src} x={x} y={y} width={width} height={height} mask={`url(#${maskId})`} onLoad={() => setImageReady(true)} />
+          {!transparentBackground && <rect x={x} y={y} width={width} height={height} fill="white" />}
+          <image href={drawing.src} x={x} y={y} width={width} height={height} mask={`url(#${maskId})`} onLoad={() => setImageReady(true)} />
         </svg>
       ) : <AbstractArtwork name={name} className={className} />}
       {showReplay && drawing && imageReady && <button className={styles.replay} type="button" onClick={() => replay.current()} aria-label={`Replay ${artwork.name} animation`}>Replay <span aria-hidden="true">↻</span></button>}

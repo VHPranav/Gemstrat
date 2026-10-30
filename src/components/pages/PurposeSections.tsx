@@ -107,7 +107,7 @@ export default function PurposeSections() {
           <p>Every meaningful change starts with a conversation.</p>
           <Link href="/#contact" className={styles.contactLink}>Start a conversation <span aria-hidden="true">↗</span></Link>
         </div>
-        <div className={styles.related}><Link href="/#about-intro">Our approach <span aria-hidden="true">↗</span></Link><Link href="/#leadership">Meet our leadership <span aria-hidden="true">↗</span></Link></div>
+        <div className={styles.related}><Link href="/our-approach">Our approach <span aria-hidden="true">↗</span></Link><Link href="/#leadership">Meet our leadership <span aria-hidden="true">↗</span></Link></div>
       </section>
     </div>
   );

@@ -49,7 +49,7 @@ interface SubPageProps {
 // in a scattered order, each over WORD_WINDOW of it — like the homepage hero.
 const DISSOLVE = 1;
 const WORD_WINDOW = 0.4;
-// Match the homepage hero's scattered exit order for this six-word headline.
+// Use the homepage's scattered order, adapted to each headline's word count.
 const HERO_DISSOLVE_ORDER = [3, 1, 5, 0, 4, 2];
 
 function Arrow({ down }: { down?: boolean }) {
@@ -119,11 +119,15 @@ export default function SubPage({ eyebrow, title, intro, next, aside, centered, 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const words = Array.from(copy.querySelectorAll<HTMLElement>('[data-word]'));
     const fades = Array.from(copy.querySelectorAll<HTMLElement>('[data-fade]'));
+    const exitOrder = [
+      ...HERO_DISSOLVE_ORDER.filter((index) => index < words.length),
+      ...words.map((_, index) => index).filter((index) => !HERO_DISSOLVE_ORDER.includes(index)),
+    ];
     return onScrollFrame(() => {
       const p = Math.min(1, Math.max(0, window.scrollY / window.innerHeight / DISSOLVE));
       words.forEach((el, i) => {
-        const rank = HERO_DISSOLVE_ORDER.indexOf(i);
-        const start = ((rank === -1 ? i : rank) / Math.max(1, words.length - 1)) * (1 - WORD_WINDOW);
+        const rank = exitOrder.indexOf(i);
+        const start = (rank / Math.max(1, words.length - 1)) * (1 - WORD_WINDOW);
         const wp = Math.min(1, Math.max(0, (p - start) / WORD_WINDOW));
         setWordStyle(el, 1 - wp, wp * 12, -wp * 14);
       });

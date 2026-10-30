@@ -1,0 +1,93 @@
+.root { position: relative; z-index: 2; display: flow-root; color: #f5f5f5; }
+.root section { padding: 42px 32px 110px; scroll-margin-top: 75px; }
+.sectionMeta { display: flex; justify-content: space-between; gap: 24px; font-size: 10px; text-transform: uppercase; letter-spacing: .1em; padding-bottom: 24px; border-top: 1px solid #ffffff30; padding-top: 20px; color: #999; }
+.manifesto { overflow: hidden; background: #090909; }
+.statement { font-size: clamp(52px, 8.5vw, 138px); line-height: .99; font-weight: 400; letter-spacing: -.055em; margin: 90px 0 70px; }
+.statement span { color: #858585; }
+.manifestoBottom { display: grid; grid-template-columns: 1fr 1fr; align-items: start; gap: 40px; }
+.downArrow { font-size: clamp(64px, 9vw, 140px); line-height: 1; }
+.manifestoBottom p { max-width: 490px; font-size: clamp(19px, 2vw, 28px); line-height: 1.45; margin: 0 0 0 auto; color: #b3b3b3; }
+.connection { max-width: 940px; margin: 100px auto 0; }
+.connectionArt { width: 100%; height: auto; display: block; filter: invert(1); mix-blend-mode: screen; }
+.method { background: #f7f7f4; color: #111; }
+.method .sectionMeta, .invitation .sectionMeta { border-color: #0003; color: #666; }
+.methodHeading { display: flex; align-items: end; justify-content: space-between; gap: 36px; margin: 60px 0 80px; }
+.methodHeading h2, .partnershipHeading h2 { font-size: clamp(46px, 6.3vw, 98px); line-height: 1.02; font-weight: 400; letter-spacing: -.05em; margin: 0; }
+.methodHeading p { font-size: 15px; color: #666; line-height: 1.6; max-width: 310px; margin: 0; }
+.methodGrid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 4%; align-items: start; }
+.stages { padding-left: clamp(24px, 6vw, 100px); }
+.stage { min-height: 85svh; display: flex; flex-direction: column; justify-content: center; padding: 60px 0; opacity: .3; transition: opacity .45s ease; }
+.active { opacity: 1; }
+.stage h3 { margin: 0 0 28px; font-size: clamp(38px, 4.6vw, 70px); font-weight: 400; letter-spacing: -.045em; line-height: 1; }
+.stageContent h4 { font-size: clamp(21px, 2vw, 29px); letter-spacing: -.025em; font-weight: 400; margin: 0 0 20px; }
+.stageContent p { color: #666; font-size: 18px; line-height: 1.65; margin: 0; max-width: 430px; }
+.methodArt { position: sticky; top: 80px; height: calc(100svh - 120px); min-height: 320px; display: flex; flex-direction: column; justify-content: center; }
+.artEntrance { height: min(70svh, 650px); display: flex; align-items: center; justify-content: center; mix-blend-mode: multiply; animation: contentIn .65s ease-out; }
+.artEntrance > div { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
+.abstract { display: block; width: 100%; height: 100%; max-width: 660px; object-fit: contain; mix-blend-mode: multiply; }
+.artCaption { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; border-top: 1px solid #0003; margin-top: 35px; padding-top: 16px; color: #777; }
+.partnership { background: #090909; }
+.partnershipHeading { display: grid; grid-template-columns: 1.3fr 1fr; gap: 12%; align-items: end; margin: 65px 0 90px; }
+.partnershipHeading h2 span { color: #858585; }
+.partnershipHeading p { font-size: 19px; line-height: 1.55; color: #999; margin: 0; max-width: 390px; }
+.commitments { display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px; }
+.commitments article { border-top: 1px solid #ffffff30; padding-top: 22px; }
+.commitments article > span { font-size: 11px; color: #777; }
+.commitments h3 { font-size: clamp(25px, 2.8vw, 40px); font-weight: 400; letter-spacing: -.035em; line-height: 1.1; margin: 45px 0 24px; }
+.commitments p { font-size: 16px; line-height: 1.6; color: #999; max-width: 310px; }
+.root .invitation { background: #f7f7f4; color: #111; padding-top: 0; overflow: hidden; }
+.invitationArt { margin: 0 -32px 56px; }
+.gridArt { width: 100%; height: clamp(100px, 20vw, 290px); object-fit: cover; object-position: center; mix-blend-mode: multiply; display: block; }
+.invitation h2 { font-size: clamp(52px, 8vw, 125px); line-height: 1.02; font-weight: 400; letter-spacing: -.055em; margin: 70px 0 45px; }
+.invitation h2 span { color: #999; }
+.contactLink { display: flex; justify-content: space-between; align-items: center; max-width: 390px; padding: 18px 0; border-bottom: 1px solid #111; font-size: 16px; }
+.contactLink span { font-size: 28px; transition: transform .25s; }
+.contactLink:hover span { transform: translate(3px, -3px); }
+.footerLinks { display: flex; justify-content: space-between; gap: 30px; border-top: 1px solid #0003; margin-top: 100px; padding-top: 24px; font-size: 12px; }
+.footerLinks a { display: flex; gap: 50px; }
+.root a:focus-visible, .root button:focus-visible { outline: 1px solid currentColor; outline-offset: 6px; }
+@keyframes contentIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .motion [data-approach-reveal] { opacity: 0; transform: translateY(24px); transition: opacity .8s, transform .8s cubic-bezier(.2,.7,.2,1); }
+  .motion [data-approach-reveal].visible { opacity: 1; transform: none; }
+}
+@media (max-width: 760px) {
+  .root section { padding: 30px 20px 75px; }
+  .sectionMeta { font-size: 9px; gap: 20px; }
+  .sectionMeta span:last-child { text-align: right; }
+  .statement { margin: 65px 0 45px; font-size: clamp(45px, 8.5vw, 70px); }
+  .manifestoBottom { grid-template-columns: 60px 1fr; gap: 24px; }
+  .manifestoBottom p { font-size: 19px; }
+  .connection { margin-top: 60px; }
+  .methodHeading { flex-direction: column; align-items: start; margin: 40px 0; gap: 24px; }
+  .methodGrid { gap: 4%; grid-template-columns: 1fr 1fr; }
+  .stages { padding-left: 20px; }
+  .stage { min-height: 85svh; padding: 45px 0; }
+  .stage h3 { font-size: 38px; }
+  .stageContent h4 { font-size: 20px; }
+  .stageContent p { font-size: 15px; }
+  .methodArt { min-height: 280px; }
+  .artEntrance { height: min(60svh, 480px); }
+  .partnershipHeading { grid-template-columns: 1fr; gap: 32px; margin: 40px 0 55px; }
+  .partnershipHeading p { font-size: 18px; }
+  .commitments { gap: 25px; }
+  .commitments h3 { margin-top: 30px; font-size: 26px; }
+  .commitments p { font-size: 15px; }
+  .invitationArt { margin: 0 -20px 35px; }
+  .invitation h2 { margin: 45px 0 35px; }
+  .footerLinks { margin-top: 70px; }
+}
+@media (max-width: 520px) {
+  .methodGrid { grid-template-columns: 1.2fr .8fr; gap: 16px; }
+  .methodArt { top: 80px; min-height: 220px; }
+  .stage h3 { font-size: 30px; }
+  .stageContent h4 { font-size: 19px; }
+  .artEntrance { height: 300px; }
+  .artCaption { margin-top: 20px; }
+  .stages { width: 100%; padding-left: 8px; }
+  .commitments { grid-template-columns: 1fr; gap: 28px; }
+  .commitments h3 { margin: 20px 0 14px; font-size: 30px; }
+  .commitments p { max-width: 100%; }
+  .footerLinks a { gap: 15px; }
+}
+@media (prefers-reduced-motion: reduce) { .artEntrance, .stageContent { animation: none; } }

@@ -25,7 +25,7 @@ const ZMenu = dynamic(() => import('@/components/navigation/ZMenu'), { ssr: fals
 const MENU_LINKS: ZMenuLink[] = [
   { label: 'Who we are', children: [
     { label: 'Our purpose', href: '/our-purpose' },
-    { label: 'Our approach', href: '#about-intro' },
+    { label: 'Our approach', href: '/our-approach' },
     { label: 'Leadership', href: '#leadership' },
   ] },
   { label: 'Theory of Gemstrat', href: '#statement' },

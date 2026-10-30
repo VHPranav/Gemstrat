@@ -63,7 +63,7 @@ interface Line {
   order: number; // 0 → 1, for the stagger
 }
 
-export default function SkeletonMorph({ data, heroOnly = false, centerOnScroll = false }: { data: BlueprintData; heroOnly?: boolean; centerOnScroll?: boolean }) {
+export default function SkeletonMorph({ data, heroOnly = false, centerOnScroll = false, centerBeforeContent = false }: { data: BlueprintData; heroOnly?: boolean; centerOnScroll?: boolean; centerBeforeContent?: boolean }) {
   useEffect(() => {
     const canvas = document.createElement('canvas');
     canvas.setAttribute('aria-hidden', 'true');
@@ -273,7 +273,9 @@ export default function SkeletonMorph({ data, heroOnly = false, centerOnScroll =
         const hero = document.querySelector<HTMLElement>('main > header');
         const heroBottom = hero?.getBoundingClientRect().bottom ?? H * 2;
         const enterAt = window.scrollY + heroBottom - H;
-        const progress = (window.scrollY - enterAt) / H;
+        // Finish centering, then hold briefly before the next section enters.
+        const centerStart = centerBeforeContent ? enterAt - H * 0.75 : enterAt;
+        const progress = (window.scrollY - centerStart) / H;
         centerProgress = clamp01(progress / 0.55);
         const move = ease(centerProgress);
         ghost.position.set(heroPosition.x * (1 - move), heroPosition.y * (1 - move), heroPosition.z);
@@ -432,7 +434,7 @@ export default function SkeletonMorph({ data, heroOnly = false, centerOnScroll =
       guideHandoff.active = false;
       guideHandoff.reveal = 0;
     };
-  }, [data, heroOnly, centerOnScroll]);
+  }, [data, heroOnly, centerOnScroll, centerBeforeContent]);
 
   return null;
 }
