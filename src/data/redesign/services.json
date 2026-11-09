@@ -1,0 +1,632 @@
+[
+  {
+    "title": "Business Transformation",
+    "slug": "business-transformation",
+    "group": "Transform",
+    "headline": "Change with a clear direction.",
+    "image": "/images/about/high-speed-train.webp",
+    "art": "angular-convergence",
+    "intro": "Business transformation starts with a clear view of where the organisation needs to go and what is holding it back. Gemstrat helps connect business ambition with operating models, processes, technology and the people who will deliver the change.",
+    "steps": [
+      {
+        "title": "Set the direction",
+        "body": "Examine the current business model, customer needs and performance challenges. Agree priorities and define what successful change would look like."
+      },
+      {
+        "title": "Design the future business",
+        "body": "Work through changes to the operating model, processes, responsibilities and supporting technology. Make dependencies and trade-offs visible before implementation."
+      },
+      {
+        "title": "Turn direction into delivery",
+        "body": "Build a sequenced transformation roadmap with owners, milestones and measures. Support implementation planning, organisational change and progress reviews."
+      }
+    ],
+    "outputs": "current-state assessment, future operating model, prioritised initiatives, transformation roadmap and measurement plan",
+    "faq": {
+      "question": "Where should transformation begin?",
+      "answer": "Start with the business problem, its baseline and the decisions that need to change."
+    },
+    "cta": "Plan your next phase of change.",
+    "specialty": false
+  },
+  {
+    "title": "Enterprise Architecture",
+    "slug": "enterprise-architecture",
+    "group": "Transform",
+    "headline": "See the whole. Plan the next.",
+    "image": "/images/about/scalable-scaffolding.webp",
+    "art": "wire-figure",
+    "intro": "A clear architecture helps a business see how its capabilities, processes, information and systems fit together. Gemstrat helps map that picture and plan the changes needed to support business priorities.",
+    "steps": [
+      {
+        "title": "Understand the current landscape",
+        "body": "Map business capabilities, critical workflows, applications, data flows and integrations. Identify duplicated effort, dependencies and constraints."
+      },
+      {
+        "title": "Define the target state",
+        "body": "Connect the business strategy to a practical future architecture. Agree principles, responsibilities and the decisions that will guide investment."
+      },
+      {
+        "title": "Plan the transition",
+        "body": "Prioritise changes by business value, feasibility and dependency. Create an architecture roadmap that teams can use when planning delivery."
+      }
+    ],
+    "outputs": "capability map, process maps, application landscape, current and future-state views, architecture principles and transition roadmap",
+    "faq": {
+      "question": "How is this different from an IT review?",
+      "answer": "It connects technology decisions to business capabilities and operating needs."
+    },
+    "cta": "Map your business for what comes next.",
+    "specialty": false
+  },
+  {
+    "title": "AI Consulting",
+    "slug": "ai-consulting",
+    "group": "Intelligence",
+    "headline": "Find where AI can make a difference.",
+    "image": "/images/about/ai-automation.webp",
+    "art": "contour-sculpture",
+    "intro": "Choosing where to use AI is a business decision. Gemstrat helps teams examine opportunities, understand readiness and decide which applications deserve further investment.",
+    "steps": [
+      {
+        "title": "Find useful opportunities",
+        "body": "Review tasks and decisions with the people doing them. Assess use cases against business value, data availability, feasibility and risk."
+      },
+      {
+        "title": "Test the assumptions",
+        "body": "Define a focused pilot, a meaningful baseline and a way to evaluate output quality. Identify integration requirements and where human review is needed."
+      },
+      {
+        "title": "Prepare for adoption",
+        "body": "Translate the findings into an implementation recommendation, with owners and the organisational changes needed to use the solution."
+      }
+    ],
+    "outputs": "opportunity assessment, use-case shortlist, readiness review and pilot recommendation",
+    "faq": {
+      "question": "Do we need to choose a model first?",
+      "answer": "Begin with the task and evaluation criteria; tool selection follows those needs."
+    },
+    "cta": "Find the right starting point for AI.",
+    "specialty": false
+  },
+  {
+    "title": "AI Strategy",
+    "slug": "ai-strategy",
+    "group": "Intelligence",
+    "headline": "Give your AI ambition a direction.",
+    "image": "/images/about/strategy-notebook.webp",
+    "art": "angular-convergence",
+    "intro": "An AI strategy gives individual experiments a common direction. Gemstrat helps teams connect AI adoption to business priorities, investment decisions, responsibilities and practical safeguards.",
+    "steps": [
+      {
+        "title": "Decide where to focus",
+        "body": "Identify the business outcomes AI should support and prioritise a portfolio of opportunities. Assess data, architecture and workforce readiness alongside potential value."
+      },
+      {
+        "title": "Define how decisions will be made",
+        "body": "Establish proposed ownership, review criteria and escalation routes. Address data access, evaluation, human oversight and ongoing monitoring in the operating model."
+      },
+      {
+        "title": "Build an adoption roadmap",
+        "body": "Sequence pilots, integration work and staff development. Agree how progress will be assessed and when to revisit investment decisions."
+      }
+    ],
+    "outputs": "AI ambition, prioritised portfolio, adoption roadmap, proposed governance and capability plan",
+    "faq": {
+      "question": "What makes a roadmap usable?",
+      "answer": "Clear dependencies, accountable owners, review points and agreed measures."
+    },
+    "cta": "Define your AI direction.",
+    "specialty": false
+  },
+  {
+    "title": "AI & Intelligent Automation",
+    "slug": "ai-intelligent-automation",
+    "group": "Intelligence",
+    "headline": "Better workflows. More possibility.",
+    "image": "/images/about/ai-automation.webp",
+    "art": "interlocking-loops",
+    "intro": "Useful automation fits the way work actually happens. Gemstrat helps teams examine repetitive processes, choose suitable automation and design how people and systems will work together.",
+    "steps": [
+      {
+        "title": "Map the workflow",
+        "body": "Document inputs, hand-offs, decisions and exceptions. Identify where rules-based automation is sufficient and where AI may add value."
+      },
+      {
+        "title": "Design for real conditions",
+        "body": "Plan integrations, access controls, human approvals and exception handling. Define how output quality and failures will be observed."
+      },
+      {
+        "title": "Pilot and improve",
+        "body": "Test against a baseline before expanding the workflow. Review completion time, error rates, rework and adoption rather than promising a fixed saving."
+      }
+    ],
+    "outputs": "workflow assessment, automation design, pilot scope, operating procedures and evaluation plan",
+    "faq": {
+      "question": "Can every step be automated?",
+      "answer": "Suitability depends on data, consequences and the need for judgement; define human review where appropriate."
+    },
+    "cta": "Explore a workflow worth improving.",
+    "specialty": false
+  },
+  {
+    "title": "Digital Solutions",
+    "slug": "digital-solutions",
+    "group": "Experience",
+    "headline": "Useful by design. Built to work.",
+    "image": "/images/about/neo-marketing-digital.webp",
+    "art": "contour-ribbon",
+    "intro": "Digital products should make a task easier for the people using them. Gemstrat connects product thinking, experience design and development to shape websites, applications and platforms around real business needs.",
+    "steps": [
+      {
+        "title": "Discover",
+        "body": "Understand users, tasks and business priorities. Define requirements and success criteria before committing to a build."
+      },
+      {
+        "title": "Design and build",
+        "body": "Turn the requirements into journeys, prototypes and a planned technical solution. Address content, accessibility, integrations and maintainability as part of the work."
+      },
+      {
+        "title": "Launch and improve",
+        "body": "Test key journeys, plan handover and use feedback to guide the next iteration. Agree ongoing support separately."
+      }
+    ],
+    "outputs": "discovery brief, product requirements, UX/UI designs, implementation scope and launch plan",
+    "faq": {
+      "question": "Website or application?",
+      "answer": "A website primarily communicates and supports enquiries; an application also needs workflows, data and permissions for users to perform tasks."
+    },
+    "cta": "Discuss your digital product.",
+    "specialty": false
+  },
+  {
+    "title": "Brand Strategy",
+    "slug": "brand-strategy",
+    "group": "Experience",
+    "headline": "A clear place in the world.",
+    "image": "/images/about/strategy-notebook.webp",
+    "art": "angular-convergence",
+    "intro": "Brand strategy gives a business a clear place in the market and a reason for people to choose it. Gemstrat helps clarify who the brand serves, what it stands for and how that should guide communication and experience.",
+    "steps": [
+      {
+        "title": "Understand the market",
+        "body": "Explore audiences, competitors and the business's ambitions. Identify the needs and perceptions the brand must address."
+      },
+      {
+        "title": "Define a position",
+        "body": "Develop the value proposition, positioning and core narrative. Clarify portfolio relationships where several brands or offerings need to work together."
+      },
+      {
+        "title": "Make it usable",
+        "body": "Translate strategy into messaging priorities and practical guidance for teams. Connect the direction to identity, campaigns and customer touchpoints."
+      }
+    ],
+    "outputs": "audience insights, positioning, value proposition, brand architecture where needed and messaging framework",
+    "faq": {
+      "question": "Is a rebrand always necessary?",
+      "answer": "First establish the gap; the answer may be clearer positioning or more consistent delivery."
+    },
+    "cta": "Clarify what your brand stands for.",
+    "specialty": false
+  },
+  {
+    "title": "Brand Identity",
+    "slug": "brand-identity",
+    "group": "Experience",
+    "headline": "A character all your own.",
+    "image": "/images/about/branding.webp",
+    "art": "contour-sculpture",
+    "intro": "Identity makes a brand recognisable in everyday use. Gemstrat develops visual and verbal systems that help a business express its strategy across the places people encounter it.",
+    "steps": [
+      {
+        "title": "Build the system",
+        "body": "Explore the identity direction, then develop logo usage, typography, colour, imagery and layout principles. Define voice and messaging guidance alongside the visual work where agreed."
+      },
+      {
+        "title": "Apply it to real touchpoints",
+        "body": "Test the system on relevant digital and physical applications. Ensure it can adapt across formats without losing coherence."
+      },
+      {
+        "title": "Support rollout",
+        "body": "Prepare brand guidelines, assets and agreed templates so teams can use the identity consistently."
+      }
+    ],
+    "outputs": "identity system, asset library, usage guidelines and rollout templates",
+    "faq": {
+      "question": "Is identity just a logo?",
+      "answer": "The system includes the visual and verbal choices that support recognition across touchpoints."
+    },
+    "cta": "Build an identity your team can use.",
+    "specialty": false
+  },
+  {
+    "title": "360° Branding",
+    "slug": "360-branding",
+    "group": "Experience",
+    "headline": "One brand. Every encounter.",
+    "image": "/images/about/branding.webp",
+    "art": "interlocking-loops",
+    "intro": "A brand takes shape through every interaction. Gemstrat connects positioning, identity, communication and experience so customers encounter a coherent business across digital and offline touchpoints.",
+    "steps": [
+      {
+        "title": "Connect the foundations",
+        "body": "Align the brand's purpose, audience and position with its identity and message."
+      },
+      {
+        "title": "Plan the experience",
+        "body": "Map the touchpoints that matter to customers and staff. Prioritise the gaps between the brand promise and the experience people receive."
+      },
+      {
+        "title": "Activate consistently",
+        "body": "Coordinate launch materials, campaign communication and practical brand tools. Establish how teams will review consistency as the business grows."
+      }
+    ],
+    "outputs": "integrated brand plan, priority touchpoint map, campaign direction and rollout toolkit",
+    "faq": {
+      "question": "How does this differ from brand identity?",
+      "answer": "Identity defines expression; 360° branding connects that expression to strategy, activation and experience."
+    },
+    "cta": "Connect your brand across every touchpoint.",
+    "specialty": false
+  },
+  {
+    "title": "Advertising & Marketing",
+    "slug": "advertising-marketing",
+    "group": "Experience",
+    "headline": "Ideas that move people to act.",
+    "image": "/images/about/advertising.webp",
+    "art": "contour-ribbon",
+    "intro": "Effective marketing connects the audience, message and channel to a clear business objective. Gemstrat helps shape campaigns that can be planned, delivered and evaluated against that objective.",
+    "steps": [
+      {
+        "title": "Set the campaign direction",
+        "body": "Define the audience, offer, desired action and role of the campaign. Agree a budget and measurement approach before launch."
+      },
+      {
+        "title": "Bring creative and media together",
+        "body": "Develop the campaign idea and adapt it for the agreed mix of paid, owned and offline channels. Coordinate creative requirements with targeting and delivery plans."
+      },
+      {
+        "title": "Learn from performance",
+        "body": "Review qualified enquiries, conversion quality and commercial outcomes alongside channel metrics. Use testing to inform the next decision."
+      }
+    ],
+    "outputs": "campaign brief, channel plan, creative assets within scope, measurement plan and optimisation recommendations",
+    "faq": {
+      "question": "Which channel should we start with?",
+      "answer": "Choose according to audience behaviour, objective, budget and the ability to measure the response."
+    },
+    "cta": "Plan a campaign around your growth goals.",
+    "specialty": false
+  },
+  {
+    "title": "People Strategy",
+    "slug": "people-strategy",
+    "group": "People & Growth",
+    "headline": "Build the team for what comes next.",
+    "image": "/images/about/clarity-lighthouse.webp",
+    "art": "wire-figure",
+    "intro": "A business strategy depends on the people who put it into practice. Gemstrat helps organisations examine the roles, skills, structures and ways of working needed for their next phase.",
+    "steps": [
+      {
+        "title": "Understand the people implications",
+        "body": "Translate business priorities into capability and workforce requirements. Identify gaps in responsibilities, skills and the employee experience."
+      },
+      {
+        "title": "Design practical changes",
+        "body": "Review organisation design, workforce planning and development priorities with leaders and HR teams. Connect proposed changes to operational needs."
+      },
+      {
+        "title": "Support adoption",
+        "body": "Plan communication, manager involvement and learning activities. Define how capability and adoption will be reviewed over time."
+      }
+    ],
+    "outputs": "people priorities, organisation or role recommendations, workforce capability plan and change roadmap",
+    "faq": {
+      "question": "Where should a people strategy start?",
+      "answer": "With the business direction and evidence about the capabilities needed to deliver it."
+    },
+    "cta": "Align your people plans with your business.",
+    "specialty": false
+  },
+  {
+    "title": "Leadership Development",
+    "slug": "leadership-development",
+    "group": "People & Growth",
+    "headline": "Help your people lead forward.",
+    "image": "/images/about/high-speed-train.webp",
+    "art": "contour-sculpture",
+    "intro": "Leadership development should help people handle the decisions and situations they face at work. Gemstrat helps shape learning around business priorities, leadership expectations and practical application.",
+    "steps": [
+      {
+        "title": "Define the capability need",
+        "body": "Identify the behaviours, decisions and responsibilities the programme should support. Tailor the focus for emerging managers, experienced leaders or executives."
+      },
+      {
+        "title": "Create opportunities to practise",
+        "body": "Combine relevant workshops, workplace exercises and reflection. Add coaching or mentoring where it is part of the agreed service."
+      },
+      {
+        "title": "Review application",
+        "body": "Gather feedback and examine how the learning is being used in the role. Adapt the programme to what participants and the business need next."
+      }
+    ],
+    "outputs": "capability assessment, programme outline, learning materials and application review plan",
+    "faq": {
+      "question": "Can a programme be tailored?",
+      "answer": "Define the participant group, business context and desired changes before selecting content."
+    },
+    "cta": "Build the leadership capability your next phase needs.",
+    "specialty": false
+  },
+  {
+    "title": "Brand Experience",
+    "slug": "brand-experience",
+    "group": "Experience",
+    "headline": "Make every encounter matter.",
+    "image": "/images/about/branding.webp",
+    "art": "contour-ribbon",
+    "intro": "Make the brand promise tangible in the moments customers experience. Map priority journeys, identify gaps and define how digital, physical and human touchpoints should work together.",
+    "steps": [
+      {
+        "title": "Customer journeys",
+        "body": "Begin with the goals, context and priorities behind your brand experience brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Experience principles",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Touchpoint improvements",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "customer journeys, experience principles, touchpoint improvements",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Neo Marketing",
+    "slug": "neo-marketing",
+    "group": "Experience",
+    "headline": "Connect attention to action.",
+    "image": "/images/about/neo-marketing-digital.webp",
+    "art": "contour-ribbon",
+    "intro": "Connect search, social, content and paid media around a clear growth objective. Start with audience behaviour, plan the measurement and use testing to improve the next decision.",
+    "steps": [
+      {
+        "title": "Audience and channel planning",
+        "body": "Begin with the goals, context and priorities behind your neo marketing brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Search, social and content",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Measurement and testing",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "audience and channel planning, search, social and content, measurement and testing",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Web Development",
+    "slug": "web-development",
+    "group": "Experience",
+    "headline": "A better place to meet your business.",
+    "image": "/images/about/neo-marketing-digital.webp",
+    "art": "contour-ribbon",
+    "intro": "Design and build websites around the information people need and the actions they want to take. Connect content, user experience and development, with clear plans for performance, accessibility and maintenance.",
+    "steps": [
+      {
+        "title": "Content and user experience",
+        "body": "Begin with the goals, context and priorities behind your web development brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Design and development",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Launch and maintenance planning",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "content and user experience, design and development, launch and maintenance planning",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "App Development",
+    "slug": "app-development",
+    "group": "Experience",
+    "headline": "Bring a useful idea to life.",
+    "image": "/images/about/ai-automation.webp",
+    "art": "contour-ribbon",
+    "intro": "Turn a product idea into a defined set of journeys, requirements and release priorities. Plan the application around users, data and integrations, then validate the core tasks before expanding the product.",
+    "steps": [
+      {
+        "title": "Product discovery",
+        "body": "Begin with the goals, context and priorities behind your app development brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Journeys and prototypes",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Release planning",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "product discovery, journeys and prototypes, release planning",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "HR & Leadership Training",
+    "slug": "hr-leadership-training",
+    "group": "People & Growth",
+    "headline": "Learning that carries into work.",
+    "image": "/images/about/clarity-lighthouse.webp",
+    "art": "contour-ribbon",
+    "intro": "Build practical skills around the situations your managers and HR teams face. Shape training around agreed needs, with workplace exercises and a way to review application.",
+    "steps": [
+      {
+        "title": "Learning needs",
+        "body": "Begin with the goals, context and priorities behind your hr & leadership training brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Workplace exercises",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Application and feedback",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "learning needs, workplace exercises, application and feedback",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Technical Training",
+    "slug": "technical-training",
+    "group": "People & Growth",
+    "headline": "Build confidence through practice.",
+    "image": "/images/about/ai-automation.webp",
+    "art": "contour-ribbon",
+    "intro": "Help teams develop the technical skills their work requires. Assess the starting point, define role-based learning goals and combine explanation with relevant hands-on practice.",
+    "steps": [
+      {
+        "title": "Role-based skill assessment",
+        "body": "Begin with the goals, context and priorities behind your technical training brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Learning goals",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Hands-on practice",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "role-based skill assessment, learning goals, hands-on practice",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Film & Content Production",
+    "slug": "film-content-production",
+    "group": "Experience",
+    "headline": "Stories with a reason to be told.",
+    "image": "/images/about/advertising.webp",
+    "art": "contour-ribbon",
+    "intro": "Bring a business story to the screen with a clear objective and an audience in mind. Connect the creative brief, script, production and edit to the places the content will be used.",
+    "steps": [
+      {
+        "title": "Creative brief and script",
+        "body": "Begin with the goals, context and priorities behind your film & content production brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Production planning",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Editing and delivery",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "creative brief and script, production planning, editing and delivery",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Startup Support",
+    "slug": "startup-support",
+    "group": "People & Growth",
+    "headline": "Give your next milestone a plan.",
+    "image": "/images/about/strategy-notebook.webp",
+    "art": "contour-ribbon",
+    "intro": "Turn an early idea into a clearer proposition and a practical launch plan. Gemstrat can help founders examine the audience, business model, brand and digital product requirements around their next milestone.",
+    "steps": [
+      {
+        "title": "Proposition and audience",
+        "body": "Begin with the goals, context and priorities behind your startup support brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Validation and MVP brief",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Go-to-market planning",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "proposition and audience, validation and mvp brief, go-to-market planning",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Growth Partnership",
+    "slug": "growth-partnership",
+    "group": "People & Growth",
+    "headline": "A partner in the next chapter.",
+    "image": "/images/about/high-speed-train.webp",
+    "art": "contour-ribbon",
+    "intro": "Create a regular forum for the decisions that shape business growth. Agree priorities, translate them into an operating plan and review progress with the people accountable for delivery.",
+    "steps": [
+      {
+        "title": "Growth assessment",
+        "body": "Begin with the goals, context and priorities behind your growth partnership brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Operating priorities",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "Regular progress reviews",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "growth assessment, operating priorities, regular progress reviews",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  },
+  {
+    "title": "Gemstrat Luxe",
+    "slug": "gemstrat-luxe",
+    "group": "Experience",
+    "headline": "A considered approach to the exceptional.",
+    "image": "/images/about/branding.webp",
+    "art": "contour-ribbon",
+    "intro": "A considered starting point for private lifestyle and asset requirements. Define what matters to you and coordinate the relevant specialist conversations around it.",
+    "steps": [
+      {
+        "title": "Understanding your brief",
+        "body": "Begin with the goals, context and priorities behind your gemstrat luxe brief. Define what needs to change and what a useful result looks like."
+      },
+      {
+        "title": "Specialist coordination",
+        "body": "Work through the options together, make the requirements tangible and agree a scope that fits the task."
+      },
+      {
+        "title": "A tailored next step",
+        "body": "Bring the work into a practical plan, with clear ownership, review points and the support needed for the next stage."
+      }
+    ],
+    "outputs": "understanding your brief, specialist coordination, a tailored next step",
+    "faq": null,
+    "cta": "Tell us what you have in mind",
+    "specialty": true
+  }
+]

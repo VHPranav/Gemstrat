@@ -1,0 +1,15 @@
+import Image from 'next/image';
+import Link from 'next/link';
+import { groups, regions, services } from '@/data/redesign/content';
+import { Arrow, Eyebrow, JumpNav, PageFrame, SectionHead, ServiceCards, styles } from './PageParts';
+
+export default function LocationPage({ region }: { region: (typeof regions)[number] }) {
+  return <PageFrame category={`Global presence / ${region.name}`} title={`New possibilities. ${region.name}.`} intro={region.intro} image={region.image}>
+    <JumpNav items={[{ id: 'overview', title: `Gemstrat & ${region.name}` }, { id: 'capabilities', title: 'Our capabilities' }, { id: 'services', title: 'Explore services' }, { id: 'connect', title: 'Connect with us' }]} />
+    <section className={styles.section} id="overview" data-nav-light><div className={styles.split}><div><Eyebrow>A connected perspective</Eyebrow><h2 style={{ marginTop: 30 }}>Your context.<br />Our shared starting point.</h2><p>{region.intro}</p><div className={styles.pills}>{region.focus.map(f => <span className={styles.pill} key={f}>{f}</span>)}</div></div><div className={styles.imageWrap}><Image className={styles.image} src={region.image} alt={`Architectural perspective associated with ${region.name}`} width={900} height={1100} /><div className={styles.imageCaption}><span>{region.name}</span><span>Global perspectives</span></div></div></div></section>
+    <section className={`${styles.section} ${styles.dark}`} id="capabilities"><SectionHead label="Our capabilities" title="Connected around your priorities." /><div className={styles.steps}>{groups.map((g, i) => <div className={styles.step} key={g}><span className={styles.number}>0{i + 1}</span><h3>{g}</h3><p>{['Shape business direction and connect the capabilities, processes and systems that support it.', 'Find practical applications for AI and automation, grounded in business needs.', 'Bring digital products, brand and marketing together around the customer.', 'Connect people, leadership and learning with the next phase of the business.'][i]}</p></div>)}</div></section>
+    <section className={styles.section} id="services" data-nav-light><SectionHead label="A place to begin" title="Explore the possibilities." /><ServiceCards items={services.filter(s => region.services.includes(s.slug))} /></section>
+    <section className={styles.output} id="connect" data-nav-light><Eyebrow>Start a conversation</Eyebrow><div><h2>Tell us about your project.</h2><p>Share your location, business priorities and the support you are looking for. We’ll discuss the right scope and way of working together.</p><Link className={styles.link} href={`/contact?region=${region.slug}`}>Discuss a project in {region.name}<Arrow /></Link></div></section>
+    <section className={styles.section} data-nav-light><SectionHead label="Across our network" title="Explore another perspective." /><div className={styles.pills}>{regions.filter(r => r.slug !== region.slug).map(r => <Link className={styles.pill} href={`/locations/${r.slug}`} key={r.slug}>{r.name} ↗</Link>)}</div></section>
+  </PageFrame>;
+}

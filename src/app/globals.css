@@ -390,6 +390,13 @@ html[data-perf="lite"] *::after {
   -webkit-backdrop-filter: none !important;
   mix-blend-mode: normal !important;
 }
+/* The navbar wordmark turns black over white sections with a single cheap
+   invert. Keep it against both the global img grayscale rule (unlayered, so
+   it beats Tailwind's .invert) and lite mode, or it vanishes white-on-white. */
+header img.invert,
+html[data-perf="lite"] header img.invert {
+  filter: invert(1) !important;
+}
 
 /* ---------- Sub pages (src/components/pages/SubPage.tsx) ---------- */
 .sub-rise {
