@@ -18,8 +18,17 @@ const SCATTER = [ // direction (x, y, z) and tumble (rx, ry, rz) per piece
   [-1.15, .85, 1.2, .9, -1.3, .5], [1.2, -.9, -1.4, -1.1, .8, -.6], [-1.3, -.55, .9, .7, 1.1, -.9],
   [1.05, 1.1, -1, -.8, -1, .7], [1.35, .2, 1.6, 1.2, .6, .4],
 ];
-const REVEAL_AT = .2, REVEAL_STEP = .035, REVEAL_LEN = .07;
-const JOIN_AT = .27, JOIN_STEP = .08, JOIN_LEN = .22;
+const REVEAL_STEP = .035, REVEAL_LEN = .07;
+
+/** How the Z forms over the opening (progress p). 'scatter' (purpose): pieces
+ *  join slowly across three statements. 'wireframe' (approach): pieces float
+ *  through step 01, a thin wireframe Z draws in on step 02, the glass locks
+ *  into it on step 03 and the outline fades once the Z is solid on step 04. */
+export type ZBuild = 'scatter' | 'wireframe';
+const BUILDS = {
+  scatter: { revealAt: .2, joinAt: .27, joinStep: .08, joinLen: .22, sharpAt: .84, wireIn: 0, wireOut: 0 },
+  wireframe: { revealAt: .2, joinAt: .54, joinStep: .035, joinLen: .13, sharpAt: .74, wireIn: .38, wireOut: .82 },
+};
 // Depth of field while blurred: each piece sits at its own depth, so it gets
 // its own blur (px at full strength); far and near pieces blur the most
 const PIECE_BLUR = [14, 5, 9, 6, 18];
@@ -29,7 +38,6 @@ const JOINED_BLUR = 10;
 // and fades back, so the wireframe and the copy lead
 const BLAST_BLUR = [7, 4, 6, 5, 9];
 const BLAST_OPACITY = .18;
-const JOINED = JOIN_AT + JOIN_STEP * (JOIN_ORDER.length - 1) + JOIN_LEN;
 
 // After the closing line (raw/q from the scene): the homepage's glass
 // separation. Face panels pull a little apart in a wave, showing the
@@ -43,7 +51,7 @@ const EDGE_COLOR = 0x111111, EDGE_OPACITY = .35;
 
 type Phase = { raw: number; q: number };
 
-export default function ClarityMark({ progress, phase }: { progress: RefObject<number>; phase?: RefObject<Phase> }) {
+export default function ClarityMark({ progress, phase, build = 'scatter' }: { progress: RefObject<number>; phase?: RefObject<Phase>; build?: ZBuild }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = host.current;
@@ -93,7 +101,9 @@ export default function ClarityMark({ progress, phase }: { progress: RefObject<n
       const edgeGeo = new THREE.EdgesGeometry(geometry, 8);
       const edgeMat = new THREE.LineBasicMaterial({ color: EDGE_COLOR, transparent: true, opacity: 0, depthWrite: false });
       const edges = new THREE.LineSegments(edgeGeo, edgeMat);
-      piece.add(edges);
+      // The outline lives on the Z itself, not the piece, so it can show the
+      // finished shape while the glass is still apart
+      group.add(edges);
       disposables.push(material, edgeGeo, edgeMat);
       geometry.computeBoundingBox();
       group.add(piece);
@@ -123,6 +133,8 @@ export default function ClarityMark({ progress, phase }: { progress: RefObject<n
     const camera = new THREE.OrthographicCamera(-5, 5, 3.5, -3.5, .1, 100);
     camera.position.z = 12;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const B = BUILDS[build];
+    const JOINED = B.joinAt + B.joinStep * (JOIN_ORDER.length - 1) + B.joinLen;
     let width = 0, height = 0;
     const t0 = performance.now();
     const apartOf = PIECE_BLUR.map(() => 1);
@@ -160,10 +172,12 @@ export default function ClarityMark({ progress, phase }: { progress: RefObject<n
       const blast = smooth((ph.raw - .84) / .16) * (1 - smooth((ph.q - .9) / .09));
       group.scale.setScalar(1.25);
 
+      // Approach: the wireframe Z on its own, ahead of the glass
+      const wire = B.wireIn ? smooth((p - B.wireIn) / .07) * (1 - smooth((p - B.wireOut) / .05)) : 0;
       pieces.forEach((pc, i) => {
         const rank = JOIN_ORDER.indexOf(i);
-        const reveal = smooth((p - REVEAL_AT - rank * REVEAL_STEP) / REVEAL_LEN);
-        const apart = still ? 0 : 1 - smooth((p - JOIN_AT - rank * JOIN_STEP) / JOIN_LEN);
+        const reveal = smooth((p - B.revealAt - rank * REVEAL_STEP) / REVEAL_LEN);
+        const apart = still ? 0 : 1 - smooth((p - B.joinAt - rank * B.joinStep) / B.joinLen);
         const [dx, dy, dz, rx, ry, rz] = SCATTER[i];
         // While apart, each piece keeps a slow float of its own
         // (wide, slow, never-repeating-looking drift and turn, fading out as it joins)
@@ -196,11 +210,11 @@ export default function ClarityMark({ progress, phase }: { progress: RefObject<n
           const sp = panel.spin * n * Math.PI;
           panel.mesh.rotation.set(panel.axis.x * sp, panel.axis.y * sp, panel.axis.z * sp);
         });
-        pc.edgeMat.opacity = EDGE_OPACITY * Math.min(1, most * 6) * reveal;
+        pc.edgeMat.opacity = EDGE_OPACITY * Math.max(Math.min(1, most * 6) * reveal, wire);
       });
       // The pieces stay fully blurred until "One direction forward." blurs
       // out (the scene's third statement exits over p .84–.88), then sharpen
-      const soft = still ? 0 : 1 - smooth((p - .84) / .04);
+      const soft = still ? 0 : 1 - smooth((p - B.sharpAt) / .04);
       if (!still) moveZGlints(glints, time);
       if (soft > .005 || blast > .005) {
         // Each piece's glass alone, copied to its own layer with its own blur;
@@ -237,6 +251,6 @@ export default function ClarityMark({ progress, phase }: { progress: RefObject<n
       disposables.forEach(d => d.dispose());
       base.dispose(); reflections.dispose(); renderer.dispose();
     };
-  }, [progress, phase]);
+  }, [progress, phase, build]);
   return <div ref={host} style={{ position: 'absolute', inset: 0 }} />;
 }

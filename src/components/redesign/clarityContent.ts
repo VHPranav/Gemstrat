@@ -7,6 +7,10 @@ export interface ClarityContent {
   heroSubtext: string;
   /** Three statements that blur through while the Z forms */
   statements: string[];
+  /** Approach variant: numbered method steps replace the statements, the Z
+   *  builds wireframe-first, and the later layouts are mirrored */
+  variant?: 'approach';
+  steps?: { title: string; body: string; detail: string }[];
   /** Two closing lines under the finished Z */
   closing: [string, string];
   belief: { title: string; body: string; link: { label: string; href: string } };

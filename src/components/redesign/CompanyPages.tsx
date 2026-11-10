@@ -27,6 +27,31 @@ export function PurposePage() {
   return <PageFrame about hero={<ClarityScene content={PURPOSE_CONTENT} label="Our purpose: different perspectives, one connected practice" />} ctaTitle="Let’s put purpose into practice." category="Our purpose" title="Different perspectives. One connected practice." intro="We bring strategy, technology and brand together to help businesses move forward with clarity." art="interlocking-loops">{null}</PageFrame>;
 }
 
+// Our approach: the same scroll language as Our purpose, but a different
+// story — four method steps build the Z wireframe-first, and the later
+// layouts are mirrored
+const APPROACH_CONTENT: ClarityContent = {
+  variant: 'approach',
+  heroLines: [['Different'], ['minds.'], ['Shared'], ['direction.']],
+  heroSubtext: 'Strategy, technology and brand. One way of working.',
+  statements: [],
+  steps: process,
+  closing: ['Understand. Define. Make. Move forward.', 'A visible path, together.'],
+  belief: {
+    title: 'Close to the challenge. Part of the work.',
+    body: 'We work alongside your teams to understand the realities of delivery. A clear scope, visible decisions and agreed checkpoints give everyone a common reference, and useful knowledge transfer helps your team carry the work forward.',
+    link: { label: 'Start a conversation', href: '/contact' },
+  },
+  practice: {
+    title: 'The right perspectives, together.',
+    cards: [services[0], services[2], services[6]].map(sv => ({ title: sv.title, body: sv.headline, href: `/services/${sv.slug}`, label: 'Explore' })),
+  },
+};
+
+export function ApproachPage() {
+  return <PageFrame about hero={<ClarityScene content={APPROACH_CONTENT} label="Our approach: different minds, shared direction" />} ctaTitle="Let’s find the way forward together." category="Our approach" title="Different minds. Shared direction." intro="Progress starts when the right perspectives come together." art="interlocking-loops">{null}</PageFrame>;
+}
+
 export function PurposeBody() {
   return <div className={styles.page}>
     <JumpNav items={[{ id: 'purpose', title: 'Why we exist' }, { id: 'direction', title: 'Vision & mission' }, { id: 'values', title: 'Our values' }]} />

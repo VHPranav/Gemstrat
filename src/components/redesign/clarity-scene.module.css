@@ -75,3 +75,40 @@
         .practiceText>p{margin-bottom:20px!important}
 }
 @media(prefers-reduced-motion:reduce){.practice,.practiceTitle,.practiceCards,.practiceCard{position:relative;inset:auto;top:auto;left:auto;right:auto;bottom:auto;width:auto;height:auto;transform:none}.practice{padding:10svh 7vw;pointer-events:auto}.practiceCard{opacity:1!important;filter:none!important;margin-bottom:6svh;min-height:300px}.practiceText [data-card-word],.practiceTitle [data-practice-word]{opacity:1!important;filter:none!important;transform:none!important}}
+
+/* ---------- Approach variant ---------- */
+/* Method steps: a large number with the title on the left, the description
+   and deliverables on the right, either side of the forming Z */
+.steps{position:absolute;inset:0;z-index:3;pointer-events:none;color:#fff;mix-blend-mode:difference}
+.step{position:absolute;inset:0}
+.stepLead{position:absolute;left:5vw;top:50%;transform:translateY(-50%);width:30vw}
+.stepNumber{display:block;font-size:clamp(90px,12vw,210px);line-height:.8;letter-spacing:-.07em;margin-bottom:18px;opacity:0}
+.stepLead h2{margin:0!important;font-size:clamp(34px,3.8vw,64px);font-weight:400;line-height:1;letter-spacing:-.05em}
+.stepBody{position:absolute;right:5vw;top:50%;transform:translateY(-50%);width:min(380px,26vw)}
+.stepBody p{margin:0 0 20px!important;font-size:clamp(16px,1.25vw,21px);line-height:1.5}
+.stepBody small{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.7;line-height:1.7}
+.step [data-step-word]{display:inline-block;white-space:pre;opacity:0;filter:blur(16px)}
+@media(max-width:640px){
+  .stepLead{left:7vw;top:13svh;transform:none;width:86vw}
+  .stepNumber{font-size:clamp(64px,20vw,96px);margin-bottom:10px}
+  .stepLead h2{font-size:clamp(28px,8vw,40px)}
+  .stepBody{left:7vw;right:7vw;top:auto;bottom:7svh;transform:none;width:auto}
+}
+@media(prefers-reduced-motion:reduce){.steps{position:relative;display:block}.step,.stepLead,.stepBody{position:relative;inset:auto;top:auto;left:auto;right:auto;bottom:auto;transform:none;width:auto}.step{padding:10svh 7vw}.stepNumber,.step [data-step-word]{opacity:1!important;filter:none!important;transform:none!important}}
+
+/* Mirrored layouts, so approach never reads as a copy of purpose */
+.belief.mirror h2{top:auto;bottom:10svh}
+.belief.mirror>div{bottom:auto;top:16svh}
+.practice.mirror .practiceTitle{left:auto;right:5vw;text-align:right}
+.practice.mirror .practiceCards{right:auto;left:5vw}
+@media(max-width:640px){.belief.mirror h2{bottom:auto;top:12svh}.belief.mirror>div{top:auto;bottom:6svh}.practice.mirror .practiceTitle{left:7vw;right:auto;text-align:left}.practice.mirror .practiceCards{left:7vw}}
+
+/* Lite mode switches blend modes off, which would leave the white
+   "difference" text white-on-white: give it plain ink instead */
+:global(html[data-perf="lite"]) .statements,
+:global(html[data-perf="lite"]) .closing,
+:global(html[data-perf="lite"]) .belief,
+:global(html[data-perf="lite"]) .steps{color:#111}
+/* Approach has four longer steps to read: more scroll for the whole scene */
+.scene.sceneLong{height:2000svh}
+@media(prefers-reduced-motion:reduce){.scene.sceneLong{height:auto}}

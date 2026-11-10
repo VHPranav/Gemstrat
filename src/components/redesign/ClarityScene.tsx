@@ -21,6 +21,7 @@ const STORY = .615;
 export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About Gemstrat: from different perspectives to a shared direction' }: { content?: ClarityContent; label?: string }) {
   const words = content.heroLines.flat();
   const wordCount = words.length;
+  const approach = content.variant === 'approach';
   const [time, setTime] = useState(['--', '--']);
   useEffect(() => {
     const update = () => {
@@ -87,6 +88,26 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
           setWordStyle(word, visible, motion.matches ? 0 : (1-visible)*16, motion.matches ? 0 : (1-enter)*24-exit*16);
         });
       });
+      // Approach: four numbered steps, each in, held, then out
+      el.querySelectorAll<HTMLElement>('[data-step]').forEach((stepEl, i) => {
+        const a = .2 + i * .17;
+        const exit = span(p, a + .13, a + .165);
+        stepEl.setAttribute('aria-hidden', p < a || exit >= 1 ? 'true' : 'false');
+        const num = stepEl.querySelector<HTMLElement>('[data-step-number]');
+        if (num) {
+          const v = span(p, a, a + .05) * (1 - exit);
+          setWordStyle(num, v, motion.matches ? 0 : (1 - v) * 16, motion.matches ? 0 : (1 - v) * 40);
+        }
+        // Every word is in by a + .065 however long the step is, then the
+        // whole step holds until a + .13
+        const stepWords = stepEl.querySelectorAll<HTMLElement>('[data-step-word]');
+        const stagger = .03 / Math.max(1, stepWords.length);
+        stepWords.forEach((word, index) => {
+          const enter = span(p, a + .01 + index * stagger, a + .035 + index * stagger);
+          const visible = enter * (1 - exit);
+          setWordStyle(word, visible, motion.matches ? 0 : (1 - visible) * 16, motion.matches ? 0 : (1 - enter) * 24 - exit * 16);
+        });
+      });
       el.style.setProperty('--closing', String(span(p, .88, .96)));
       el.querySelectorAll<HTMLElement>('[data-closing-word]').forEach((word, i) => {
         const enter = span(p, .88 + i * .008, .93 + i * .008);
@@ -135,11 +156,11 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
       el.querySelectorAll<HTMLElement>('[data-belief]').forEach(b => { b.setAttribute('aria-hidden', beliefOn ? 'false' : 'true'); b.style.pointerEvents = beliefOn ? 'auto' : 'none'; });
     });
   }, [wordCount]);
-  return <section ref={root} className={css.scene} id="overview" aria-label={label}>
+  return <section ref={root} className={`${css.scene} ${approach ? css.sceneLong : ''}`} id="overview" aria-label={label}>
     <div className={css.stage} data-nav-light>
       <div className={css.visual} aria-hidden="true">
         <svg data-flat-mark className={css.fallback} viewBox="35 -30 95 85"><g transform="translate(165.1 0) scale(-1 1)">{S_PIECES.map((piece, i) => <g key={i} data-flat-piece style={{ opacity: 0 }} transform={`translate(${fallbackOffsets[i][0]} ${fallbackOffsets[i][1]}) rotate(${fallbackOffsets[i][2]} 82.55 11.94)`}><polygon points={piece.map(([x,y]) => `${x},${y}`).join(' ')} fill="currentColor" /></g>)}</g></svg>
-        <Mark progress={progress} phase={phase} />
+        <Mark progress={progress} phase={phase} build={approach ? 'wireframe' : 'scatter'} />
       </div>
       <header className={css.hero}>
         <span className={`${css.clock} ${css.hours}`} aria-hidden="true">{time[0]}</span>
@@ -148,16 +169,20 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
         <h1 aria-label={words.join(' ')}>{content.heroLines.map((line, row) => { const start = content.heroLines.slice(0, row).flat().length; return <span className={css.headingLine} key={row}>{line.map((word, k) => { const i = start + k; return <span data-hero-word key={i}><span className={css.introWord} style={{ animationDelay: `${.12 + i * .1}s` }}>{word}</span></span>; })}</span>; })}</h1>
         <p className={css.heroSubtext} data-hero-subtext aria-label={content.heroSubtext}>{content.heroSubtext.split(' ').map((w, j) => <span key={j} aria-hidden="true"><span className={css.introWord} style={{ animationDelay: `${.6 + j * .06}s` }}>{w}</span>{' '}</span>)}</p>
       </header>
-      <div className={css.statements}>{content.statements.map((text, i) => <h2 data-statement key={text} className={css.statement}>{text.split(' ').map((word, j) => <span key={j} data-statement-word>{word}{' '}</span>)}</h2>)}</div>
+      {approach && content.steps && <div className={css.steps}>{content.steps.map((st, i) => <article data-step key={st.title} className={css.step} aria-hidden="true">
+        <div className={css.stepLead}><span className={css.stepNumber} data-step-number>0{i + 1}</span><h2>{st.title.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</h2></div>
+        <div className={css.stepBody}><p>{st.body.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</p><small>{st.detail.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</small></div>
+      </article>)}</div>}
+      <div className={css.statements}>{(approach ? [] : content.statements).map((text, i) => <h2 data-statement key={text} className={css.statement}>{text.split(' ').map((word, j) => <span key={j} data-statement-word>{word}{' '}</span>)}</h2>)}</div>
       <p className={css.closing} aria-label={content.closing.join(' ')}>{content.closing.map((line, l) => <span key={l} aria-hidden="true" style={{ display: 'block' }}>{line.split(' ').map((w, j) => <span key={j} data-closing-word>{w}{' '}</span>)}</span>)}</p>
-      <div className={css.belief} data-belief aria-hidden="true">
+      <div className={`${css.belief} ${approach ? css.mirror : ''}`} data-belief aria-hidden="true">
         <h2>{splitWords(content.belief.title)}</h2>
         <div>
           <p>{splitWords(content.belief.body)}</p>
           <Link className={css.beliefLink} href={content.belief.link.href} data-belief-word>{content.belief.link.label} →</Link>
         </div>
       </div>
-      <div className={css.practice} id="explore">
+      <div className={`${css.practice} ${approach ? css.mirror : ''}`} id="explore">
         <h2 className={css.practiceTitle} aria-label={content.practice.title}>{content.practice.title.split(' ').map((w, j) => <span key={j} aria-hidden="true" data-practice-word>{w}{' '}</span>)}</h2>
         <div className={css.practiceCards}>
           {content.practice.cards.map(item => <article key={item.title} className={css.practiceCard} data-practice-card aria-hidden="true">
