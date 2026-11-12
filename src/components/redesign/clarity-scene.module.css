@@ -112,3 +112,41 @@
 /* Approach has four longer steps to read: more scroll for the whole scene */
 .scene.sceneLong{height:2000svh}
 @media(prefers-reduced-motion:reduce){.scene.sceneLong{height:auto}}
+
+/* ---------- Leadership variant ---------- */
+/* Perspectives: zig-zag either side of the Z, one per focused piece */
+.persps{position:absolute;inset:0;z-index:3;pointer-events:none;color:#fff;mix-blend-mode:difference}
+.persp{position:absolute;left:5vw;bottom:12svh;width:min(440px,30vw)}
+.persp h2{margin:0 0 18px!important;font-size:clamp(32px,3.4vw,58px);font-weight:400;line-height:1.02;letter-spacing:-.05em}
+.persp p{margin:0!important;font-size:clamp(15px,1.15vw,19px);line-height:1.55}
+.persp [data-persp-word]{display:inline-block;white-space:pre;opacity:0;filter:blur(16px)}
+@media(max-width:640px){.persp{left:7vw;right:7vw;width:auto;top:auto;bottom:7svh;text-align:left}}
+@media(prefers-reduced-motion:reduce){.persps{position:relative;display:block}.persp{position:relative;inset:auto;width:auto;text-align:left;padding:8svh 7vw}.persp [data-persp-word]{opacity:1!important;filter:none!important;transform:none!important}}
+:global(html[data-perf="lite"]) .persps{color:#111}
+
+/* "How we lead": title top left, one principle at a time bottom right,
+   both clear of the Z in the middle */
+.practice.stacked .practiceTitle{top:14svh;transform:none;width:28vw}
+.practice.stacked .practiceCards{top:auto;bottom:8svh;transform:none;width:min(400px,27vw);height:min(320px,44svh)}
+.practice.stacked .practiceCard{align-items:flex-end}
+@media(max-width:640px){.practice.stacked .practiceTitle{width:86vw;top:12svh}.practice.stacked .practiceCards{left:7vw;right:7vw;width:auto;bottom:6svh;height:34svh}}
+
+/* Leadership hero: the five glass pieces stand in a line-up across the
+   middle (drawn by ClarityMark); the title sits centred beneath them and the
+   subtext under that. No clock. */
+.hero.heroLineup{display:block;padding:0}
+.heroLineup h1{position:absolute;left:50%;bottom:15svh;transform:translateX(-50%);width:max-content;max-width:90vw;font-size:clamp(44px,5.6vw,96px);line-height:.98;text-align:center}
+.heroLineup .headingLine{padding:0!important;margin:0!important}
+.heroLineup .heroSubtext{left:50%;right:auto;bottom:7svh;transform:translateX(-50%);width:max-content;max-width:86vw;text-align:center;font-size:clamp(15px,1.2vw,19px)}
+@media(max-width:640px){.heroLineup h1{bottom:18svh;font-size:clamp(36px,10.5vw,56px)}.heroLineup .heroSubtext{bottom:8svh}}
+@media(prefers-reduced-motion:reduce){.hero.heroLineup{position:relative;min-height:100svh}}
+
+
+
+/* Filmstrip: each perspective centred beneath the carousel row */
+.persp{left:50%;right:auto;top:auto;bottom:8svh;transform:translateX(-50%);width:min(640px,86vw);text-align:center}
+
+.persp h2{font-size:clamp(28px,2.8vw,48px);margin-bottom:12px!important}
+.persp p{max-width:34em;margin:0 auto!important}
+@media(max-width:640px){.persp{left:50%;right:auto;width:86vw;bottom:7svh;text-align:center}}
+@media(prefers-reduced-motion:reduce){.persp{transform:none;width:auto}}

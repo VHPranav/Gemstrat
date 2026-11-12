@@ -8,6 +8,7 @@ import { setWordStyle } from '@/lib/wordStyle';
 import { S_PIECES } from '@/lib/heroObject';
 import css from './clarity-scene.module.css';
 import { ABOUT_CONTENT, type ClarityContent } from './clarityContent';
+import { SPOT_AT, SPOT_STEP } from './spotlight';
 
 const Mark = dynamic(() => import('./ClarityMark'), { ssr: false });
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -22,6 +23,7 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
   const words = content.heroLines.flat();
   const wordCount = words.length;
   const approach = content.variant === 'approach';
+  const leadership = content.variant === 'leadership';
   const [time, setTime] = useState(['--', '--']);
   useEffect(() => {
     const update = () => {
@@ -56,11 +58,10 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
         setWordStyle(word, 1 - w, w * 14, -w * 16);
       });
       el.style.setProperty('--clock-opacity', String(1 - leave));
-      const subtext = el.querySelector<HTMLElement>('[data-hero-subtext]');
-      if (subtext) {
+      el.querySelectorAll<HTMLElement>('[data-hero-subtext]').forEach(subtext => {
         subtext.style.opacity = String(1 - leave);
         subtext.style.filter = `blur(${motion.matches ? 0 : leave * 12}px)`;
-      }
+      });
       const assembly = span(p, .3, .77);
       el.style.setProperty('--assembly', String(assembly));
       const fallback = el.querySelector<SVGSVGElement>('[data-flat-mark]');
@@ -104,6 +105,19 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
         const stagger = .03 / Math.max(1, stepWords.length);
         stepWords.forEach((word, index) => {
           const enter = span(p, a + .01 + index * stagger, a + .035 + index * stagger);
+          const visible = enter * (1 - exit);
+          setWordStyle(word, visible, motion.matches ? 0 : (1 - visible) * 16, motion.matches ? 0 : (1 - enter) * 24 - exit * 16);
+        });
+      });
+      // Leadership: one perspective per spotlight turn, alternating sides
+      el.querySelectorAll<HTMLElement>('[data-persp]').forEach((pe, i) => {
+        const a = SPOT_AT + i * SPOT_STEP;
+        const exit = i === 4 ? span(p, .8, .84) : span(p, a + SPOT_STEP - .025, a + SPOT_STEP);
+        pe.setAttribute('aria-hidden', p < a || exit >= 1 ? 'true' : 'false');
+        const ws = pe.querySelectorAll<HTMLElement>('[data-persp-word]');
+        const stg = .025 / Math.max(1, ws.length);
+        ws.forEach((word, index) => {
+          const enter = span(p, a + .005 + index * stg, a + .03 + index * stg);
           const visible = enter * (1 - exit);
           setWordStyle(word, visible, motion.matches ? 0 : (1 - visible) * 16, motion.matches ? 0 : (1 - enter) * 24 - exit * 16);
         });
@@ -156,16 +170,17 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
       el.querySelectorAll<HTMLElement>('[data-belief]').forEach(b => { b.setAttribute('aria-hidden', beliefOn ? 'false' : 'true'); b.style.pointerEvents = beliefOn ? 'auto' : 'none'; });
     });
   }, [wordCount]);
-  return <section ref={root} className={`${css.scene} ${approach ? css.sceneLong : ''}`} id="overview" aria-label={label}>
+  return <section ref={root} className={`${css.scene} ${approach || leadership ? css.sceneLong : ''}`} id="overview" aria-label={label}>
     <div className={css.stage} data-nav-light>
       <div className={css.visual} aria-hidden="true">
         <svg data-flat-mark className={css.fallback} viewBox="35 -30 95 85"><g transform="translate(165.1 0) scale(-1 1)">{S_PIECES.map((piece, i) => <g key={i} data-flat-piece style={{ opacity: 0 }} transform={`translate(${fallbackOffsets[i][0]} ${fallbackOffsets[i][1]}) rotate(${fallbackOffsets[i][2]} 82.55 11.94)`}><polygon points={piece.map(([x,y]) => `${x},${y}`).join(' ')} fill="currentColor" /></g>)}</g></svg>
-        <Mark progress={progress} phase={phase} build={approach ? 'wireframe' : 'scatter'} />
+        <Mark progress={progress} phase={phase} build={approach ? 'wireframe' : leadership ? 'spotlight' : 'scatter'} />
       </div>
-      <header className={css.hero}>
+      <header className={`${css.hero} ${leadership ? css.heroLineup : ''}`}>
+        {!leadership && <>
         <span className={`${css.clock} ${css.hours}`} aria-hidden="true">{time[0]}</span>
         <span className={css.clockAccessible} role="timer" aria-label={`Your local time ${time[0]}:${time[1]}`} />
-        <span className={`${css.clock} ${css.minutes}`} aria-hidden="true">:{time[1]}</span>
+        <span className={`${css.clock} ${css.minutes}`} aria-hidden="true">:{time[1]}</span></>}
         <h1 aria-label={words.join(' ')}>{content.heroLines.map((line, row) => { const start = content.heroLines.slice(0, row).flat().length; return <span className={css.headingLine} key={row}>{line.map((word, k) => { const i = start + k; return <span data-hero-word key={i}><span className={css.introWord} style={{ animationDelay: `${.12 + i * .1}s` }}>{word}</span></span>; })}</span>; })}</h1>
         <p className={css.heroSubtext} data-hero-subtext aria-label={content.heroSubtext}>{content.heroSubtext.split(' ').map((w, j) => <span key={j} aria-hidden="true"><span className={css.introWord} style={{ animationDelay: `${.6 + j * .06}s` }}>{w}</span>{' '}</span>)}</p>
       </header>
@@ -173,7 +188,11 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
         <div className={css.stepLead}><span className={css.stepNumber} data-step-number>0{i + 1}</span><h2>{st.title.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</h2></div>
         <div className={css.stepBody}><p>{st.body.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</p><small>{st.detail.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</small></div>
       </article>)}</div>}
-      <div className={css.statements}>{(approach ? [] : content.statements).map((text, i) => <h2 data-statement key={text} className={css.statement}>{text.split(' ').map((word, j) => <span key={j} data-statement-word>{word}{' '}</span>)}</h2>)}</div>
+      {leadership && content.perspectives && <div className={css.persps}>{content.perspectives.map(pp => <article data-persp key={pp.title} className={css.persp} aria-hidden="true">
+        <h2>{pp.title.split(' ').map((w, j) => <span key={j} data-persp-word>{w}{' '}</span>)}</h2>
+        <p>{pp.body.split(' ').map((w, j) => <span key={j} data-persp-word>{w}{' '}</span>)}</p>
+      </article>)}</div>}
+      <div className={css.statements}>{(approach || leadership ? [] : content.statements).map((text, i) => <h2 data-statement key={text} className={css.statement}>{text.split(' ').map((word, j) => <span key={j} data-statement-word>{word}{' '}</span>)}</h2>)}</div>
       <p className={css.closing} aria-label={content.closing.join(' ')}>{content.closing.map((line, l) => <span key={l} aria-hidden="true" style={{ display: 'block' }}>{line.split(' ').map((w, j) => <span key={j} data-closing-word>{w}{' '}</span>)}</span>)}</p>
       <div className={`${css.belief} ${approach ? css.mirror : ''}`} data-belief aria-hidden="true">
         <h2>{splitWords(content.belief.title)}</h2>
@@ -182,7 +201,7 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
           <Link className={css.beliefLink} href={content.belief.link.href} data-belief-word>{content.belief.link.label} →</Link>
         </div>
       </div>
-      <div className={`${css.practice} ${approach ? css.mirror : ''}`} id="explore">
+      <div className={`${css.practice} ${approach ? css.mirror : ''} ${leadership ? css.stacked : ''}`} id="explore">
         <h2 className={css.practiceTitle} aria-label={content.practice.title}>{content.practice.title.split(' ').map((w, j) => <span key={j} aria-hidden="true" data-practice-word>{w}{' '}</span>)}</h2>
         <div className={css.practiceCards}>
           {content.practice.cards.map(item => <article key={item.title} className={css.practiceCard} data-practice-card aria-hidden="true">

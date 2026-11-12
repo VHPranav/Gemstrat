@@ -5,7 +5,21 @@ import * as THREE from 'three';
 import gsap from 'gsap';
 import { createHeroObject } from '@/lib/heroObject';
 import { splitIntoPanels } from '@/lib/zPanels';
+import { SPOT_AT, SPOT_STEP } from './spotlight';
 import { addZLights, createZReflections, createZMaterial, applyZShade, moveZGlints } from '@/lib/zLook';
+
+// Rotation (about z) that stands a piece's long axis upright: the principal
+// axis of its vertices in the xy plane, turned to vertical
+function uprightAngle(geometry: THREE.BufferGeometry) {
+  const pos = geometry.attributes.position;
+  let mx = 0, my = 0;
+  for (let i = 0; i < pos.count; i++) { mx += pos.getX(i); my += pos.getY(i); }
+  mx /= pos.count; my /= pos.count;
+  let cxx = 0, cyy = 0, cxy = 0;
+  for (let i = 0; i < pos.count; i++) { const x = pos.getX(i) - mx, y = pos.getY(i) - my; cxx += x * x; cyy += y * y; cxy += x * y; }
+  const theta = .5 * Math.atan2(2 * cxy, cxx - cyy);
+  return Math.PI / 2 - theta;
+}
 
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 const smooth = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
@@ -24,16 +38,21 @@ const REVEAL_STEP = .035, REVEAL_LEN = .07;
  *  join slowly across three statements. 'wireframe' (approach): pieces float
  *  through step 01, a thin wireframe Z draws in on step 02, the glass locks
  *  into it on step 03 and the outline fades once the Z is solid on step 04. */
-export type ZBuild = 'scatter' | 'wireframe';
+export type ZBuild = 'scatter' | 'wireframe' | 'spotlight';
 const BUILDS = {
   scatter: { revealAt: .2, joinAt: .27, joinStep: .08, joinLen: .22, sharpAt: .84, wireIn: 0, wireOut: 0 },
   wireframe: { revealAt: .2, joinAt: .54, joinStep: .035, joinLen: .13, sharpAt: .74, wireIn: .38, wireOut: .82 },
+  // Leadership: a focus pull. Each piece is one perspective; in its turn it
+  // snaps sharp and bright while the other four stay soft and dim, then all
+  // five join into the Z
+  spotlight: { revealAt: .16, joinAt: .74, joinStep: .015, joinLen: .08, sharpAt: .84, wireIn: 0, wireOut: 0 },
 };
 // Depth of field while blurred: each piece sits at its own depth, so it gets
 // its own blur (px at full strength); far and near pieces blur the most
 const PIECE_BLUR = [14, 5, 9, 6, 18];
 // As a piece joins the Z it moves onto one shared focal plane: this blur
 const JOINED_BLUR = 10;
+// Spotlight turns: perspective k focuses piece JOIN_ORDER[k] (see spotlight.ts)
 // While blasted apart the flying glass softens (px at full blast, per piece)
 // and fades back, so the wireframe and the copy lead
 const BLAST_BLUR = [7, 4, 6, 5, 9];
@@ -103,11 +122,12 @@ export default function ClarityMark({ progress, phase, build = 'scatter' }: { pr
       const edges = new THREE.LineSegments(edgeGeo, edgeMat);
       // The outline lives on the Z itself, not the piece, so it can show the
       // finished shape while the glass is still apart
-      group.add(edges);
+      // (approach only — elsewhere it travels with its piece)
+      if (build === 'wireframe') group.add(edges); else piece.add(edges);
       disposables.push(material, edgeGeo, edgeMat);
       geometry.computeBoundingBox();
       group.add(piece);
-      return { piece, panels, material, edgeMat, edges, opacity: material.opacity, center: geometry.boundingBox!.getCenter(new THREE.Vector3()) };
+      return { piece, panels, material, edgeMat, edges, opacity: material.opacity, center: geometry.boundingBox!.getCenter(new THREE.Vector3()), size: geometry.boundingBox!.getSize(new THREE.Vector3()), upright: uprightAngle(geometry) };
     });
     // Wave order across every panel: top left → bottom right, as on the homepage
     const allPanels = pieces.flatMap(p => p.panels).sort((m, n) => (m.home.x * .35 - m.home.y + m.home.z * .15) - (n.home.x * .35 - n.home.y + n.home.z * .15));
@@ -130,6 +150,31 @@ export default function ClarityMark({ progress, phase, build = 'scatter' }: { pr
 
     const tumble = new THREE.Euler(), quat = new THREE.Quaternion(), pivot = new THREE.Vector3();
     scene.add(group); group.visible = false; reflections.update(renderer); group.visible = true;
+    // Leadership: a soft shadow under each piece on an imaginary floor. They
+    // live outside the Z group, in world space, and are drawn on the main
+    // canvas only (never copied into the blurred per-piece layers)
+    const shadowGroup = new THREE.Group();
+    shadowGroup.visible = build === 'spotlight';
+    scene.add(shadowGroup);
+    // The soft shadow: a blurred ellipse
+    const shadowTex = (() => {
+      const c = document.createElement('canvas'); c.width = c.height = 128;
+      const x = c.getContext('2d')!;
+      const g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+      g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.45, 'rgba(0,0,0,.45)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      x.fillStyle = g; x.fillRect(0, 0, 128, 128);
+      return new THREE.CanvasTexture(c);
+    })();
+    const shadowGeo = new THREE.PlaneGeometry(1, 1);
+    disposables.push(shadowTex, shadowGeo);
+    const shadows = pieces.map(() => {
+      const mat = new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: 0, depthWrite: false });
+      const m = new THREE.Mesh(shadowGeo, mat);
+      m.renderOrder = -1;
+      shadowGroup.add(m);
+      disposables.push(mat);
+      return m;
+    });
     const camera = new THREE.OrthographicCamera(-5, 5, 3.5, -3.5, .1, 100);
     camera.position.z = 12;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -138,9 +183,16 @@ export default function ClarityMark({ progress, phase, build = 'scatter' }: { pr
     let width = 0, height = 0;
     const t0 = performance.now();
     const apartOf = PIECE_BLUR.map(() => 1);
+    const focusOf = PIECE_BLUR.map(() => 0);
+    const depthOf = PIECE_BLUR.map(() => 1);
+    const groupQuat = new THREE.Quaternion(), heroQ = new THREE.Quaternion(), qTmp = new THREE.Quaternion();
+    const stand = new THREE.Euler(), slot = new THREE.Vector3(), heroPos = new THREE.Vector3();
+    const spot = build === 'spotlight';
     // Once the Z is whole it spins on its own; scrolling speeds the spin up,
     // then it eases back to the idle speed
     let spin = 0, boost = 0, lastY = window.scrollY;
+    // Leadership ring: which slot faces the front (in piece units, wraps at 5)
+    let ring = 0;
     const frame = () => {
       const dt = Math.min(gsap.ticker.deltaRatio(60), 3) / 60;
       const dy = Math.abs(window.scrollY - lastY);
@@ -172,34 +224,111 @@ export default function ClarityMark({ progress, phase, build = 'scatter' }: { pr
       const blast = smooth((ph.raw - .84) / .16) * (1 - smooth((ph.q - .9) / .09));
       group.scale.setScalar(1.25);
 
+      // Leadership: a ring. The five pieces stand upright on the
+      // circumference of a slowly turning circle. In the hero it orbits on its
+      // own; through the perspectives it turns one stop at a time to bring
+      // each piece to the front, large and sharp; after the fifth the ring
+      // folds into the Z
+      // strip: 0 in the hero (free orbit), 1 once the perspectives drive it
+      const strip = spot && !still ? smooth((p - .08) / .12) : 0;
+      if (spot) {
+        const t = (p - SPOT_AT) / SPOT_STEP;
+        const step = Math.max(0, Math.min(4, Math.floor(t)));
+        const settle = t < 0 ? 0 : step < 4 ? smooth((t - step - .78) / .22) : 0;
+        const target = Math.min(4, step + settle);
+        // Hero: a slow, continuous orbit; through the perspectives the ring
+        // turns to the current piece
+        if (still) ring = target;
+        else {
+          ring += dt * .12 * (1 - strip);
+          if (strip > 0) {
+            // Always turn forwards (the same way as the idle orbit), never
+            // back the short way round; only a tiny overshoot settles back
+            let diff = (((target - ring) % 5) + 5) % 5;
+            if (diff > 4.6) diff -= 5;
+            ring += diff * Math.min(1, dt * 10 * strip);
+          }
+        }
+      }
+      if (spot) { group.updateMatrixWorld(); groupQuat.copy(group.quaternion).invert(); }
       // Approach: the wireframe Z on its own, ahead of the glass
       const wire = B.wireIn ? smooth((p - B.wireIn) / .07) * (1 - smooth((p - B.wireOut) / .05)) : 0;
       pieces.forEach((pc, i) => {
         const rank = JOIN_ORDER.indexOf(i);
-        const reveal = smooth((p - B.revealAt - rank * REVEAL_STEP) / REVEAL_LEN);
+        const reveal = spot ? 1 : smooth((p - B.revealAt - rank * REVEAL_STEP) / REVEAL_LEN);
         const apart = still ? 0 : 1 - smooth((p - B.joinAt - rank * B.joinStep) / B.joinLen);
-        const [dx, dy, dz, rx, ry, rz] = SCATTER[i];
-        // While apart, each piece keeps a slow float of its own
-        // (wide, slow, never-repeating-looking drift and turn, fading out as it joins)
-        const fx = (Math.sin(time * .45 + i * 1.7) * .35 + Math.sin(time * .17 + i) * .2) * apart;
-        const fy = (Math.cos(time * .38 + i * 2.3) * .3 + Math.sin(time * .21 + i * .7) * .18) * apart;
-        const fz = Math.sin(time * .29 + i * 1.1) * .4 * apart;
-        tumble.set(
-          rx * apart + Math.sin(time * .33 + i) * .7 * apart,
-          ry * apart + Math.cos(time * .27 + i * 1.3) * .8 * apart,
-          rz * apart + Math.sin(time * .23 + i * 2.1) * .5 * apart,
-        );
-        quat.setFromEuler(tumble);
-        pivot.copy(pc.center).applyQuaternion(quat);
-        pc.piece.position.set(dx * 2.2 * apart + fx + pc.center.x - pivot.x, dy * 1.6 * apart + fy + pc.center.y - pivot.y, dz * 1.5 * apart + fz + pc.center.z - pivot.z);
-        pc.piece.rotation.copy(tumble);
-        // Blur-in companion: a small scale-up as the piece arrives
-        pc.piece.scale.setScalar(.82 + .18 * reveal);
-        pc.material.opacity = pc.opacity * reveal * (1 - (1 - BLAST_OPACITY) * blast);
+        let near = 0;
+        if (!spot) {
+          const [dx, dy, dz, rx, ry, rz] = SCATTER[i];
+          // While apart, each piece keeps a slow float of its own
+          // (wide, slow, never-repeating-looking drift and turn, fading out as it joins)
+          const fx = (Math.sin(time * .45 + i * 1.7) * .35 + Math.sin(time * .17 + i) * .2) * apart;
+          const fy = (Math.cos(time * .38 + i * 2.3) * .3 + Math.sin(time * .21 + i * .7) * .18) * apart;
+          const fz = Math.sin(time * .29 + i * 1.1) * .4 * apart;
+          tumble.set(
+            rx * apart + Math.sin(time * .33 + i) * .7 * apart,
+            ry * apart + Math.cos(time * .27 + i * 1.3) * .8 * apart,
+            rz * apart + Math.sin(time * .23 + i * 2.1) * .5 * apart,
+          );
+          quat.setFromEuler(tumble);
+          pivot.copy(pc.center).applyQuaternion(quat);
+          pc.piece.position.set(dx * 2.2 * apart + fx + pc.center.x - pivot.x, dy * 1.6 * apart + fy + pc.center.y - pivot.y, dz * 1.5 * apart + fz + pc.center.z - pivot.z);
+          pc.piece.rotation.copy(tumble);
+          // Blur-in companion: a small scale-up as the piece arrives
+          pc.piece.scale.setScalar(.82 + .18 * reveal);
+        } else {
+          // Place on the circle: d is this piece's offset from the front
+          // stop (-2.5..2.5), th its angle round the ring
+          const d = ((((rank - ring) % 5) + 7.5) % 5) - 2.5;
+          const th = d * (Math.PI * 2 / 5);
+          const depth = (Math.cos(th) + 1) / 2; // 1 at the front, 0 at the back
+          depthOf[i] = depth;
+          near = Math.max(0, 1 - Math.abs(d)) * strip;
+          // Upright, facing the camera with a slow sway, turned a little
+          // along the ring so it reads as going round
+          stand.set(Math.sin(time * .4 + i) * .06, -.35 + Math.sin(th) * .5 + Math.sin(time * .3 + i * 1.3) * .15, pc.upright);
+          heroQ.copy(groupQuat).multiply(qTmp.setFromEuler(stand));
+          // The ring seen from slightly above: the front of the circle sits
+          // lower, the back higher, and the back is pushed away in depth
+          const radius = camera.right * .56;
+          const bob = Math.sin(time * .5 + i) * .04;
+          const ringY = camera.top * (.26 - .06 * strip) - Math.cos(th) * camera.top * .17;
+          slot.set(Math.sin(th) * radius, ringY + bob, Math.cos(th) * 3);
+          const slotX = slot.x, slotZ = slot.z;
+          group.worldToLocal(slot);
+          // Size: nearer pieces larger; through the perspectives the front
+          // piece grows (long bars capped so they stay inside the frame)
+          const longest = Math.max(pc.size.x, pc.size.y) * 1.25;
+          const big = Math.min(1.5, Math.max(1, (camera.top * 1.05) / longest));
+          const base = .5 + .36 * depth;
+          const rowScale = base + (big - base) * near;
+          // Shadow: a soft ellipse a little below the piece's foot, darker
+          // and wider for nearer pieces, smaller as the piece bobs up; it
+          // fades as the ring folds into the Z and during the glass blast
+          const sh = shadows[i];
+          const foot = ringY - longest * rowScale * .5 - .28 * rowScale;
+          const sw = (Math.min(pc.size.x, pc.size.y) * 1.25 + .9) * rowScale * (1 - bob * 1.5);
+          sh.position.set(slotX, foot, slotZ - .5);
+          sh.scale.set(sw, sw * .22, 1);
+          (sh.material as THREE.MeshBasicMaterial).opacity = (.1 + .2 * depth) * smooth((apart - .35) / .5) * (1 - blast);
+          heroPos.copy(slot).sub(pivot.copy(pc.center).multiplyScalar(rowScale).applyQuaternion(heroQ));
+          // Fold: after the fifth perspective the row closes into the Z
+          const w = apart;
+          pc.piece.position.copy(heroPos).multiplyScalar(w);
+          pc.piece.quaternion.identity().slerp(heroQ, w);
+          pc.piece.scale.setScalar(1 + (rowScale - 1) * w);
+        }
+        // Everyone stays in the frame; the centre piece is full strength and
+        // catches more light on the glass
+        const lit = spot ? .6 + .4 * Math.max(depthOf[i], 1 - apart) : 1;
+        if (spot) pc.material.envMapIntensity = 3 + 1.4 * near;
+        const focus = near;
+        pc.material.opacity = pc.opacity * reveal * lit * (1 - (1 - BLAST_OPACITY) * blast);
 
         // Glass separation after the closing line
         let most = 0;
         apartOf[i] = apart;
+        focusOf[i] = focus;
         // The homepage blast: panels fly out along their own direction and
         // spin, each after its own delay, while the wireframe stays put. Out
         // after the closing line, home again before the practice cards.
@@ -222,6 +351,7 @@ export default function ClarityMark({ progress, phase, build = 'scatter' }: { pr
         const src = renderer.domElement;
         pieces.forEach((pc, i) => {
           pieces.forEach((o, j) => { o.piece.visible = i === j; o.edges.visible = false; });
+          shadowGroup.visible = false;
           renderer.render(scene, camera);
           const { canvas, ctx } = layers[i];
           if (canvas.width !== src.width || canvas.height !== src.height) { canvas.width = src.width; canvas.height = src.height; }
@@ -229,10 +359,11 @@ export default function ClarityMark({ progress, phase, build = 'scatter' }: { pr
           ctx.drawImage(src, 0, 0);
           canvas.style.display = 'block';
           const depthBlur = JOINED_BLUR + (PIECE_BLUR[i] - JOINED_BLUR) * apartOf[i];
-          canvas.style.filter = `blur(${(depthBlur * soft + BLAST_BLUR[i] * blast).toFixed(2)}px)`;
+          canvas.style.filter = `blur(${((spot ? 10 * Math.pow(Math.max(0, (.88 - depthOf[i]) / .88), 1.6) * apartOf[i] * soft : depthBlur * soft * (1 - focusOf[i])) + BLAST_BLUR[i] * blast).toFixed(2)}px)`;
         });
         // Main canvas: wireframe only
         pieces.forEach(o => { o.piece.visible = true; o.edges.visible = true; o.panels.forEach(pn => (pn.mesh.visible = false)); });
+        shadowGroup.visible = spot;
         renderer.render(scene, camera);
         pieces.forEach(o => o.panels.forEach(pn => (pn.mesh.visible = true)));
       } else {

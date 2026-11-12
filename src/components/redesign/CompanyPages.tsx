@@ -2,7 +2,6 @@ import ClarityScene from './ClarityScene';
 import { ABOUT_CONTENT, type ClarityContent } from './clarityContent';
 import Image from 'next/image';
 import Link from 'next/link';
-import AbstractArtwork from '@/components/abstract/AbstractArtwork';
 import { groups, process, services, values, regions } from '@/data/redesign/content';
 import { Arrow, ContactCTA, Eyebrow, JumpNav, PageFooter, PageFrame, SectionHead, ServiceCards, styles } from './PageParts';
 
@@ -78,9 +77,37 @@ export function GlobalBody() {
   return <div className={styles.page}><section className={styles.section} id="overview" data-nav-light><SectionHead label="Global presence" title="Different markets. Connected thinking." description="Start with your local priorities and bring the relevant perspectives into the same plan." /><div className={styles.regionLinks}>{regions.map((r, i) => <Link className={styles.regionLink} key={r.slug} href={`/locations/${r.slug}`}><small>0{i + 1}</small><span>{r.name}</span><Arrow /></Link>)}</div></section><ContactCTA /><PageFooter /></div>;
 }
 
+// Leadership: five perspectives, one per piece of the Z, pulled into focus
+// in turn before they join (sample perspectives until team profiles arrive)
+const LEADERSHIP_CONTENT: ClarityContent = {
+  variant: 'leadership',
+  heroLines: [['The', 'minds'], ['behind', 'the', 'work.']],
+  heroSubtext: 'Five perspectives. One leadership team.',
+  statements: [],
+  perspectives: [
+    { title: 'Strategy & transformation', body: 'Business direction, operating models and a clear path from ambition to execution.' },
+    { title: 'Technology & intelligence', body: 'Architecture, digital products and practical decisions about AI and automation.' },
+    { title: 'Brand & experience', body: 'Positioning, identity and experiences that express what a business stands for.' },
+    { title: 'People & capability', body: 'Teams, skills and ways of working that let change take hold and keep going.' },
+    { title: 'Delivery & partnership', body: 'Working alongside your people, with visible decisions and agreed checkpoints.' },
+  ],
+  closing: ['Five perspectives.', 'One leadership team.'],
+  belief: {
+    title: 'Close to the business. Open to a better answer.',
+    body: 'We believe leadership means creating clarity, listening to different perspectives and staying connected to the people doing the work.',
+    link: { label: 'Talk to our team', href: '/contact' },
+  },
+  practice: {
+    title: 'How we lead.',
+    cards: [
+      { title: 'Create clarity', body: 'Make the direction, the choices and their trade-offs easy for everyone to see.', href: '/our-approach', label: 'Our approach' },
+      { title: 'Listen widely', body: 'Bring every relevant perspective into the room before deciding what matters most.', href: '/focus-areas', label: 'Our focus areas' },
+      { title: 'Stay close to the work', body: 'Lead from inside the engagement, alongside the teams who carry it forward.', href: '/our-purpose', label: 'Our purpose' },
+      { title: 'Leave teams stronger', body: 'Measure success by what your people can keep doing once we step back.', href: '/contact', label: 'Start a conversation' },
+    ],
+  },
+};
+
 export function LeadershipPage() {
-  return <PageFrame category="Who we are / Leadership" title="The minds behind the work." intro="Connected perspectives make a stronger plan. Our leadership brings business, technology, creative and people thinking into the same conversation." art="wire-figure">
-    <section className={styles.section} id="overview" data-nav-light><SectionHead label="Leadership perspectives" title="Expertise with a shared direction." description="Our practice connects these disciplines around the needs of your business." /><span className={styles.sampleLabel}>Sample profile layout · team details to follow</span><div className={styles.cardGrid}>{[{ title: 'Strategy & transformation', art: 'angular-convergence', body: 'Business direction, operating models and a clear path from ambition to execution.' }, { title: 'Technology & intelligence', art: 'wire-figure', body: 'Architecture, digital products and practical decisions about AI and automation.' }, { title: 'Brand & experience', art: 'contour-ribbon', body: 'Positioning, identity and experiences that express what a business stands for.' }].map(p => <article className={styles.profile} key={p.title}><div className={styles.profileArt}><AbstractArtwork name={p.art} /></div><Eyebrow>Practice perspective</Eyebrow><h3>{p.title}</h3><p>{p.body}</p></article>)}</div></section>
-    <section className={`${styles.section} ${styles.dark}`}><SectionHead label="How we lead" title="Close to the business. Open to a better answer." description="We believe leadership means creating clarity, listening to different perspectives and staying connected to the people doing the work." /></section>
-  </PageFrame>;
+  return <PageFrame about hero={<ClarityScene content={LEADERSHIP_CONTENT} label="Leadership: the minds behind the work" />} ctaTitle="Meet the minds behind the work." category="Who we are / Leadership" title="The minds behind the work." intro="Connected perspectives make a stronger plan." art="wire-figure">{null}</PageFrame>;
 }

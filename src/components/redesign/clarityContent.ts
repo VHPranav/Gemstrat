@@ -9,7 +9,9 @@ export interface ClarityContent {
   statements: string[];
   /** Approach variant: numbered method steps replace the statements, the Z
    *  builds wireframe-first, and the later layouts are mirrored */
-  variant?: 'approach';
+  variant?: 'approach' | 'leadership';
+  /** Leadership variant: five perspectives, one per Z piece, in a focus pull */
+  perspectives?: { title: string; body: string }[];
   steps?: { title: string; body: string; detail: string }[];
   /** Two closing lines under the finished Z */
   closing: [string, string];
