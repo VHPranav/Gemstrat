@@ -1,7 +1,7 @@
 // ---------------------------------------------------------------------------
 // GET /api/news: regional industry headlines for the Our global presence page.
 //
-// For each Gemstrat region, the Worker asks Google News (RSS) for recent
+// For each Gemstrat region, the Worker asks Bing News (RSS) for recent
 // stories about the topics Gemstrat works on (AI, digital transformation,
 // automation, brand and marketing, people and leadership) in that market.
 // Every headline then passes two filters before it can appear next to the
@@ -20,14 +20,14 @@
 export interface NewsStory { title: string; source: string; href: string; published: string }
 export type NewsFeed = { updated: string; regions: Record<string, NewsStory[]> };
 
-/** Two short searches per region (long OR-queries make Google ignore the
- *  date limit): technology and transformation, then brand and people */
+/** Two short searches per region: technology and transformation, then
+ *  brand and people */
 const SEARCHES = [
   '("artificial intelligence" OR "digital transformation" OR automation) business',
   '(branding OR marketing OR workforce OR "customer experience") business',
 ];
 
-/** Each region: its Google News edition and the place to search for */
+/** Each region: its Bing News market and the place to search for */
 const REGIONS: Record<string, { edition: string; place: string }> = {
   'toronto': { edition: 'CA', place: 'Canada' },
   'new-york': { edition: 'US', place: '"U.S."' },
@@ -53,7 +53,7 @@ const BLOCK = new RegExp('\\b(' + [
   'geopolit\\w*',
   // markets and sport (not what Gemstrat does)
   'stocks?', 'shares', 'sensex', 'nifty', 'nasdaq', 'dow', 'earnings', 'ipo', 'cricket', 'football', 'soccer', 'match', 'tournament', 'olympic\\w*', 'coach', 'captain', 'ipl', 'nba', 'nfl',
-  'layoffs?', 'laid off', 'slash\\w*', 'cuts?', 'resign\\w*', 'shockwaves?', 'crack\\w* down', 'crackdown', 'curbs?', 'bans?', 'banned', 'moratorium', 'pulls? out', 'warns?', 'threat\\w*', 'fears?', 'job cuts?', 'cuts jobs', 'fired', 'bankrupt\\w*', 'collapse\\w*', 'crisis', 'recession', 'slump\\w*', 'plunge\\w*', 'losses',
+  'layoffs?', 'laid off', 'slash\\w*', 'cuts?', 'resign\\w*', 'shockwaves?', 'crack\\w* down', 'crackdown', 'curbs?', 'bans?', 'banned', 'moratorium', 'restructur\\w*', 'outages?', 'downtime', 'pulls? out', 'warns?', 'threat\\w*', 'fears?', 'job cuts?', 'cuts jobs', 'fired', 'bankrupt\\w*', 'collapse\\w*', 'crisis', 'recession', 'slump\\w*', 'plunge\\w*', 'losses',
   // adult, religion, gambling, misc
   'sex\\w*', 'porn\\w*', 'deepfakes?', 'religio\\w*', 'church', 'mosque', 'temple', 'betting', 'gambling', 'casino', 'crypto\\w*', 'bitcoin',
   // competitors
@@ -81,11 +81,12 @@ const tag = (item: string, name: string) => {
   return match ? decode(match[1]) : '';
 };
 
-async function search(edition: string, query: string): Promise<NewsStory[]> {
-  const url = new URL('https://news.google.com/rss/search');
+async function search(market: string, query: string): Promise<NewsStory[]> {
+  // Bing News RSS (Google News refuses requests from Cloudflare's network).
+  // qft interval 8 = the past week
+  const url = new URL('https://www.bing.com/news/search');
   url.search = new URLSearchParams({
-    q: `${query} when:7d`,
-    hl: `en-${edition}`, gl: edition, ceid: `${edition}:en`,
+    q: query, format: 'rss', cc: market, setlang: 'en', qft: 'interval="8"',
   }).toString();
   const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; news-reader)' } });
   if (!response.ok) return [];
@@ -94,14 +95,19 @@ async function search(edition: string, query: string): Promise<NewsStory[]> {
   const seen = new Set<string>();
   const stories: NewsStory[] = [];
   for (const [, item] of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
-    const source = tag(item, 'source');
-    // Google appends " - Source" to every title
-    const title = tag(item, 'title').replace(new RegExp(`\\s+-\\s+${source.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`), '').trim();
-    const href = tag(item, 'link');
+    // "Khaleej Times on MSN" → "Khaleej Times"
+    const source = tag(item, 'News:Source').replace(/\s+on MSN$/i, '');
+    const title = tag(item, 'title');
+    const summary = tag(item, 'description');
+    // Bing wraps the article address in a click-tracking link
+    let href = tag(item, 'link');
+    try { href = new URL(href).searchParams.get('url') ?? href; } catch { continue; }
+    href = href.replace(/^http:\/\//, 'https://');
     const key = title.toLowerCase().slice(0, 60);
     if (!source || !href.startsWith('https://') || seen.has(key)) continue;
     if (title.length < 30 || title.length > 170) continue;
-    if (!TOPIC.test(title) || BLOCK.test(title) || BLOCK.test(source) || BLOCKED_SOURCES.test(source) || !LATIN.test(source)) continue;
+    // The topic must be in the headline; nothing off-brand in the headline or its summary
+    if (!TOPIC.test(title) || BLOCK.test(`${title} ${summary}`) || BLOCK.test(source) || BLOCKED_SOURCES.test(source) || BLOCKED_SOURCES.test(href) || !LATIN.test(source)) continue;
     const published = new Date(tag(item, 'pubDate'));
     if (!(Date.now() - published.getTime() < MAX_AGE_DAYS * 864e5)) continue;
     seen.add(key);
