@@ -126,7 +126,24 @@ async function regionStories(edition: string, place: string): Promise<NewsStory[
     .slice(0, PER_REGION);
 }
 
+// The Cache API is ignored on workers.dev addresses, so each Worker
+// instance also keeps the last good feed in memory for the same hour
+let remembered: { body: string; at: number } | null = null;
+
+const respond = (body: string, maxAge: number) => new Response(body, {
+  headers: {
+    'Content-Type': 'application/json; charset=utf-8',
+    // A failed fetch is only kept briefly, so the next visitor retries
+    'Cache-Control': `public, max-age=${maxAge}`,
+    // Public data; lets the local dev server (another port) read it too
+    'Access-Control-Allow-Origin': '*',
+  },
+});
+
 export async function handleNews(request: Request, ctx: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
+  if (remembered && Date.now() - remembered.at < CACHE_SECONDS * 1000) {
+    return respond(remembered.body, CACHE_SECONDS - Math.floor((Date.now() - remembered.at) / 1000));
+  }
   const cache = (caches as unknown as { default: Cache }).default;
   const key = new Request(new URL('/api/news', request.url).toString());
   const cached = await cache.match(key);
@@ -142,15 +159,11 @@ export async function handleNews(request: Request, ctx: { waitUntil(promise: Pro
   const feed: NewsFeed = { updated: new Date().toISOString(), regions: Object.fromEntries(entries) };
   const found = entries.some(([, stories]) => stories.length > 0);
 
-  const response = new Response(JSON.stringify(feed), {
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      // A failed fetch is only kept briefly, so the next visitor retries
-      'Cache-Control': `public, max-age=${found ? CACHE_SECONDS : 60}`,
-      // Public data; lets the local dev server (another port) read it too
-      'Access-Control-Allow-Origin': '*',
-    },
-  });
-  if (found) ctx.waitUntil(cache.put(key, response.clone()));
+  const body = JSON.stringify(feed);
+  const response = respond(body, found ? CACHE_SECONDS : 60);
+  if (found) {
+    remembered = { body, at: Date.now() };
+    ctx.waitUntil(cache.put(key, response.clone()));
+  }
   return response;
 }
