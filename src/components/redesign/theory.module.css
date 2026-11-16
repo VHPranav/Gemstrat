@@ -1,0 +1,138 @@
+/* ---------- Theory by Gemstrat: "Into focus" ---------- */
+
+/* Pinned stage: the hero, then one full screen per featured case */
+.scene{height:1500svh;position:relative;background:#fff}
+.stage{position:sticky;top:0;height:100svh;overflow:hidden;isolation:isolate;background:#fff;color:#111}
+
+/* Hero: a wall of blurred problems around the title */
+.wall{position:absolute;inset:0;z-index:1;pointer-events:none;--problem:clamp(18px,2vw,34px);mask-image:radial-gradient(ellipse at center,transparent 22%,#000 65%)}
+.problem{position:absolute;translate:-50% -50%;white-space:nowrap;font-size:var(--problem);letter-spacing:-.04em;color:#8d8d8d;opacity:.7}
+.hero{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 6vw;pointer-events:none}
+.hero h1{margin:0;max-width:100%;font-size:clamp(46px,8vw,116px);font-weight:400;letter-spacing:-.06em;line-height:1.02;color:#111}
+.hero h1 [data-title-word]{display:block;white-space:nowrap;opacity:1}
+.hero p{margin:28px 0 0!important;max-width:380px;font-size:clamp(15px,1.2vw,19px);line-height:1.6;color:#444}
+.hero [data-sub-word]{display:inline-block;white-space:pre;opacity:1}
+
+/* A case: full-screen image layers (blurred grey → sharp grey → colour) */
+.case{position:absolute;inset:0;z-index:3;background:#000;color:#fff;opacity:0}
+.wipe{position:absolute;inset:0;width:100%;height:100%;z-index:4;pointer-events:none;visibility:hidden}
+.media{position:absolute;inset:0;will-change:transform}
+.media img{object-fit:cover}
+.blurred{filter:blur(26px) grayscale(1) brightness(.45);transform:scale(1.08)}
+.grey{filter:grayscale(1) brightness(.5);opacity:0;will-change:opacity}
+.colour{filter:brightness(.58) saturate(.9);opacity:0;will-change:opacity}
+.shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.35) 0%,transparent 28%,transparent 50%,rgba(0,0,0,.6) 100%);pointer-events:none}
+
+.case [data-w]{display:inline-block;white-space:pre;opacity:0;filter:blur(16px)}
+.case small{display:block;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.65);margin-bottom:18px}
+
+.meta{position:absolute;top:96px;left:5vw;right:5vw;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.meta em{font-style:normal;margin-left:18px;padding:5px 9px;border:1px solid rgba(255,255,255,.4);font-size:10px}
+
+.challenge{position:absolute;left:5vw;bottom:9svh;width:min(620px,48vw)}
+.challenge h2{margin:0 0 22px;font-size:clamp(34px,3.8vw,64px);font-weight:400;letter-spacing:-.05em;line-height:1.02}
+.challenge p{margin:0;font-size:clamp(15px,1.15vw,19px);line-height:1.6;color:rgba(255,255,255,.85);max-width:34em}
+
+.approach{position:absolute;right:5vw;bottom:9svh;width:min(480px,36vw)}
+.approach p{margin:0;font-size:clamp(18px,1.6vw,26px);line-height:1.45;letter-spacing:-.02em}
+.approach ul{list-style:none;padding:0;margin:26px 0 0;display:flex;flex-wrap:wrap;gap:8px}
+.approach li{border:1px solid rgba(255,255,255,.45);padding:8px 13px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+
+.outcome{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 6vw}
+.figures{display:flex;gap:clamp(40px,8vw,140px);justify-content:center;flex-wrap:wrap}
+.case .figures>[data-w]{display:flex;flex-direction:column;align-items:center;max-width:300px;white-space:normal}
+.figures strong{white-space:nowrap;font-size:clamp(64px,9vw,150px);font-weight:400;letter-spacing:-.07em;line-height:.95;font-variant-numeric:tabular-nums}
+.figures span{margin-top:14px;font-size:clamp(13px,1vw,16px);color:rgba(255,255,255,.8);line-height:1.45}
+.outcome p{margin:44px 0 0;font-size:clamp(18px,1.6vw,26px);letter-spacing:-.02em}
+
+/* Progress through the cases, on the right edge */
+.counter{position:absolute;right:2.2vw;top:50%;transform:translateY(-50%);z-index:4;display:flex;gap:14px;align-items:stretch;color:#fff}
+.track{width:1px;background:rgba(255,255,255,.25);position:relative}
+.fill{position:absolute;inset:0;background:#fff;transform-origin:top;transform:scaleY(0)}
+.counter ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:22px;font-size:11px;letter-spacing:.1em}
+.counter li{opacity:.4;transition:opacity .4s}
+.counter li[data-active]{opacity:1}
+
+/* ---------- All cases: the index ---------- */
+.index{position:relative;padding:120px 5vw 110px;background:#fff;color:#111}
+.indexHead{display:grid;grid-template-columns:1.3fr 1fr;gap:6vw;align-items:end;margin-bottom:56px}
+.indexHead h2{margin:0!important;font-size:clamp(38px,4.6vw,76px);font-weight:400;letter-spacing:-.055em;line-height:1.02}
+.indexHead p{margin:0;font-size:16px;line-height:1.65;color:#555}
+.indexHead em{display:block;margin-top:12px;font-style:normal;font-size:12px;color:#888}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px}
+.filters button{font:inherit;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:11px 18px;border:1px solid #bdbdbd;background:transparent;color:#111;border-radius:40px;cursor:pointer;transition:background .3s,color .3s,border-color .3s}
+.filters button:hover{border-color:#111}
+.filters .filterOn{background:#111;color:#fff;border-color:#111}
+.rows{list-style:none;margin:0;padding:0;border-top:1px solid rgba(16,16,16,.18)}
+.row{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:50px 2.2fr 1.2fr .9fr 1.6fr 30px;gap:24px;align-items:center;padding:30px 0;border-bottom:1px solid rgba(16,16,16,.18);transition:padding .4s cubic-bezier(.16,1,.3,1),color .3s}
+.row:hover,.row:focus-visible{padding-left:14px;padding-right:6px}
+.rows:hover .row:not(:hover){color:#a5a5a5}
+.row:focus-visible{outline:1px solid #111;outline-offset:4px}
+.rowNum{font-size:12px;color:#888}
+.rowTitle{font-size:clamp(20px,1.9vw,30px);letter-spacing:-.035em;line-height:1.15}
+.rowMeta,.rowPractice{font-size:13px;color:#666}
+.rowPractice{text-transform:uppercase;letter-spacing:.08em;font-size:11px}
+.rowResult{font-size:13px;color:#555;line-height:1.4}
+.rowResult strong{font-weight:400;font-size:20px;color:#111;letter-spacing:-.03em;margin-right:6px}
+.rowArrow{font-size:20px;transition:transform .3s}
+.row:hover .rowArrow{transform:translateX(5px)}
+
+.preview{position:fixed;left:0;top:0;width:280px;height:200px;z-index:20;pointer-events:none;overflow:hidden}
+.preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);filter:blur(10px);transition:opacity .4s,transform .6s cubic-bezier(.16,1,.3,1),filter .5s}
+.preview .previewOn{opacity:1;transform:scale(1);filter:blur(0)}
+@media(hover:none){.preview{display:none}}
+
+/* Detail panel */
+.backdrop{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .5s;backdrop-filter:blur(4px)}
+.backdropOn{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;bottom:0;z-index:2001;width:min(640px,100vw);background:#fff;color:#111;overflow-y:auto;overscroll-behavior:contain;transform:translateX(100%);transition:transform .7s cubic-bezier(.16,1,.3,1)}
+.panelOn{transform:none}
+.panelClose{position:sticky;top:0;z-index:2;margin-left:auto;display:flex;gap:10px;align-items:center;font:inherit;font-size:12px;letter-spacing:.1em;text-transform:uppercase;background:#111;color:#fff;border:0;padding:16px 22px;cursor:pointer}
+.panelImage{position:relative;height:300px;margin-top:-50px}
+.panelImage img{object-fit:cover}
+.panelBody{padding:40px 48px 70px}
+.panelBody .sample{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:6px 10px;background:#e4e4e4;color:#555;margin-bottom:18px}
+.panelBody small{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#777}
+.panelBody h2{margin:14px 0 30px!important;font-size:clamp(32px,3vw,46px);font-weight:400;letter-spacing:-.05em;line-height:1.05}
+.panelBody h3{margin:34px 0 10px!important;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:400;color:#777}
+.panelBody p,.panelBody li{margin:0;font-size:16px;line-height:1.7;color:#333}
+.panelBody ul{margin:0;padding-left:18px}
+.panelFigures{display:flex;gap:40px;flex-wrap:wrap;padding:24px 0;border-top:1px solid rgba(16,16,16,.18);border-bottom:1px solid rgba(16,16,16,.18)}
+.panelFigures>div{display:flex;flex-direction:column;max-width:220px}
+.panelFigures strong{font-size:48px;font-weight:400;letter-spacing:-.06em;line-height:1}
+.panelFigures span{margin-top:8px;font-size:13px;color:#666;line-height:1.4}
+.panelBody blockquote{margin:36px 0 0;padding-left:20px;border-left:2px solid #111}
+.panelBody blockquote p{font-size:20px;letter-spacing:-.02em;line-height:1.45;color:#111}
+.panelBody cite{display:block;margin-top:12px;font-style:normal;font-size:12px;color:#777}
+.panelLinks{display:flex;flex-direction:column}
+.panelLinks a{padding:12px 0;border-bottom:1px solid rgba(16,16,16,.18);font-size:15px}
+.panelLinks a:hover{color:#777}
+.panelCta{display:inline-flex;margin-top:40px;background:#111;color:#fff;padding:18px 24px;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.panelCta:hover{background:#333}
+
+/* ---------- Smaller screens ---------- */
+@media(max-width:900px){
+  .challenge{width:auto;right:5vw;bottom:10svh}
+  .approach{width:auto;left:5vw;bottom:10svh}
+  .row{grid-template-columns:36px 1fr 24px;gap:6px 14px;padding:24px 0}
+  .rowMeta,.rowPractice,.rowResult{grid-column:2}
+  .rowArrow{grid-column:3;grid-row:1}
+  .indexHead{grid-template-columns:1fr;gap:20px}
+}
+@media(max-width:640px){
+  .wall{--problem:16px}
+  .meta{top:84px;left:6vw;right:6vw;font-size:10px}
+  .meta em{display:none}
+  .challenge,.approach{left:6vw;right:6vw;bottom:8svh}
+  .figures{flex-direction:column;gap:28px}
+  .outcome p{margin-top:28px}
+  .counter{right:3vw}
+  .counter ol{gap:16px}
+  .index{padding:80px 6vw}
+  .panelBody{padding:30px 24px 60px}
+  .panelImage{height:220px}
+}
+
+/* Slow devices (lite): no blur filters, so keep the text dark-on-light readable */
+:global(html[data-perf="lite"]) .grey{opacity:1!important}
+

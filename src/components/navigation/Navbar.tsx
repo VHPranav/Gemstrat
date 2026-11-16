@@ -28,7 +28,7 @@ const MENU_LINKS: ZMenuLink[] = [
     { label: 'Our approach', href: '/our-approach' },
     { label: 'Leadership', href: '#leadership' },
   ] },
-  { label: 'Theory of Gemstrat', href: '#statement' },
+  { label: 'Theory by Gemstrat', href: '/theory-by-gemstrat' },
   { label: 'Our global presence', href: '/our-global-presence' },
   { label: 'What we do', href: '/focus-areas' },
   { label: 'Contact', href: '#contact' },

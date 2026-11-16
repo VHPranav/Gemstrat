@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// Cloudflare Worker: byte-range requests for the videos.
+// Cloudflare Worker: byte-range requests for the videos, and /api/news.
 // The site is static files (out/, served by Workers static assets), which
 // always answer with the whole file. Safari (Mac and iPhone) won't play a
 // <video> unless the server honours `Range: bytes=…` with 206 Partial
@@ -7,6 +7,8 @@
 // fetches the file from the assets and streams back just the bytes asked
 // for. Everything else is served by the assets directly.
 // ---------------------------------------------------------------------------
+
+import { handleNews } from './news';
 
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
@@ -70,7 +72,10 @@ function sliceStream(body: ReadableStream<Uint8Array>, start: number, end: numbe
 }
 
 const worker = {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: { waitUntil(promise: Promise<unknown>): void }): Promise<Response> {
+    // Regional industry headlines (see news.ts)
+    if (new URL(request.url).pathname === '/api/news') return handleNews(request, ctx);
+
     // The whole file, without the range
     const file = await env.ASSETS.fetch(new Request(request.url, { method: 'GET' }));
     if (!file.ok || !file.body) return file;

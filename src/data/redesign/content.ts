@@ -63,5 +63,5 @@ export const navigation = [
   { title: 'Who we are', links: [{ title: 'Our purpose', href: '/our-purpose' }, { title: 'Our approach', href: '/our-approach' }, { title: 'Leadership', href: '/about/leadership' }] },
   { title: 'What we do', links: services.map(s => ({ title: s.title, href: `/services/${s.slug}` })) },
   { title: 'Global presence', links: regions.map(r => ({ title: r.name, href: `/locations/${r.slug}` })) },
-  { title: 'Perspectives', links: [{ title: 'Insights', href: '/perspectives/insights' }, { title: 'Case studies', href: '/perspectives/case-studies' }, { title: 'Industries', href: '/perspectives/industries' }] },
+  { title: 'Theory by Gemstrat', links: [{ title: 'Case studies', href: '/theory-by-gemstrat' }] },
 ];
