@@ -64,6 +64,8 @@ const BLOCK = new RegExp('\\b(' + [
 const BLOCKED_SOURCES = /(newswire|presswire|globe ?newswire|business ?wire|pr ?web|openpr|einpresswire|accesswire|issuewire|prlog|press release)/i;
 
 const CACHE_SECONDS = 60 * 60;
+/** Bump to throw away cached feeds after changing the searches or filters */
+const FEED_VERSION = 2;
 const PER_REGION = 6;
 /** Older stories are dropped, so the page never shows stale news */
 const MAX_AGE_DAYS = 21;
@@ -145,7 +147,7 @@ export async function handleNews(request: Request, ctx: { waitUntil(promise: Pro
     return respond(remembered.body, CACHE_SECONDS - Math.floor((Date.now() - remembered.at) / 1000));
   }
   const cache = (caches as unknown as { default: Cache }).default;
-  const key = new Request(new URL('/api/news', request.url).toString());
+  const key = new Request(new URL(`/api/news?v=${FEED_VERSION}`, request.url).toString());
   const cached = await cache.match(key);
   if (cached) return cached;
 
