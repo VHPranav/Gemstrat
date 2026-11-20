@@ -34,6 +34,7 @@ interface Props {
   title: string[];
   intro: string;
   areas: FocusArea[];
+  heroOnly?: boolean;
 }
 
 const INTRO = 70; // vh of scroll for the headline to leave
@@ -60,7 +61,7 @@ function scatter(n: number) {
   return order;
 }
 
-export default function FocusStage({ title, intro, areas }: Props) {
+export default function FocusStage({ title, intro, areas, heroOnly = false }: Props) {
   const ref = useRef<HTMLElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
   const statueRef = useRef<HTMLDivElement>(null);
@@ -111,7 +112,7 @@ export default function FocusStage({ title, intro, areas }: Props) {
       mo.observe(html, { attributes: true, attributeFilter: ['class'] });
     }
 
-    const stop = onScrollFrame(() => {
+    const stop = heroOnly ? () => {} : onScrollFrame(() => {
       const el = ref.current;
       if (!el) return;
       const vh = window.innerHeight;
@@ -141,7 +142,7 @@ export default function FocusStage({ title, intro, areas }: Props) {
       mo?.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [areas.length]);
+  }, [areas.length, heroOnly]);
 
   let wordIndex = 0;
 
@@ -150,7 +151,7 @@ export default function FocusStage({ title, intro, areas }: Props) {
       id="areas"
       ref={ref}
       className="relative"
-      style={{ height: `${INTRO + areas.length * PER_AREA + 100}vh` }}
+      style={{ height: heroOnly ? '100svh' : `${INTRO + areas.length * PER_AREA + 100}vh` }}
     >
       <div className="sticky top-0 h-screen h-[100svh] overflow-hidden">
         {/* The statue, large and central: the backdrop for the whole page */}
@@ -200,7 +201,7 @@ export default function FocusStage({ title, intro, areas }: Props) {
         </div>
 
         {/* The areas, one at a time, alternating sides */}
-        {areas.map((a, i) => {
+        {!heroOnly && areas.map((a, i) => {
           const state = i === active ? 'now' : i < active ? 'past' : 'next';
           const right = i % 2 === 1;
           const part = (k: number): React.CSSProperties => ({

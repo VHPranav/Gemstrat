@@ -2,7 +2,7 @@ const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
 // The same uneven pixel frontier as the Theory transition. The outgoing
 // hero already has a white background, so the canvas only draws the letters.
-export function drawHorizonWipe(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, width: number, height: number, progress: number) {
+export function drawHorizonWipe(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, width: number, height: number, progress: number, letters = 'FIVEREGIONSONEWAYOFWORKING') {
   const ratio = Math.min(window.devicePixelRatio || 1, 2);
   const pixelWidth = Math.round(width * ratio);
   const pixelHeight = Math.round(height * ratio);
@@ -18,7 +18,6 @@ export function drawHorizonWipe(canvas: HTMLCanvasElement, context: CanvasRender
   let titleMask = '';
   context.font = `${cell * .65}px monospace`;
   context.textAlign = 'center';
-  const letters = 'FIVEREGIONSONEWAYOFWORKING';
   for (let column = 0; column * cell < width; column++) {
     const x = column * cell;
     const position = x / width;

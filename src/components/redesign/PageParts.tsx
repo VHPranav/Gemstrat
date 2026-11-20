@@ -28,20 +28,20 @@ export function JumpNav({ items }: { items: { id: string; title: string }[] }) {
   return <nav className={styles.anchorNav} aria-label="On this page" data-nav-light>{items.map(i => <a key={i.id} href={`#${i.id}`}>{i.title}</a>)}</nav>;
 }
 
-export function ContactCTA({ title = 'What would you like to move forward?' }: { title?: string }) {
-  return <section className={styles.cta} data-nav-light><h2>{title}</h2><div><p>Bring us the challenge. Let’s find a clear direction together.</p><Link className={styles.button} href="/contact">Start a conversation <Arrow /></Link></div></section>;
+export function ContactCTA({ title = 'What would you like to move forward?', dark = false }: { title?: string; dark?: boolean }) {
+  return <section className={styles.cta} data-nav-light={dark ? undefined : true}><h2>{title}</h2><div><p>Bring us the challenge. Let’s find a clear direction together.</p><Link className={styles.button} href="/contact">Start a conversation <Arrow /></Link></div></section>;
 }
 
-export function PageFooter({ regionLinks }: { regionLinks?: { title: string; href: string }[] } = {}) {
-  return <footer className={styles.footer}>
+export function PageFooter({ regionLinks, light = false }: { regionLinks?: { title: string; href: string }[]; light?: boolean } = {}) {
+  return <footer className={`${styles.footer} ${light ? styles.footerLight : ''}`} data-nav-light={light ? true : undefined}>
     <div className={styles.footerTop}><Link className={styles.wordmark} href="/">GEMSTRAT</Link><p>Solving what matters.<br />Building what lasts.<br /><a href="mailto:ask@gemstrat.com">ask@gemstrat.com ↗</a></p></div>
     <div className={styles.footerGrid}>{navigation.map(group => <div key={group.title}><h3>{group.title}</h3><ul className={group.title === 'What we do' ? styles.serviceLinks : undefined}>{(group.title === 'Global presence' && regionLinks ? regionLinks : group.links).map(link => <li key={link.href}><Link href={link.href}>{link.title}</Link></li>)}</ul></div>)}</div>
     <div className={styles.footerBottom}><span>© {new Date().getFullYear()} Gemstrat</span><div className={styles.footerLegal}><Link href="/privacy-policy">Privacy policy</Link><Link href="/terms-and-conditions">Terms & conditions</Link><Link href="/sitemap">Sitemap</Link><Link href="/contact">Contact</Link></div></div>
   </footer>;
 }
 
-export function PageFrame({ title, category, intro, art, image, children, cta = true, about = false, hero, ctaTitle, regionLinks }: { ctaTitle?: string; regionLinks?: { title: string; href: string }[]; hero?: ReactNode; about?: boolean; title: string; category: string; intro: string; art?: string; image?: string; children: ReactNode; cta?: boolean }) {
-  return <SubPage bare title={[]} intro="" next={{ label: 'Explore', href: '#overview' }} closing={false}><div className={`${styles.page} ${about ? styles.about : ''}`}>{hero ?? <PageHero clean={about} title={title} category={category} intro={intro} art={art} image={image} />}{children}{about ? <div className={styles.endcap}>{cta && <ContactCTA title={ctaTitle} />}<PageFooter regionLinks={regionLinks} /></div> : <>{cta && <ContactCTA />}<PageFooter regionLinks={regionLinks} /></>}</div></SubPage>;
+export function PageFrame({ title, category, intro, art, image, children, cta = true, about = false, hero, ctaTitle, regionLinks, theme = 'light' }: { theme?: 'light' | 'dark'; ctaTitle?: string; regionLinks?: { title: string; href: string }[]; hero?: ReactNode; about?: boolean; title: string; category: string; intro: string; art?: string; image?: string; children: ReactNode; cta?: boolean }) {
+  return <SubPage bare title={[]} intro="" next={{ label: 'Explore', href: '#overview' }} closing={false}><div className={`${styles.page} ${about ? styles.about : ''} ${theme === 'dark' ? styles.darkPage : ''}`}>{hero ?? <PageHero clean={about} title={title} category={category} intro={intro} art={art} image={image} />}{children}{about ? <div className={styles.endcap}>{cta && <ContactCTA title={ctaTitle} dark={theme === 'dark'} />}<PageFooter regionLinks={regionLinks} light={theme === 'dark'} /></div> : <>{cta && <ContactCTA dark={theme === 'dark'} />}<PageFooter regionLinks={regionLinks} light={theme === 'dark'} /></>}</div></SubPage>;
 }
 
 export function ServiceCards({ items }: { items: Service[] }) {

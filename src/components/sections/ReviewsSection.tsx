@@ -227,7 +227,7 @@ export default function ReviewsSection() {
                 ref={review1Ref}
                 className="w-[85vw] sm:w-[560px] lg:w-[640px] xl:w-[700px] shrink-0 pointer-events-auto"
               >
-                <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
+                <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f4] leading-[1.38] tracking-[-0.02em] m-0">
                   {REVIEWS[0].quote.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
@@ -243,7 +243,7 @@ export default function ReviewsSection() {
                     </span>
                   ))}
                 </p>
-                <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
+                <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9d9d9d] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
                   {REVIEWS[0].author.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
@@ -267,7 +267,7 @@ export default function ReviewsSection() {
                 ref={review2Ref}
                 className="w-[85vw] sm:w-[560px] lg:w-[640px] xl:w-[700px] shrink-0 pointer-events-auto ml-[36vw]"
               >
-                <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f5] leading-[1.38] tracking-[-0.02em] m-0">
+                <p className="font-archivo text-[clamp(1.35rem,2.2vw,36px)] font-normal text-[#f4f4f4] leading-[1.38] tracking-[-0.02em] m-0">
                   {REVIEWS[1].quote.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
@@ -283,7 +283,7 @@ export default function ReviewsSection() {
                     </span>
                   ))}
                 </p>
-                <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9c9ca4] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
+                <p className="font-archivo text-[clamp(1.05rem,1.3vw,22px)] font-normal text-[#9d9d9d] leading-[1.4] tracking-[-0.01em] mt-6 m-0">
                   {REVIEWS[1].author.split(' ').map((word, wIdx) => (
                     <span
                       key={wIdx}
@@ -327,7 +327,7 @@ export default function ReviewsSection() {
         {/* ========================================================= */}
         <div
           ref={footerCurtainRef}
-          className="absolute inset-0 w-full h-full bg-[#070708] z-30 shadow-[-40px_0_100px_rgba(0,0,0,0.98)] border-l border-white/[0.14] will-change-transform overflow-hidden select-none flex flex-col justify-between"
+          className="absolute inset-0 w-full h-full bg-[#070707] z-30 shadow-[-40px_0_100px_rgba(0,0,0,0.98)] border-l border-white/[0.14] will-change-transform overflow-hidden select-none flex flex-col justify-between"
           style={{ transform: 'translate3d(100%, 0, 0)' }}
         >
           {/* Subtle Left Edge Glow Line */}
@@ -369,7 +369,7 @@ export default function ReviewsSection() {
                       Let&apos;s Build What&apos;s Next
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">✦</span>
-                    <span className="font-archivo-expanded font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#8e8e93] mr-10 sm:mr-14">
+                    <span className="font-archivo-expanded font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#8e8e8e] mr-10 sm:mr-14">
                       Scale What Matters
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">—</span>
@@ -377,7 +377,7 @@ export default function ReviewsSection() {
                       Systems Architecture &amp; Brand Acceleration
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">✦</span>
-                    <span className="font-archivo-expanded font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#a1a1aa] mr-10 sm:mr-14">
+                    <span className="font-archivo-expanded font-light text-[clamp(2.4rem,5.2vw,84px)] tracking-[-0.03em] text-[#a2a2a2] mr-10 sm:mr-14">
                       Gemstrat Global
                     </span>
                     <span className="font-mono text-white/25 text-[clamp(1.2rem,2vw,28px)] mr-10 sm:mr-14">—</span>
@@ -392,7 +392,7 @@ export default function ReviewsSection() {
               {/* Left Column: Monumental Headline & Magnetic Button */}
               <div className="lg:col-span-7 flex flex-col justify-between px-6 sm:px-12 lg:px-16 py-8 sm:py-10 border-b lg:border-b-0 lg:border-r border-white/[0.08]">
                 <div>
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-3">
+                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#727272] block mb-3">
                     {'// Architecture statement'}
                   </span>
                   <h2 className="font-archivo-expanded text-[clamp(2.6rem,6.8vw,104px)] font-normal text-white leading-[0.88] tracking-[-0.04em] m-0">
@@ -406,7 +406,7 @@ export default function ReviewsSection() {
                   {/* Brutalist Button with High-Contrast Inversion */}
                   <a
                     href="mailto:ask@gemstrat.com"
-                    className="group relative inline-flex items-center justify-center bg-white text-black px-8 sm:px-10 py-4 sm:py-4.5 rounded-none font-mono text-[12px] sm:text-[13px] font-bold tracking-[0.15em] transition-all duration-300 hover:bg-[#070708] hover:text-white border border-white pointer-events-auto"
+                    className="group relative inline-flex items-center justify-center bg-white text-black px-8 sm:px-10 py-4 sm:py-4.5 rounded-none font-mono text-[12px] sm:text-[13px] font-bold tracking-[0.15em] transition-all duration-300 hover:bg-[#070707] hover:text-white border border-white pointer-events-auto"
                   >
                     <span>Get in touch</span>
                     <span className="ml-3 inline-block transition-transform duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-0.5">
@@ -414,7 +414,7 @@ export default function ReviewsSection() {
                     </span>
                   </a>
 
-                  <div className="font-mono text-[10px] tracking-[0.14em] text-[#71717a] leading-relaxed max-w-[280px]">
+                  <div className="font-mono text-[10px] tracking-[0.14em] text-[#727272] leading-relaxed max-w-[280px]">
                     Ready to co-found, rethink, and scale your system architecture.
                   </div>
                 </div>
@@ -425,23 +425,23 @@ export default function ReviewsSection() {
 
                 {/* Direct Transmission Block */}
                 <div className="px-6 sm:px-10 lg:px-12 py-8 flex flex-col justify-center">
-                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#71717a] block mb-4">
+                  <span className="font-mono text-[10px] tracking-[0.25em] text-[#727272] block mb-4">
                     [ 01 // Direct transmission ]
                   </span>
 
                   <div className="flex flex-col gap-2">
                     <a
                       href="mailto:ask@gemstrat.com"
-                      className="font-archivo text-[clamp(1.4rem,2.2vw,36px)] font-bold text-white tracking-[-0.02em] hover:text-[#c59b63] transition-colors pointer-events-auto flex items-center justify-between group"
+                      className="font-archivo text-[clamp(1.4rem,2.2vw,36px)] font-bold text-white tracking-[-0.02em] hover:text-[#a0a0a0] transition-colors pointer-events-auto flex items-center justify-between group"
                     >
                       <span>ask@gemstrat.com</span>
-                      <span className="font-mono text-[18px] text-[#71717a] group-hover:text-white transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">
+                      <span className="font-mono text-[18px] text-[#727272] group-hover:text-white transition-transform group-hover:translate-x-1 group-hover:-translate-y-1">
                         ↗
                       </span>
                     </a>
 
                     <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/[0.05]">
-                      <span className="font-mono text-[clamp(0.95rem,1.2vw,18px)] text-[#a1a1aa] tracking-[0.05em]">
+                      <span className="font-mono text-[clamp(0.95rem,1.2vw,18px)] text-[#a2a2a2] tracking-[0.05em]">
                         +1 647 472 2085
                       </span>
                       <span className="font-mono text-[10px] tracking-[0.1em] text-emerald-400/90 flex items-center gap-1.5">
@@ -476,7 +476,7 @@ export default function ReviewsSection() {
                               className="object-cover scale-110 group-hover:scale-100 transition-transform duration-700 ease-out grayscale"
                             />
                             {/* Cinematic Contrast Overlay to keep text perfectly legible */}
-                            <div className="absolute inset-0 bg-[#070708]/65 backdrop-blur-[0.5px]" />
+                            <div className="absolute inset-0 bg-[#070707]/65 backdrop-blur-[0.5px]" />
                           </div>
 
                           {/* Foreground Content */}
@@ -501,7 +501,7 @@ export default function ReviewsSection() {
             </div>
 
             {/* Bottom Bar: Architectural Metadata & Social Coordinates */}
-            <div className="w-full border-t border-white/[0.08] px-6 sm:px-12 lg:px-16 py-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-[10px] sm:text-[11px] tracking-[0.12em] text-[#71717a]">
+            <div className="w-full border-t border-white/[0.08] px-6 sm:px-12 lg:px-16 py-4.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 font-mono text-[10px] sm:text-[11px] tracking-[0.12em] text-[#727272]">
               {/* Copyright & Legal */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
                 <span className="text-white/80">&copy; 2026 Gemstrat Ltd.</span>

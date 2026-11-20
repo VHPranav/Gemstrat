@@ -6,9 +6,10 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { onScrollFrame } from '@/lib/scrollFrame';
 import { ZIcon } from '@/components/navigation/ZIcon';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { goTo, setRouterPush } from '@/lib/navigate';
 import type { ZMenuLink } from './ZMenu';
+import { groups, services } from '@/data/redesign/content';
 
 // The Z menu (three.js) loads on its own, the first time the button is
 // hovered, focused or pressed
@@ -22,16 +23,22 @@ const ZMenu = dynamic(() => import('@/components/navigation/ZMenu'), { ssr: fals
 // dark-on-light while it sits over the white sections.
 // ---------------------------------------------------------------------------
 
+// Every service, grouped by practice, for the menu's services panel
+const SERVICE_GROUPS = groups.map(group => ({
+  title: group,
+  links: services.filter(service => service.group === group).map(service => ({ label: service.title, href: `/services/${service.slug}` })),
+}));
+
 const MENU_LINKS: ZMenuLink[] = [
   { label: 'Who we are', children: [
     { label: 'Our purpose', href: '/our-purpose' },
     { label: 'Our approach', href: '/our-approach' },
-    { label: 'Leadership', href: '#leadership' },
+    { label: 'Leadership', href: '/about/leadership' },
   ] },
   { label: 'Theory by Gemstrat', href: '/theory-by-gemstrat' },
   { label: 'Our global presence', href: '/our-global-presence' },
-  { label: 'What we do', href: '/focus-areas' },
-  { label: 'Contact', href: '#contact' },
+  { label: 'What we do', href: '/what-we-do', groups: SERVICE_GROUPS },
+  { label: 'Contact', href: '/contact' },
 ];
 const LETS_TALK_WIDTH = 'w-[6rem] sm:w-[7.5rem]';
 
@@ -46,6 +53,8 @@ export default function Navbar() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [trigger, setTrigger] = useState<HTMLButtonElement | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const contactHref = pathname === '/' ? '/#contact' : '/contact';
   useEffect(() => {
     setRouterPush((href) => router.push(href));
     return () => setRouterPush(null);
@@ -200,8 +209,8 @@ export default function Navbar() {
 
           {/* Let's talk */}
           <Link
-            href="/#contact"
-            onClick={go('#contact')}
+            href={contactHref}
+            onClick={go(pathname === '/' ? '#contact' : '/contact')}
             style={{ animationDelay: '0.92s' }}
             className={`nav-item-in pointer-events-auto group flex items-center justify-between ${LETS_TALK_WIDTH} h-7 sm:h-8 pl-3 pr-2.5 sm:pl-3.5 sm:pr-3 font-sans text-[10px] sm:text-[11px] uppercase tracking-[0.04em] transition-colors duration-300 ${
               light ? 'bg-black text-white hover:bg-zinc-800' : 'bg-white text-black hover:bg-zinc-200'

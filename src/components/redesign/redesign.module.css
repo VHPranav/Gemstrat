@@ -41,3 +41,15 @@
 .endcap>.footer h3{margin-bottom:12px}
 .endcap>.footer li{margin:6px 0}
 .endcap>.footer .footerBottom{margin-top:28px;padding-top:18px}
+
+/* What We Do uses a dark variation of the shared page shell. */
+.darkPage{background:#090909;color:#f2f2f2}
+.darkPage .cta{background:#090909;color:#f2f2f2;border-color:#333}
+.darkPage .cta p{color:#c3c3c3}
+.darkPage .cta .button{background:#f2f2f2!important;color:#111!important}
+.darkPage .cta .button:hover{background:#d5d5d5!important}
+/* …ending on a white footer */
+.footerLight{background:#fff;color:#111}
+.footerLight .footerTop p,.footerLight h3,.footerLight .footerBottom{color:#666}
+.footerLight a:hover{color:#777}
+.footerLight .footerBottom{border-top-color:#1111111f}

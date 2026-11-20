@@ -12,6 +12,10 @@ export interface ZPanel {
   geometry: THREE.BufferGeometry;
   home: THREE.Vector3;
   dir: THREE.Vector3;
+  /** The face's own normal */
+  normal: THREE.Vector3;
+  /** True for the thin bevel strips along the edges (not one of the main faces) */
+  bevel: boolean;
 }
 
 export function splitIntoPanels(geometry: THREE.BufferGeometry): ZPanel[] {
@@ -50,7 +54,13 @@ export function splitIntoPanels(geometry: THREE.BufferGeometry): ZPanel[] {
     const out = home.clone().sub(center);
     if (out.lengthSq() < 1e-6) out.copy(normal);
     const dir = out.normalize().multiplyScalar(0.6).addScaledVector(normal, 0.4).normalize();
-    panels.push({ geometry: panelGeo, home, dir });
+    panelGeo.computeBoundingBox();
+    const sz = panelGeo.boundingBox!.getSize(new THREE.Vector3());
+    const bevel = [sz.x, sz.y, sz.z].filter(v => v > 0.05).length < 2;
+    // Normals from the winding can point inward: always face away from the centre
+    const outward = normal.clone();
+    if (outward.dot(home.clone().sub(center)) < 0) outward.negate();
+    panels.push({ geometry: panelGeo, home, dir, normal: outward, bevel });
   });
   if (geo !== geometry) geo.dispose();
   return panels;

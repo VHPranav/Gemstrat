@@ -99,7 +99,7 @@ export default function OurApproachSections() {
       <section id="contact" className={styles.invitation} data-nav-light aria-labelledby="approach-contact">
         <h2 id="approach-contact" data-approach-reveal>What could we<br /><span>move forward?</span></h2>
         <Link href="/#contact" className={styles.contactLink}>Let’s work it out together <span aria-hidden="true">↗</span></Link>
-        <div className={styles.footerLinks}><Link href="/our-purpose">Explore our purpose <span aria-hidden="true">↗</span></Link><Link href="/focus-areas">Discover what we do <span aria-hidden="true">↗</span></Link></div>
+        <div className={styles.footerLinks}><Link href="/our-purpose">Explore our purpose <span aria-hidden="true">↗</span></Link><Link href="/what-we-do">Discover what we do <span aria-hidden="true">↗</span></Link></div>
       </section>
     </div>
   );

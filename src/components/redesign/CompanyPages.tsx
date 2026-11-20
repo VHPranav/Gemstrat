@@ -101,7 +101,7 @@ const LEADERSHIP_CONTENT: ClarityContent = {
     title: 'How we lead.',
     cards: [
       { title: 'Create clarity', body: 'Make the direction, the choices and their trade-offs easy for everyone to see.', href: '/our-approach', label: 'Our approach' },
-      { title: 'Listen widely', body: 'Bring every relevant perspective into the room before deciding what matters most.', href: '/focus-areas', label: 'Our focus areas' },
+      { title: 'Listen widely', body: 'Bring every relevant perspective into the room before deciding what matters most.', href: '/what-we-do', label: 'What we do' },
       { title: 'Stay close to the work', body: 'Lead from inside the engagement, alongside the teams who carry it forward.', href: '/our-purpose', label: 'Our purpose' },
       { title: 'Leave teams stronger', body: 'Measure success by what your people can keep doing once we step back.', href: '/contact', label: 'Start a conversation' },
     ],

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { createHeroObject, S_HEIGHT, S_PIECE_SHADES } from '@/lib/heroObject';
 import { addZLights, applyZShade, createZMaterial, createZReflections, moveZGlints } from '@/lib/zLook';
@@ -31,6 +31,8 @@ export interface ZMenuLink {
   label: string;
   href?: string;
   children?: { label: string; href: string }[];
+  /** A large set of links, grouped (the services): shown in a panel to the right */
+  groups?: { title: string; links: { label: string; href: string }[] }[];
 }
 
 interface ZMenuProps {
@@ -46,6 +48,18 @@ interface ZMenuProps {
   onRequestClose: () => void;
   /** The closing has finished */
   onClosed: () => void;
+}
+
+/** Splits the groups into two columns of about the same length, keeping their order within each */
+function balance<G extends { links: unknown[] }>(groups: G[]) {
+  const columns: G[][] = [[], []];
+  const size = [0, 0];
+  for (const group of groups) {
+    const c = size[0] <= size[1] ? 0 : 1;
+    columns[c].push(group);
+    size[c] += group.links.length + 1.5;
+  }
+  return columns;
 }
 
 // Which piece of the Z (index in S_PIECES) each row gets, top to bottom:
@@ -122,6 +136,28 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
   // Hovered row (-1: none), and the turn each piece flips toward
   const hoverRef = useRef(-1);
   const turnRef = useRef([0, 0, 0, 0, 0]);
+  // The services panel: opened by hovering its row (or its button), and kept
+  // open while the pointer moves across to it
+  const [panel, setPanel] = useState(false);
+  const panelTimer = useRef(0);
+  // It opens on hover, beside the rows, on screens wide enough for it; on
+  // smaller (touch) screens "What we do" simply goes to the overview page
+  const wide = () => window.matchMedia('(min-width: 1024px)').matches;
+  const showPanel = () => { window.clearTimeout(panelTimer.current); if (wide()) setPanel(true); };
+  const hidePanelSoon = () => { window.clearTimeout(panelTimer.current); if (wide()) panelTimer.current = window.setTimeout(() => setPanel(false), 260); };
+  const choose = (href: string) => { setPanel(false); onSelect(href); };
+  const panelLink = links.slice(0, 5).find(link => link.groups);
+  // The row whose submenu is showing (-1: none): the other rows dim right down
+  const [focusRow, setFocusRow] = useState(-1);
+  const panelRow = links.slice(0, 5).findIndex(link => link.groups);
+  // The panel starts just past the widest row, so it never covers a link
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el || !open || !panel) return;
+    const edge = Math.max(0, ...rowRefs.current.map(row => row?.getBoundingClientRect().right ?? 0));
+    el.style.left = `${Math.round(edge + 20)}px`;
+  }, [open, panel]);
   // The latest props, for the animation loop
   const propsRef = useRef({ open, target, trigger, onClosed });
   useEffect(() => {
@@ -576,8 +612,9 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
       className="fixed inset-0 pointer-events-auto text-white"
       style={{ visibility: 'hidden' }}
     >
-      <div ref={backdropRef} className="absolute inset-0 bg-[#090909]" style={{ opacity: 0 }} onClick={onRequestClose} />
-      <div ref={canvasWrapRef} className="absolute inset-0 pointer-events-none" />
+      <div ref={backdropRef} className="absolute inset-0 bg-[#090909]" style={{ opacity: 0 }} onClick={() => { setPanel(false); onRequestClose(); }} />
+      {/* The 3D Z steps out of the way while the services are showing */}
+      <div ref={canvasWrapRef} className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${open && (panel || focusRow === panelRow) ? 'opacity-0' : ''}`} />
 
       <nav aria-label="Site">
         {links.slice(0, 5).map((link, i) => (
@@ -586,8 +623,8 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
             ref={(el) => {
               rowRefs.current[i] = el;
             }}
-            onPointerEnter={() => hover(i)}
-            onPointerLeave={() => unhover(i)}
+            onPointerEnter={() => { hover(i); setFocusRow(link.children || link.groups ? i : -1); if (link.groups) showPanel(); else if (wide()) setPanel(false); }}
+            onPointerLeave={() => { unhover(i); setFocusRow(-1); if (link.groups) hidePanelSoon(); }}
             onFocus={() => hover(i)}
             onBlur={() => unhover(i)}
             className="absolute flex items-center gap-4 sm:gap-7 pr-6 py-2 opacity-0"
@@ -597,16 +634,16 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
               ref={(el) => {
                 glyphRefs.current[i] = el;
               }}
-              className="flex items-center justify-center shrink-0 opacity-0"
+              className={`flex items-center justify-center shrink-0 opacity-0 transition-[filter] duration-300 ${open && (panel || focusRow === panelRow) ? 'invisible' : focusRow !== -1 && focusRow !== i ? 'brightness-[0.2]' : ''}`}
             >
               <ZPieceGlyph part={ROW_PIECE[i]} className="w-full h-full" />
             </span>
-            <div className="group/row relative flex items-center gap-5 md:gap-8 text-[clamp(1.25rem,4.6vw,2.2rem)] md:text-[clamp(2.4rem,4.6vw,4.4rem)] leading-none tracking-[-0.035em] whitespace-nowrap">
-              {link.href ? <a href={link.href.startsWith('#') ? `/${link.href}` : link.href} tabIndex={open ? 0 : -1} onClick={(e) => { e.preventDefault(); onSelect(link.href!); }} className="focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-8">{link.label}</a> : <button type="button" id="who-we-are-label" aria-controls="who-we-are-submenu" aria-haspopup="true" tabIndex={open ? 0 : -1} className="cursor-pointer text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-8">{link.label}</button>}
+            <div className={`group/row relative flex items-center gap-5 md:gap-8 text-[clamp(1.25rem,4.6vw,2.2rem)] md:text-[clamp(2.4rem,4.6vw,4.4rem)] leading-none tracking-[-0.035em] whitespace-nowrap transition-opacity duration-300 ${(focusRow !== -1 && focusRow !== i) || (open && panel && i !== panelRow) ? 'opacity-[0.12]' : ''}`}>
+              {link.href ? <a href={link.href.startsWith('#') ? `/${link.href}` : link.href} tabIndex={open ? 0 : -1} onClick={(e) => { e.preventDefault(); choose(link.href!); }} className="focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-8">{link.label}</a> : <button type="button" id={`menu-label-${i}`} aria-controls={`menu-submenu-${i}`} aria-haspopup="true" tabIndex={open ? 0 : -1} className="cursor-pointer text-left focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-8">{link.label}</button>}
               <sup className="ml-2 text-[10px] md:text-xs tracking-[0.12em] text-white/40 align-super tabular-nums">
                 {String(i + 1).padStart(2, '0')}
               </sup>
-              {link.children && <ul id="who-we-are-submenu" aria-labelledby="who-we-are-label" className="invisible pointer-events-none absolute left-full top-1/2 flex -translate-y-1/2 flex-col py-3 pl-5 text-[13px] sm:text-[14px] md:text-[16px] tracking-normal leading-none text-white/65 opacity-0 transition-opacity duration-200 group-hover/row:visible group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:visible group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
+              {link.children && <ul id={`menu-submenu-${i}`} aria-labelledby={`menu-label-${i}`} className="invisible pointer-events-none absolute left-full top-1/2 flex -translate-y-1/2 flex-col py-3 pl-5 text-[13px] sm:text-[14px] md:text-[16px] tracking-normal leading-none text-white/65 opacity-0 transition-opacity duration-200 group-hover/row:visible group-hover/row:pointer-events-auto group-hover/row:opacity-100 group-focus-within/row:visible group-focus-within/row:pointer-events-auto group-focus-within/row:opacity-100">
                 {link.children.map((child) => <li key={child.href}><a href={child.href.startsWith('#') ? `/${child.href}` : child.href} tabIndex={open ? 0 : -1} onClick={(e) => { e.preventDefault(); onSelect(child.href); }} className="block py-2 pr-4 hover:text-white focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 transition-colors">{child.label}</a></li>)}
               </ul>}
             </div>
@@ -614,6 +651,29 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
         ))}
       </nav>
 
+      {/* The services, by practice: to the right of the rows (screens 1024px and wider) */}
+      {panelLink?.groups && <div
+        ref={panelRef}
+        id="menu-services"
+        role="region"
+        aria-label="Services"
+        onPointerEnter={showPanel}
+        onPointerLeave={hidePanelSoon}
+        className={`absolute z-10 hidden lg:block lg:right-[3vw] lg:top-1/2 lg:max-h-[88svh] lg:-translate-y-1/2 lg:overflow-y-auto transition-[opacity,translate,visibility] duration-300 ${open && panel ? 'visible opacity-100 translate-x-0' : 'invisible pointer-events-none opacity-0 translate-x-6'}`}
+      >
+        <div className="mb-5 flex items-center justify-between gap-6 border-b border-white/15 pb-3 text-[10px] uppercase tracking-[0.14em] text-white/50">
+          <span>{panelLink.label}</span>
+          <a href={panelLink.href} tabIndex={open && panel ? 0 : -1} onClick={(e) => { e.preventDefault(); if (panelLink.href) choose(panelLink.href); }} className="hover:text-white">Overview →</a>
+        </div>
+        <div className="grid grid-cols-2 gap-x-6">
+          {balance(panelLink.groups).map((column, c) => <div key={c}>{column.map(group => <section key={group.title} className="mb-5">
+            <h3 className="mb-1.5 text-[10px] uppercase tracking-[0.14em] text-white/45">{group.title}</h3>
+            <ul>{group.links.map(item => <li key={item.href}>
+              <a href={item.href} tabIndex={open && panel ? 0 : -1} onClick={(e) => { e.preventDefault(); choose(item.href); }} className="block py-[0.22rem] text-[13px] xl:text-[14px] leading-tight text-white/75 hover:text-white focus-visible:text-white focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-4 transition-colors">{item.label}</a>
+            </li>)}</ul>
+          </section>)}</div>)}
+        </div>
+      </div>}
     </div>
   );
 }

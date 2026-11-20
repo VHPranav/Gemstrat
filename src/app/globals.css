@@ -28,15 +28,15 @@
 }
 
 @theme {
-  --color-ink: #0b0b0c;
-  --color-ink-2: #151516;
-  --color-paper: #f6f4ee;
-  --color-sand: #ece6d8;
-  --color-graphite: #46474a;
-  --color-silver: #b7b8bb;
-  --color-silver-soft: #dcdcd8;
-  --color-bronze: #9c7a44;
-  --color-bronze-soft: #c9ad7e;
+  --color-ink: #0b0b0b;
+  --color-ink-2: #151515;
+  --color-paper: #f4f4f4;
+  --color-sand: #e6e6e6;
+  --color-graphite: #474747;
+  --color-silver: #b8b8b8;
+  --color-silver-soft: #dcdcdc;
+  --color-bronze: #7d7d7d;
+  --color-bronze-soft: #b0b0b0;
   --color-hero-bg: #090909;
 
   --font-area: "Frama", "PP Frama", sans-serif;
@@ -64,21 +64,21 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ---------- design tokens ---------- */
 :root {
-  --ink: #0b0b0c;
-  --ink-2: #151516;
-  --paper: #f6f4ee;
-  --sand: #ece6d8;
-  --graphite: #46474a;
-  --silver: #b7b8bb;
-  --silver-soft: #dcdcd8;
-  --bronze: #9c7a44;
-  --bronze-soft: #c9ad7e;
-  --line-on-paper: rgba(11, 11, 12, 0.14);
-  --line-on-ink: rgba(246, 244, 238, 0.16);
+  --ink: #0b0b0b;
+  --ink-2: #151515;
+  --paper: #f4f4f4;
+  --sand: #e6e6e6;
+  --graphite: #474747;
+  --silver: #b8b8b8;
+  --silver-soft: #dcdcdc;
+  --bronze: #7d7d7d;
+  --bronze-soft: #b0b0b0;
+  --line-on-paper: rgba(0, 0, 0, 0.14);
+  --line-on-ink: rgba(255, 255, 255, 0.16);
   --text-on-paper: var(--ink);
   --text-on-ink: var(--paper);
   --sub-on-paper: var(--graphite);
-  --sub-on-ink: #c7c6c1;
+  --sub-on-ink: #c6c6c6;
 
   --gutter: clamp(20px, 5vw, 64px);
   --maxw: 1400px;
@@ -233,7 +233,7 @@ body {
   margin: 0;
   font-weight: 400;
   letter-spacing: -0.035em;
-  color: #0b0b0c;
+  color: #0b0b0b;
   text-align: center;
 }
 
@@ -433,3 +433,6 @@ html:not(.page-in) :is(.sub-word, .sub-fade) {
 @media (prefers-reduced-motion: reduce) {
   .sub-word, .sub-fade { animation: none; opacity: 1; filter: none; transform: none; }
 }
+
+/* The site uses a monochrome palette, including media and 3D artwork. */
+img, video, canvas { filter: grayscale(1); }

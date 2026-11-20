@@ -8,7 +8,7 @@ export function ContactPage() {
 }
 
 export function SitemapPage() {
-  const extra = [{ title: 'Explore', links: [{ title: 'Home', href: '/' }, { title: 'All capabilities', href: '/focus-areas' }, { title: 'Global presence', href: '/our-global-presence' }, { title: 'Connect with us', href: '/contact' }, { title: 'Privacy policy', href: '/privacy-policy' }, { title: 'Terms & conditions', href: '/terms-and-conditions' }] }];
+  const extra = [{ title: 'Explore', links: [{ title: 'Home', href: '/' }, { title: 'All capabilities', href: '/what-we-do' }, { title: 'Global presence', href: '/our-global-presence' }, { title: 'Connect with us', href: '/contact' }, { title: 'Privacy policy', href: '/privacy-policy' }, { title: 'Terms & conditions', href: '/terms-and-conditions' }] }];
   return <PageFrame category="Explore Gemstrat" title="Find your way forward." intro="All our pages, in one place. Find the thinking, expertise and perspectives you are looking for." art="angular-convergence"><section className={styles.section} id="overview" data-nav-light><div className={styles.directoryGrid}>{[...navigation, ...extra].map(g => <section key={g.title}><h2>{g.title}</h2>{g.links.map(l => <Link href={l.href} key={l.href}>{l.title}<Arrow /></Link>)}</section>)}</div></section></PageFrame>;
 }
 
