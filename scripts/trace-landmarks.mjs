@@ -20,6 +20,5 @@ for (const file of await readdir(directory)) {
       }
     }
   }
-  lines.push([0, 213, w, 213]);
   await writeFile(new URL(file.replace('.png', '-trace.json'), directory), JSON.stringify({ w, h, lines }));
 }

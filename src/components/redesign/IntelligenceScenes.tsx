@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useRef, type RefObject } from 'react';
 import type { Service } from '@/data/redesign/content';
 import { clamp, ease, isLite, isStill, mix, pinned, reveal, span, words } from './serviceMotion';
@@ -67,11 +68,15 @@ function stepLines(text: string) {
 // ---------------------------------------------------------------------------
 // Hero: from scattered points to a sharp picture
 // ---------------------------------------------------------------------------
-interface Dot { hx: number; hy: number; sx: number; sy: number; light: number; phase: number; figure: boolean; reach: number }
+interface Dot { hx: number; hy: number; sx: number; sy: number; light: number; coarse: number; phase: number; figure: boolean }
+
+/** Generation: how long the picture takes to form from noise, and the photo reveal after it (seconds) */
+const GENERATE = 3.2;
+const REVEAL = 1.1;
 
 export function IntelligenceHero({ service }: { service: Service }) {
   const root = useRef<HTMLElement>(null);
-  const field = useRef<{ dots: Dot[]; cell: number; ratio: number } | null>(null);
+  const field = useRef<{ dots: Dot[]; cell: number; ratio: number; cols: number; rows: number } | null>(null);
   const formedAt = useRef(0);
   // Clicking the field sends a ripple out from the click
   const hold = useRef({ ripple: { at: -10, x: 0, y: 0 } });
@@ -116,39 +121,43 @@ export function IntelligenceHero({ service }: { service: Service }) {
       context.drawImage(image, (cols - dw) / 2, (rows - dh) / 2, dw, dh);
       const data = context.getImageData(0, 0, cols, rows).data;
       const dots: Dot[] = [];
-      const animateGripper = service.slug === 'ai-intelligent-automation';
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
           const k = (row * cols + col) * 4;
           const light = (data[k] * .299 + data[k + 1] * .587 + data[k + 2] * .114) / 255;
           const seed = row * 977 + col;
-          // Map back to the source photo so the gripper follows the responsive crop.
-          const u = (col + .5 - (cols - dw) / 2) / dw;
-          const v = (row + .5 - (rows - dh) / 2) / dh;
-          const reach = animateGripper
-            ? span(u, .43, .455) * (1 - span(u, .57, .59))
-              * span(v, .44, .61) * (1 - span(v, .675, .69)) * dh * cell * .023
-            : 0;
           dots.push({
             hx: col * cell + cell / 2, hy: row * cell + cell / 2,
             sx: rand(seed) * w, sy: rand(seed + .5) * h,
-            light, phase: rand(seed + .25) * Math.PI * 2, reach,
+            light, coarse: light, phase: rand(seed + .25) * Math.PI * 2,
             figure: light > .55 && (col * 7 + row * 13) % 37 === 0,
           });
         }
       }
-      field.current = { dots, cell, ratio };
+      // The rough layout a generator finds first: each square's 8×8 neighbourhood, averaged
+      const B = 8;
+      for (let br = 0; br < rows; br += B) {
+        for (let bc = 0; bc < cols; bc += B) {
+          let sum = 0, count = 0;
+          for (let r = br; r < Math.min(rows, br + B); r++) for (let c = bc; c < Math.min(cols, bc + B); c++) { sum += dots[r * cols + c].light; count++; }
+          for (let r = br; r < Math.min(rows, br + B); r++) for (let c = bc; c < Math.min(cols, bc + B); c++) dots[r * cols + c].coarse = sum / count;
+        }
+      }
+      field.current = { dots, cell, ratio, cols, rows };
     };
     image.onload = build;
     image.src = service.image;
     const resize = new ResizeObserver(build);
     resize.observe(canvas);
     return () => { resize.disconnect(); image.onload = null; };
-  }, [service.image, service.slug]);
+  }, [service.image]);
 
   useLiveFrames(root, (el, time) => {
     const still = isStill();
     const lite = isLite();
+    const progressive = service.slug === 'ai-consulting' || service.slug === 'ai-strategy';
+    const buildTime = progressive ? 2.15 : GENERATE;
+    const revealTime = progressive ? 1.1 : REVEAL;
     const t = still ? 1 : pinned(el);
     const canvas = el.querySelector<HTMLCanvasElement>('[data-field]')!;
 
@@ -173,18 +182,42 @@ export function IntelligenceHero({ service }: { service: Service }) {
       const sinceRipple = time - h.ripple.at;
       const rippleFront = sinceRipple * 760;
       const rippleSize = 22 * Math.exp(-sinceRipple * 1.6);
-      const cycle = (Math.max(0, time - formedAt.current) % 4.8);
-      const reach = ease(span(cycle, .9, 2.1)) * (1 - ease(span(cycle, 2.6, 3.8)));
-      for (const dot of dots) {
+      // Generation, the way an AI image model works: the squares are laid down
+      // as noise, then the noise is removed; the rough layout (light and dark
+      // areas) appears first and the detail sharpens last
+      const since = still ? 99 : Math.max(0, time - formedAt.current);
+      const g = clamp(since / buildTime);
+      const { cols, rows } = f;
+      // Once formed, the squares give way to the photograph itself
+      const finish = span(since, buildTime, buildTime + revealTime);
+      const photoIn = progressive ? finish : ease(finish);
+      for (let i = 0; i < dots.length; i++) {
+        const dot = dots[i];
+        // A soft diagonal sweep lays the squares down from the top left; each one
+        // arrives as still grey noise and settles into the picture (no flicker)
+        const row = Math.floor(i / cols), col = i % cols;
+        const diagonal = (row / rows + col / cols) / 2;
+        // A stable grain preview gives way to large tonal shapes and then detail.
+        const cluster = Math.floor(row / 4) * 997 + Math.floor(col / 4);
+        const variation = rand(cluster + 29);
+        const local = progressive
+          ? span(g, .19 + diagonal * .09 + variation * .12, .78 + variation * .17)
+          : clamp(g * 1.45 - diagonal * .45);
+        const arrived = progressive ? ease(span(g, 0, .16)) : ease(clamp(local / .18));
+        const noise = (1 - local) ** 1.6;
+        const detail = ease(span(local, .35, 1));
+        const n = rand(i * 1.7 + 11);
+        const light = progressive
+          ? mix(.08 + n * .48, mix(dot.coarse, dot.light, detail), ease(span(local, 0, .65)))
+          : clamp(mix(dot.coarse, dot.light, detail) * (1 - noise) + n * .7 * noise);
         // Each point travels on its own slightly delayed path
         const own = ease(clamp((assemble - dot.phase / 30) / (1 - .21)));
         // Until it settles, it wanders on its own slow loop
         const wander = (1 - own) * 46;
         let x = mix(dot.sx, dot.hx, own) + Math.sin(time * .35 + dot.phase * 3) * wander;
         let y = mix(dot.sy, dot.hy, own) + Math.cos(time * .28 + dot.phase * 5) * wander;
-        y += dot.reach * reach;
         // Clicked: a ripple rings out from the click
-        if (rippleSize > .3) {
+        if (!progressive && rippleSize > .3) {
           const dx = x - h.ripple.x, dy = y - h.ripple.y;
           const r = Math.hypot(dx, dy) || 1;
           const wave = Math.exp(-((r - rippleFront) ** 2) / (2 * 70 * 70)) * Math.sin((r - rippleFront) / 24);
@@ -192,28 +225,52 @@ export function IntelligenceHero({ service }: { service: Service }) {
           y += dy / r * wave * rippleSize;
         }
         const twinkle = .78 + .22 * Math.sin(time * 2.2 + dot.phase);
-        const alpha = (.14 + dot.light * .82) * twinkle * dim * mix(.55, 1, own) * appear;
+        // The photo opens through random tiles (4×4 squares each), each at its own moment
+        const tileStart = diagonal * .24 + variation * .46;
+        const swept = progressive
+          ? ease(span(photoIn, tileStart, tileStart + .26))
+          : photoIn <= 0 ? 0 : clamp((photoIn * 1.18 - rand(cluster * 3.1 + 5) * .85) / .16);
+        // Until its tile opens, a dark cell keeps the photo hidden underneath
+        if (photoIn > 0 && swept < 1) {
+          context.fillStyle = `rgba(9,9,9,${(1 - swept).toFixed(3)})`;
+          context.fillRect(dot.hx - cell / 2, dot.hy - cell / 2, cell + .5, cell + .5);
+        }
+        const alpha = clamp((.14 + light * .82) * twinkle * dim * mix(.55, 1, own)
+          * appear * arrived * (1 - swept));
         if (alpha < .03) continue;
         context.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
-        if (dot.figure && own > .9) {
+        if (dot.figure && own > .9 && g >= 1) {
           context.fillText(String(Math.floor((dot.light * 97 + time * 3 + dot.phase * 9) % 99)).padStart(2, '0'), x, y);
         } else {
-          const r = Math.max(.6, dot.light ** 1.4 * cell * .44) * mix(.5, 1, own);
-          context.beginPath();
-          context.arc(x, y, r, 0, Math.PI * 2);
-          context.fill();
+          const r = Math.max(.6, light ** 1.4 * cell * .44) * mix(.5, 1, own);
+          // A square (the same block as the pixel wipes), sized by brightness
+          context.fillRect(x - r, y - r, r * 2, r * 2);
         }
       }
     }
 
-    // The headline holds over the formed field, then gives way to the introduction
-    reveal([...el.querySelectorAll<HTMLElement>('[data-title] [data-w]')], still ? 1 : 1 - span(t, .55, .66), still);
+    // The headline lands once the picture has resolved, holds, then gives way to the introduction
+    const resolved = still || lite ? 1 : formedAt.current
+      ? progressive ? span(time - formedAt.current, 1.25, buildTime + .45) : span(time - formedAt.current, GENERATE + .4, GENERATE + 1.2)
+      : 0;
+    // The photograph: revealed at the end of the generation, dimmed for the introduction
+    const photo = el.querySelector<HTMLElement>('[data-photo]')!;
+    const since2 = formedAt.current ? time - formedAt.current : 0;
+    // Shown underneath as soon as the reveal starts; the tiles in the square field uncover it
+    const opening = still || lite ? 1 : progressive
+      ? ease(span(since2, buildTime, buildTime + revealTime))
+      : span(since2, GENERATE, GENERATE + .05);
+    photo.style.opacity = opening > 0 ? '1' : '0';
+    if (progressive) photo.style.setProperty('--focus-blur', `${(1 - opening) * 2.5}px`);
+    photo.style.setProperty('--dim', String(mix(.62, .4, span(t, .6, .75))));
+    reveal([...el.querySelectorAll<HTMLElement>('[data-title] [data-w]')], still ? 1 : resolved * (1 - span(t, .55, .66)), still);
     reveal([...el.querySelectorAll<HTMLElement>('[data-intro] [data-w]')], still ? 1 : span(t, .68, .88), still);
     el.querySelector<HTMLElement>('[data-hint]')!.style.opacity = String(1 - span(t, 0, .05));
   });
 
   return <section className={`${css.hero} ${css.ixHero}`} ref={root} id="overview">
     <div className={`${css.heroStage} ${css.ixStage}`} data-hold>
+      <div className={css.ixPhoto} data-photo aria-hidden="true"><Image src={service.image} alt="" fill sizes="100vw" priority /></div>
       <canvas className={css.ixField} data-field aria-hidden="true" />
       <div className={css.ixShade} aria-hidden="true" />
       {/* The headline, centred as one block like the Our approach heading */}

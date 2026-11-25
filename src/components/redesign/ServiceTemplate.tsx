@@ -11,8 +11,9 @@ import { CASES, formatFigure } from './theoryContent';
 import type { ServiceDetails } from './serviceDetails';
 import { clamp, ease, isLite, isStill, mix, pinned, reveal, span, useFrame, wipesOn, words } from './serviceMotion';
 import { IntelligenceHero } from './IntelligenceScenes';
-import { DotMatrixApproach, DotPicture } from './DotScenes';
-import { DeviceWalkthrough, ExperienceHero } from './ExperienceScenes';
+import { DotMatrixApproach } from './DotScenes';
+import { ExperienceHero } from './ExperienceScenes';
+import { ClickThroughApproach } from './ClickScenes';
 import { GrowthApproach, PeopleHero } from './PeopleScenes';
 import css from './service.module.css';
 
@@ -57,7 +58,7 @@ function Hero({ service }: { service: Service }) {
       bottom: (box.bottom - hole.bottom) / box.height * 100,
     };
     const open = ease(span(t, .12, .55));
-    photo.style.clipPath = `inset(${mix(from.top, 0, open).toFixed(2)}% ${mix(from.right, 0, open).toFixed(2)}% ${mix(from.bottom, 0, open).toFixed(2)}% ${mix(from.left, 0, open).toFixed(2)}% round ${mix(hole.height * .18, 0, open).toFixed(1)}px)`;
+    photo.style.clipPath = `inset(${mix(from.top, 0, open).toFixed(2)}% ${mix(from.right, 0, open).toFixed(2)}% ${mix(from.bottom, 0, open).toFixed(2)}% ${mix(from.left, 0, open).toFixed(2)}%)`;
     photo.style.setProperty('--dim', String(mix(.92, .42, span(t, .3, .6))));
     // The photo fills the small window, centred on its subject (the train),
     // and grows with the window until it covers the screen
@@ -333,68 +334,54 @@ function Approach({ steps, keywords, wipe }: { steps: Service['steps']; keywords
 // ---------------------------------------------------------------------------
 // What you get: documents that fan out
 // ---------------------------------------------------------------------------
-function Deliverables({ items, wipe }: { items: ServiceDetails['deliverables']; wipe?: Wipe }) {
+function Deliverables({ items, wipe }: { items: ServiceDetails['deliverables']; image?: string; wipe?: Wipe }) {
   const w = wipeProps(wipe);
   const root = useRef<HTMLElement>(null);
-  // Scroll sets where the fan should be; a frame loop eases the cards
-  // towards it, so they glide rather than jump with each scroll step
-  const target = useRef(0);
-  const current = useRef(0);
-
-  const place = (el: HTMLElement, fan: number, flat: boolean) => {
-    const n = items.length;
-    const slot = Math.min(1240, window.innerWidth * .9) / n;
-    el.querySelectorAll<HTMLElement>('[data-sheet]').forEach((sheet, i) => {
-      if (flat) { sheet.style.transform = ''; return; }
-      const centre = i - (n - 1) / 2;
-      const x = mix(centre * 6, centre * slot, fan);
-      const y = mix(-i * 6, Math.abs(centre) * 14, fan);
-      const r = mix(centre * 1.6, centre * 2.4, fan) + Math.sin(fan * Math.PI) * (i % 2 ? 1.5 : -1.5);
-      sheet.style.transform = `translate3d(${x.toFixed(2)}px, ${y.toFixed(2)}px, 0) rotate(${r.toFixed(3)}deg)`;
-    });
-  };
-
+  const n = items.length;
+  // Cinematic, without a photo: the deliverable names wait one behind
+  // another in depth. The current one is large and sharp; scrolling moves
+  // the camera forward, so it grows and flies past while the next comes
+  // forward into focus
   useFrame(root, el => {
-    const flat = window.innerWidth <= 900 || isStill();
-    const t = flat ? 1 : pinned(el);
-    target.current = ease(span(t, .1, .62));
-    if (flat) { current.current = target.current; place(el, 1, true); }
-    reveal([...el.querySelectorAll<HTMLElement>('[data-sheets-title] [data-w]')], flat ? 1 : span(t, 0, .2), flat);
+    const still = isStill();
+    const t = still ? 0 : pinned(el);
+    const u = span(t, .03, .95) * (n - 1 + .55);
+    const k = Math.min(n - 1, Math.floor(u));
+    const local = u - k;
+    // Hold on each name, then travel to the next
+    const at = still ? 0 : k + (k < n - 1 ? ease(span(local, .55, 1)) : 0);
+    const lite = isLite();
+    el.querySelectorAll<HTMLElement>('[data-depth]').forEach((item, i) => {
+      const p = i - at; // > 0: waiting further back; < 0: already passed
+      const scale = p >= 0 ? 1 / (1 + p * 1.1) : 1 + -p * 4.5;
+      const opacity = p >= 0 ? clamp(1 - p * .72) : clamp(1 + p * 2.6);
+      const blur = lite ? 0 : Math.min(26, Math.abs(p) * 14);
+      // Waiting names sit higher up the tunnel, so they peek out above the current one
+      const rise = p > 0 ? Math.min(p, 2) * 17 : 0;
+      // In focus: no scale at all, so the text is drawn crisp at its real size
+      // (a scaled copy would be a stretched image, with jagged curves)
+      const settled = Math.abs(scale - 1) < .002 && rise === 0;
+      item.style.transform = settled ? 'translate(-50%, -50%)' : `translate(-50%, calc(-50% - ${rise.toFixed(2)}svh)) scale(${scale.toFixed(4)})`;
+      item.style.opacity = opacity.toFixed(3);
+      item.style.filter = blur > .1 ? `blur(${blur.toFixed(2)}px)` : '';
+      item.style.zIndex = String(100 - Math.round(Math.abs(p) * 10));
+      item.style.visibility = opacity > .01 ? 'visible' : 'hidden';
+    });
+    el.querySelectorAll<HTMLElement>('[data-depth-copy]').forEach((copy, i) => {
+      const amount = still ? (i === 0 ? 1 : 0) : clamp(1 - Math.abs(at - i) * 3);
+      copy.style.visibility = amount > 0 ? 'visible' : 'hidden';
+      reveal([...copy.querySelectorAll<HTMLElement>('[data-w]')], amount, still);
+    });
   });
-
-  useEffect(() => {
-    const el = root.current;
-    if (!el) return;
-    let frame = 0;
-    const loop = () => {
-      const flat = window.innerWidth <= 900 || isStill();
-      if (!flat) {
-        const gap = target.current - current.current;
-        if (Math.abs(gap) > .0005) {
-          current.current += gap * .14;
-          place(el, current.current, false);
-        }
-      }
-      frame = requestAnimationFrame(loop);
-    };
-    place(el, current.current, false);
-    frame = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(frame);
-    // place only reads items, which don't change on a page
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return <section className={`${css.deliverables} ${w.className}`} ref={root} id="deliverables" data-nav-light data-lead={w['data-lead']} data-trail={w['data-trail']} style={w.style}>
-    <div className={css.deliverablesStage}>
-      <div className={css.deliverablesHead} data-sheets-title>
-        <small>What you get</small>
-        <h2>{words('Useful work. Clear next steps.')}</h2>
+  return <section className={`${css.deliverables} ${w.className}`} ref={root} id="deliverables" data-nav-light data-lead={w['data-lead']} data-trail={w['data-trail']} style={{ ...w.style, height: `calc(${(n + 1) * 80}svh + var(--wipe-extra, 0px))` }}>
+    <div className={`${css.deliverablesStage} ${css.depthStage}`}>
+      <div className={css.depthHead}>
+        <span>What you get</span>
       </div>
-      <div className={css.sheets}>{items.map((item, i) => <article className={css.sheet} key={item.title} data-sheet style={{ zIndex: items.length - i }}>
-        <span>{String(i + 1).padStart(2, '0')}</span>
-        <h3>{item.title}</h3>
-        <p>{item.body}</p>
-        <i aria-hidden="true" /><i aria-hidden="true" /><i aria-hidden="true" />
-      </article>)}</div>
+      {items.map(item => <h3 className={css.depthName} data-depth key={item.title}>
+        {item.title}
+      </h3>)}
+      {items.map(item => <p className={css.depthCopy} data-depth-copy key={item.title}>{words(item.body)}</p>)}
     </div>
   </section>;
 }
@@ -402,7 +389,7 @@ function Deliverables({ items, wipe }: { items: ServiceDetails['deliverables']; 
 // ---------------------------------------------------------------------------
 // Results: one case, in the Theory style
 // ---------------------------------------------------------------------------
-function Result({ slug, wipe, dots = false }: { slug: string; wipe?: Wipe; dots?: boolean }) {
+function Result({ slug, wipe }: { slug: string; wipe?: Wipe }) {
   const w = wipeProps(wipe);
   const root = useRef<HTMLElement>(null);
   const study = CASES.find(c => c.slug === slug);
@@ -424,9 +411,7 @@ function Result({ slug, wipe, dots = false }: { slug: string; wipe?: Wipe; dots?
   if (!study) return null;
   return <section className={`${css.result} ${w.className}`} ref={root} id="results" data-lead={w['data-lead']} data-trail={w['data-trail']} style={w.style}>
     <div className={css.resultStage}>
-      <div className={`${css.resultPhoto} ${dots ? css.resultPhotoDots : ''}`} data-result-photo><Image src={study.image} alt="" fill sizes="100vw" /></div>
-      {/* Intelligence pages: the photo drawn in dots, already formed */}
-      {dots && <DotPicture src={study.image} dim={.85} progress={() => 1} />}
+      <div className={css.resultPhoto} data-result-photo><Image src={study.image} alt="" fill sizes="100vw" /></div>
       <div className={css.resultCopy} data-result-copy>
         <small>{words(`In practice · Illustrative case · ${study.industry}, ${study.location}`)}</small>
         <h2>{words(study.title)}</h2>
@@ -523,16 +508,18 @@ export function ServiceHero({ service }: { service: Service }) {
 export default function ServiceTemplate({ service, details }: { service: Service; details: ServiceDetails }) {
   const steps = details.steps ?? service.steps;
   const seams = service.group === 'Transform';
-  useSectionWipes(seams);
+  // Experience pages: a pixel wipe from What we cover into How we work
+  const experienceWipe = service.group === 'Experience';
+  useSectionWipes(seams || experienceWipe);
   const keywords = details.stepWords ?? steps.map(step => step.title.split(' ').at(-1)!.replace(/^./, c => c.toUpperCase()));
   return <>
-    <Covers items={details.covers} singleLine={service.slug === 'enterprise-architecture'} wipe={seams ? { lead: true, trail: true, z: 4 } : undefined} />
+    <Covers items={details.covers} singleLine={service.slug === 'enterprise-architecture'} wipe={seams ? { lead: true, z: 4 } : experienceWipe ? { trail: true, z: 4 } : undefined} />
     {service.group === 'Intelligence' ? <DotMatrixApproach steps={steps} keywords={keywords} />
       : service.group === 'People & Growth' ? <GrowthApproach steps={steps} keywords={keywords} />
-      : service.group === 'Experience' ? <DeviceWalkthrough service={service} steps={steps} keywords={keywords} notes={details.covers.map(cover => cover.title)} />
-      : <Approach steps={steps} keywords={keywords} wipe={seams ? { lead: true, trail: true, z: 3 } : undefined} />}
-    <Deliverables items={details.deliverables} wipe={seams ? { lead: true, trail: !!details.caseSlug, z: 2 } : undefined} />
-    {details.caseSlug && <Result slug={details.caseSlug} wipe={seams ? { lead: true, z: 1 } : undefined} dots={service.group === 'Intelligence'} />}
+      : service.group === 'Experience' ? <ClickThroughApproach steps={steps} keywords={keywords} lead />
+      : <Approach steps={steps} keywords={keywords} wipe={seams ? { trail: true, z: 3 } : undefined} />}
+    <Deliverables items={details.deliverables} image={service.image} wipe={seams ? { lead: true, trail: !!details.caseSlug, z: 2 } : undefined} />
+    {details.caseSlug && <Result slug={details.caseSlug} wipe={seams ? { lead: true, z: 1 } : undefined} />}
     <Questions faqs={details.faqs} />
     <Related service={service} connected={details.connected} />
   </>;

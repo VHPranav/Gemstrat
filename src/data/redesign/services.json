@@ -64,7 +64,7 @@
     "slug": "ai-consulting",
     "group": "Intelligence",
     "headline": "Find where AI can make a difference.",
-    "image": "/images/about/ai-automation.webp",
+    "image": "/images/about/ai-consulting-pilot.webp",
     "art": "contour-sculpture",
     "intro": "Choosing where to use AI is a business decision. Gemstrat helps teams examine opportunities, understand readiness and decide which applications deserve further investment.",
     "steps": [
@@ -94,7 +94,7 @@
     "slug": "ai-strategy",
     "group": "Intelligence",
     "headline": "Give your AI ambition a direction.",
-    "image": "/images/about/strategy-notebook.webp",
+    "image": "/images/about/ai-strategy-roadmap.webp",
     "art": "angular-convergence",
     "intro": "An AI strategy gives individual experiments a common direction. Gemstrat helps teams connect AI adoption to business priorities, investment decisions, responsibilities and practical safeguards.",
     "steps": [
@@ -154,7 +154,7 @@
     "slug": "digital-solutions",
     "group": "Experience",
     "headline": "Useful by design. Built to work.",
-    "image": "/images/about/neo-marketing-digital.webp",
+    "image": "/images/experience/digital-solutions.webp",
     "art": "contour-ribbon",
     "intro": "Digital products should make a task easier for the people using them. Gemstrat connects product thinking, experience design and development to shape websites, applications and platforms around real business needs.",
     "steps": [
@@ -184,7 +184,7 @@
     "slug": "brand-strategy",
     "group": "Experience",
     "headline": "A clear place in the world.",
-    "image": "/images/about/strategy-notebook.webp",
+    "image": "/images/experience/brand-strategy.webp",
     "art": "angular-convergence",
     "intro": "Brand strategy gives a business a clear place in the market and a reason for people to choose it. Gemstrat helps clarify who the brand serves, what it stands for and how that should guide communication and experience.",
     "steps": [
@@ -214,7 +214,7 @@
     "slug": "brand-identity",
     "group": "Experience",
     "headline": "A character all your own.",
-    "image": "/images/about/branding.webp",
+    "image": "/images/experience/brand-identity.webp",
     "art": "contour-sculpture",
     "intro": "Identity makes a brand recognisable in everyday use. Gemstrat develops visual and verbal systems that help a business express its strategy across the places people encounter it.",
     "steps": [
@@ -244,7 +244,7 @@
     "slug": "360-branding",
     "group": "Experience",
     "headline": "One brand. Every encounter.",
-    "image": "/images/about/branding.webp",
+    "image": "/images/experience/360-branding.webp",
     "art": "interlocking-loops",
     "intro": "A brand takes shape through every interaction. Gemstrat connects positioning, identity, communication and experience so customers encounter a coherent business across digital and offline touchpoints.",
     "steps": [
@@ -274,7 +274,7 @@
     "slug": "advertising-marketing",
     "group": "Experience",
     "headline": "Ideas that move people to act.",
-    "image": "/images/about/advertising.webp",
+    "image": "/images/experience/advertising-marketing.webp",
     "art": "contour-ribbon",
     "intro": "Effective marketing connects the audience, message and channel to a clear business objective. Gemstrat helps shape campaigns that can be planned, delivered and evaluated against that objective.",
     "steps": [
@@ -364,7 +364,7 @@
     "slug": "brand-experience",
     "group": "Experience",
     "headline": "Make every encounter matter.",
-    "image": "/images/about/branding.webp",
+    "image": "/images/experience/brand-experience.webp",
     "art": "contour-ribbon",
     "intro": "Make the brand promise tangible in the moments customers experience. Map priority journeys, identify gaps and define how digital, physical and human touchpoints should work together.",
     "steps": [
@@ -391,7 +391,7 @@
     "slug": "neo-marketing",
     "group": "Experience",
     "headline": "Connect attention to action.",
-    "image": "/images/about/neo-marketing-digital.webp",
+    "image": "/images/experience/neo-marketing.webp",
     "art": "contour-ribbon",
     "intro": "Connect search, social, content and paid media around a clear growth objective. Start with audience behaviour, plan the measurement and use testing to improve the next decision.",
     "steps": [
@@ -418,7 +418,7 @@
     "slug": "web-development",
     "group": "Experience",
     "headline": "A better place to meet your business.",
-    "image": "/images/about/neo-marketing-digital.webp",
+    "image": "/images/experience/web-development.webp",
     "art": "contour-ribbon",
     "intro": "Design and build websites around the information people need and the actions they want to take. Connect content, user experience and development, with clear plans for performance, accessibility and maintenance.",
     "steps": [
@@ -445,7 +445,7 @@
     "slug": "app-development",
     "group": "Experience",
     "headline": "Bring a useful idea to life.",
-    "image": "/images/about/ai-automation.webp",
+    "image": "/images/experience/app-development.webp",
     "art": "contour-ribbon",
     "intro": "Turn a product idea into a defined set of journeys, requirements and release priorities. Plan the application around users, data and integrations, then validate the core tasks before expanding the product.",
     "steps": [
@@ -526,7 +526,7 @@
     "slug": "film-content-production",
     "group": "Experience",
     "headline": "Stories with a reason to be told.",
-    "image": "/images/about/advertising.webp",
+    "image": "/images/experience/film-content-production.webp",
     "art": "contour-ribbon",
     "intro": "Bring a business story to the screen with a clear objective and an audience in mind. Connect the creative brief, script, production and edit to the places the content will be used.",
     "steps": [
@@ -607,7 +607,7 @@
     "slug": "gemstrat-luxe",
     "group": "Experience",
     "headline": "A considered approach to the exceptional.",
-    "image": "/images/about/branding.webp",
+    "image": "/images/experience/gemstrat-luxe.webp",
     "art": "contour-ribbon",
     "intro": "A considered starting point for private lifestyle and asset requirements. Define what matters to you and coordinate the relevant specialist conversations around it.",
     "steps": [

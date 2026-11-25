@@ -132,9 +132,9 @@ function paintDots(context: CanvasRenderingContext2D, g: Grid, time: number, rip
       const alpha = (.07 + v * .9) * twinkle * dim;
       if (alpha < .02) continue;
       context.fillStyle = `rgba(255,255,255,${alpha.toFixed(3)})`;
-      context.beginPath();
-      context.arc(x, y, Math.max(.6, (.12 + v ** 1.3 * .32) * g.cell), 0, Math.PI * 2);
-      context.fill();
+      // A square (the same block as the pixel wipes), sized by brightness
+      const half = Math.max(.6, (.12 + v ** 1.3 * .32) * g.cell);
+      context.fillRect(x - half, y - half, half * 2, half * 2);
     }
   }
 }

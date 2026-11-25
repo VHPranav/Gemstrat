@@ -502,7 +502,7 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
       });
       if (!use3d) glyphRefs.current.forEach((g, i) => g && (g.style.opacity = String(v.label[i])));
 
-      render?.(time, dt);
+      if (phase !== 'handoff') render?.(time, dt);
     };
 
     const setClosed = () => {
@@ -614,7 +614,11 @@ export default function ZMenu({ links, open, target, trigger, onSelect, onReques
     >
       <div ref={backdropRef} className="absolute inset-0 bg-[#090909]" style={{ opacity: 0 }} onClick={() => { setPanel(false); onRequestClose(); }} />
       {/* The 3D Z steps out of the way while the services are showing */}
-      <div ref={canvasWrapRef} className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${open && (panel || focusRow === panelRow) ? 'opacity-0' : ''}`} />
+      <div
+        ref={canvasWrapRef}
+        className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${open && (panel || focusRow === panelRow) ? 'opacity-0' : ''}`}
+        style={{ visibility: !open && target?.startsWith('/') ? 'hidden' : undefined }}
+      />
 
       <nav aria-label="Site">
         {links.slice(0, 5).map((link, i) => (

@@ -14,7 +14,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
  const { slug } = await params; const service = services.find(s => s.slug === slug); if (!service) notFound();
  // Services with their extra content written use the new template; the rest keep the older page for now
  const details = serviceDetails[slug];
- if (details) return <PageFrame key={slug} about hero={<ServiceHero service={service} />} category={service.group} title={service.headline} intro={service.intro} ctaTitle={service.cta}>
+ if (details) return <PageFrame key={slug} about hero={<ServiceHero service={service} />} category={service.group} title={service.headline} intro={service.intro} ctaTitle={service.cta} ctaTitleWidth={slug === 'ai-consulting' ? '9em' : undefined}>
   <ServiceTemplate service={service} details={details} />
  </PageFrame>;
  return <ServicePage key={slug} service={service} />;
