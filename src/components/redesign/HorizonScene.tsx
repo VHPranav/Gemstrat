@@ -55,7 +55,7 @@ function HorizonOpening() {
     <div className={styles.openingCopy}>
       <h1>Five regions.<br />One way of working.</h1>
       <div className={styles.openingIntro}>
-        <p>Connected expertise across five regions, close to where our clients work.</p>
+        <p>Global perspective, local relevance. Core teams across five regions, serving clients worldwide.</p>
         <a href="#regions" className={styles.openingLink}>Explore our locations <span aria-hidden="true">↓</span></a>
       </div>
     </div>
@@ -92,7 +92,7 @@ function JourneyLabel({ from, to }: { from: PresenceOffice; to: PresenceOffice }
   const minute = usePresenceMinute();
   const difference = minute === null ? null : offset(to.timezone, minute) - offset(from.timezone, minute);
   return <span className={styles.journeyLabel}>
-    → {travelDistance(from, to).toLocaleString('en-GB')} km
+    → {to.region} · {travelDistance(from, to).toLocaleString('en-GB')} km
     {difference === 0 ? ' · Same local time' : difference !== null && ` · ${Math.abs(difference)} h ${difference > 0 ? 'ahead' : 'behind'}`}
   </span>;
 }

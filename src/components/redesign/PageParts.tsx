@@ -28,8 +28,8 @@ export function JumpNav({ items }: { items: { id: string; title: string }[] }) {
   return <nav className={styles.anchorNav} aria-label="On this page" data-nav-light>{items.map(i => <a key={i.id} href={`#${i.id}`}>{i.title}</a>)}</nav>;
 }
 
-export function ContactCTA({ title = 'What would you like to move forward?', dark = false, titleWidth }: { title?: string; dark?: boolean; titleWidth?: string }) {
-  return <section className={styles.cta} data-nav-light={dark ? undefined : true}><h2 style={titleWidth ? { maxWidth: titleWidth, textWrap: 'balance' } : undefined}>{title}</h2><div><p>Bring us the challenge. Let’s find a clear direction together.</p><Link className={styles.button} href="/contact">Start a conversation <Arrow /></Link></div></section>;
+export function ContactCTA({ title = 'What would you like to move forward?', text = 'Bring us the challenge. Let’s find a clear direction together.', dark = false, titleWidth }: { title?: string; text?: string; dark?: boolean; titleWidth?: string }) {
+  return <section className={styles.cta} data-nav-light={dark ? undefined : true}><h2 style={titleWidth ? { maxWidth: titleWidth, textWrap: 'balance' } : undefined}>{title}</h2><div><p>{text}</p><Link className={styles.button} href="/contact">Start a conversation <Arrow /></Link></div></section>;
 }
 
 export function PageFooter({ regionLinks, light = false }: { regionLinks?: { title: string; href: string }[]; light?: boolean } = {}) {
@@ -40,8 +40,8 @@ export function PageFooter({ regionLinks, light = false }: { regionLinks?: { tit
   </footer>;
 }
 
-export function PageFrame({ title, category, intro, art, image, children, cta = true, about = false, hero, ctaTitle, ctaTitleWidth, regionLinks, theme = 'light' }: { theme?: 'light' | 'dark'; ctaTitle?: string; ctaTitleWidth?: string; regionLinks?: { title: string; href: string }[]; hero?: ReactNode; about?: boolean; title: string; category: string; intro: string; art?: string; image?: string; children: ReactNode; cta?: boolean }) {
-  return <SubPage bare title={[]} intro="" next={{ label: 'Explore', href: '#overview' }} closing={false}><div className={`${styles.page} ${about ? styles.about : ''} ${theme === 'dark' ? styles.darkPage : ''}`}>{hero ?? <PageHero clean={about} title={title} category={category} intro={intro} art={art} image={image} />}{children}{about ? <div className={styles.endcap}>{cta && <ContactCTA title={ctaTitle} titleWidth={ctaTitleWidth} dark={theme === 'dark'} />}<PageFooter regionLinks={regionLinks} light={theme === 'dark'} /></div> : <>{cta && <ContactCTA dark={theme === 'dark'} />}<PageFooter regionLinks={regionLinks} light={theme === 'dark'} /></>}</div></SubPage>;
+export function PageFrame({ title, category, intro, art, image, children, cta = true, about = false, hero, ctaTitle, ctaText, ctaTitleWidth, regionLinks, theme = 'light' }: { theme?: 'light' | 'dark'; ctaTitle?: string; ctaText?: string; ctaTitleWidth?: string; regionLinks?: { title: string; href: string }[]; hero?: ReactNode; about?: boolean; title: string; category: string; intro: string; art?: string; image?: string; children: ReactNode; cta?: boolean }) {
+  return <SubPage bare title={[]} intro="" next={{ label: 'Explore', href: '#overview' }} closing={false}><div className={`${styles.page} ${about ? styles.about : ''} ${theme === 'dark' ? styles.darkPage : ''}`}>{hero ?? <PageHero clean={about} title={title} category={category} intro={intro} art={art} image={image} />}{children}{about ? <div className={styles.endcap}>{cta && <ContactCTA title={ctaTitle} text={ctaText} titleWidth={ctaTitleWidth} dark={theme === 'dark'} />}<PageFooter regionLinks={regionLinks} light={theme === 'dark'} /></div> : <>{cta && <ContactCTA dark={theme === 'dark'} />}<PageFooter regionLinks={regionLinks} light={theme === 'dark'} /></>}</div></SubPage>;
 }
 
 export function ServiceCards({ items }: { items: Service[] }) {

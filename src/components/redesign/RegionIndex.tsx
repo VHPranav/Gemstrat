@@ -37,7 +37,7 @@ export default function RegionIndex() {
 
   return <section className={styles.index} id="regions" data-nav-light>
     <h2>Where we work, and how.</h2>
-    <p className={styles.indexIntro}>Explore each location’s focus, services and ways to get in touch.</p>
+    <p className={styles.indexIntro}>We don’t visit markets. We work within them.</p>
     {presence.map((office, i) => {
       const expanded = open === office.slug;
       const panel = `${office.slug}-details`;

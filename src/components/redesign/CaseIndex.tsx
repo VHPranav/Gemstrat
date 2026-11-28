@@ -75,8 +75,8 @@ export default function CaseIndex() {
 
   return <section className={css.index} id="cases" data-nav-light>
     <div className={css.indexHead}>
-      <h2>Every challenge, its own way forward.</h2>
-      <p>Browse every case by practice. Open one to see the full story. <em>These are sample cases that show the layout; real client work will replace them.</em></p>
+      <h2>Tailored engagements, across every industry we serve.</h2>
+      <p>Browse Gemstrat client engagements across transformation, AI, brand and people. <em>These are sample cases that show the layout; real client work will replace them.</em></p>
     </div>
     <div className={css.filters} role="group" aria-label="Filter cases by practice">
       {(['All', ...PRACTICES] as const).map(p => <button key={p} type="button" className={filter === p ? css.filterOn : ''} aria-pressed={filter === p} onClick={() => setFilter(p)}>{p}</button>)}
@@ -109,7 +109,7 @@ export default function CaseIndex() {
         <button ref={closeBtn} type="button" className={css.panelClose} onClick={close}>Close <span aria-hidden="true">✕</span></button>
         <div className={css.panelImage}><Image src={open.image} alt="" fill sizes="(max-width:640px) 100vw, 640px" /></div>
         <div className={css.panelBody}>
-          <span className={css.sample}>Sample case</span>
+          <span className={css.sample}>Illustrative engagement</span>
           <small>{open.practice} · {open.industry}, {open.location}</small>
           <h2>{open.title}</h2>
           <div className={css.panelFigures}>{open.figures.map((f, k) => <div key={k}><strong>{formatFigure(f)}</strong><span>{f.label}</span></div>)}</div>

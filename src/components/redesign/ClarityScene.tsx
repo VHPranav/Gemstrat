@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { onScrollFrame } from '@/lib/scrollFrame';
 import { setWordStyle } from '@/lib/wordStyle';
 import { S_PIECES } from '@/lib/heroObject';
@@ -14,7 +14,26 @@ const Mark = dynamic(() => import('./ClarityMark'), { ssr: false });
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 const span = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
 const fallbackOffsets = [[-16, -12, -18], [15, 13, 14], [-19, 6, -28], [13, -14, 37], [19, -3, -17]];
-const splitWords = (text: string) => text.split(' ').map((w, j) => <span key={j} data-belief-word>{w}{' '}</span>);
+// One span per word (each blurs in on its own, found by `attr`); phrases in
+// `links` are wrapped in a link, with any punctuation after them kept outside it
+const splitWords = (text: string, links: { text: string; href: string }[] = [], attr = 'data-belief-word') => {
+  const words = text.split(' ');
+  const out: ReactNode[] = [];
+  const mark = { [attr]: true };
+  for (let j = 0; j < words.length; j++) {
+    const link = links.find(l => words.slice(j, j + l.text.split(' ').length).join(' ').startsWith(l.text));
+    if (!link) {
+      out.push(<span key={j} {...mark}>{words[j]}{' '}</span>);
+      continue;
+    }
+    const linkWords = link.text.split(' ');
+    const tail = words.slice(j, j + linkWords.length).join(' ').slice(link.text.length);
+    out.push(<Link key={j} href={link.href}>{linkWords.map((w, m) => <span key={m} {...mark}>{w}{m < linkWords.length - 1 || !tail ? ' ' : ''}</span>)}</Link>);
+    if (tail) out.push(<span key={`${j}-tail`} {...mark}>{tail}{' '}</span>);
+    j += linkWords.length - 1;
+  }
+  return out;
+};
 
 // Share of the scroll the original story + belief take; the practice phase gets the rest
 const STORY = .615;
@@ -24,7 +43,8 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
   const wordCount = words.length;
   const approach = content.variant === 'approach';
   const leadership = content.variant === 'leadership';
-  const [time, setTime] = useState(['--', '--']);
+  // Empty until the browser knows the local time (no "--:--" placeholder)
+  const [time, setTime] = useState<string[] | null>(null);
   useEffect(() => {
     const update = () => {
       const now = new Date();
@@ -178,26 +198,28 @@ export default function ClarityScene({ content = ABOUT_CONTENT, label = 'About G
       </div>
       <header className={`${css.hero} ${leadership ? css.heroLineup : ''}`}>
         {!leadership && <>
-        <span className={`${css.clock} ${css.hours}`} aria-hidden="true">{time[0]}</span>
-        <span className={css.clockAccessible} role="timer" aria-label={`Your local time ${time[0]}:${time[1]}`} />
-        <span className={`${css.clock} ${css.minutes}`} aria-hidden="true">:{time[1]}</span></>}
-        <h1 aria-label={words.join(' ')}>{content.heroLines.map((line, row) => { const start = content.heroLines.slice(0, row).flat().length; return <span className={css.headingLine} key={row}>{line.map((word, k) => { const i = start + k; return <span data-hero-word key={i}><span className={css.introWord} style={{ animationDelay: `${.12 + i * .1}s` }}>{word}</span></span>; })}</span>; })}</h1>
+        <span className={`${css.clock} ${css.hours}`} aria-hidden="true">{time?.[0]}</span>
+        <span className={css.clockAccessible} role="timer" aria-label={time ? `Your local time ${time[0]}:${time[1]}` : undefined} />
+        <span className={`${css.clock} ${css.minutes}`} aria-hidden="true">{time && `:${time[1]}`}</span></>}
+        {/* The space after each word keeps the words apart in the page's text
+            (it sits at the end of an inline-block, so it takes no room) */}
+        <h1 aria-label={words.join(' ')}>{content.heroLines.map((line, row) => { const start = content.heroLines.slice(0, row).flat().length; return <span className={css.headingLine} key={row}>{line.map((word, k) => { const i = start + k; return <span data-hero-word key={i}><span className={css.introWord} style={{ animationDelay: `${.12 + i * .1}s` }}>{word}</span>{' '}</span>; })}</span>; })}</h1>
         <p className={css.heroSubtext} data-hero-subtext aria-label={content.heroSubtext}>{content.heroSubtext.split(' ').map((w, j) => <span key={j} aria-hidden="true"><span className={css.introWord} style={{ animationDelay: `${.6 + j * .06}s` }}>{w}</span>{' '}</span>)}</p>
       </header>
       {approach && content.steps && <div className={css.steps}>{content.steps.map((st, i) => <article data-step key={st.title} className={css.step} aria-hidden="true">
-        <div className={css.stepLead}><span className={css.stepNumber} data-step-number>0{i + 1}</span><h2>{st.title.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</h2></div>
-        <div className={css.stepBody}><p>{st.body.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</p><small>{st.detail.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</small></div>
+        <div className={css.stepLead}><span className={css.stepNumber} data-step-number>0{i + 1}</span><h3>{st.title.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</h3></div>
+        <div className={css.stepBody}><p>{splitWords(st.body, st.links, 'data-step-word')}</p><small>{st.detail.split(' ').map((w, j) => <span key={j} data-step-word>{w}{' '}</span>)}</small></div>
       </article>)}</div>}
       {leadership && content.perspectives && <div className={css.persps}>{content.perspectives.map(pp => <article data-persp key={pp.title} className={css.persp} aria-hidden="true">
-        <h2>{pp.title.split(' ').map((w, j) => <span key={j} data-persp-word>{w}{' '}</span>)}</h2>
+        <h3>{pp.title.split(' ').map((w, j) => <span key={j} data-persp-word>{w}{' '}</span>)}</h3>
         <p>{pp.body.split(' ').map((w, j) => <span key={j} data-persp-word>{w}{' '}</span>)}</p>
       </article>)}</div>}
-      <div className={css.statements}>{(approach || leadership ? [] : content.statements).map((text, i) => <h2 data-statement key={text} className={css.statement}>{text.split(' ').map((word, j) => <span key={j} data-statement-word>{word}{' '}</span>)}</h2>)}</div>
+      <div className={css.statements}>{(approach || leadership ? [] : content.statements).map((text, i) => <h3 data-statement key={text} className={css.statement}>{text.split(' ').map((word, j) => <span key={j} data-statement-word>{word}{' '}</span>)}</h3>)}</div>
       <p className={css.closing} aria-label={content.closing.join(' ')}>{content.closing.map((line, l) => <span key={l} aria-hidden="true" style={{ display: 'block' }}>{line.split(' ').map((w, j) => <span key={j} data-closing-word>{w}{' '}</span>)}</span>)}</p>
       <div className={`${css.belief} ${approach ? css.mirror : ''}`} data-belief aria-hidden="true">
         <h2>{splitWords(content.belief.title)}</h2>
         <div>
-          <p>{splitWords(content.belief.body)}</p>
+          <p>{splitWords(content.belief.body, content.belief.links)}</p>
           <Link className={css.beliefLink} href={content.belief.link.href} data-belief-word>{content.belief.link.label} →</Link>
         </div>
       </div>

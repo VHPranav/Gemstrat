@@ -2,12 +2,55 @@ import { regions, services } from '@/data/redesign/content';
 
 // Replace before launch: the office addresses and phone numbers need verification.
 const contact = { address: '[Office address to be confirmed]', phone: '[Local phone to be confirmed]', email: 'ask@gemstrat.com' };
+// Each office: its city (which sets the clock, the distances and the schema
+// address), the region card's "Local focus" line, two "Why Gemstrat" points
+// and two FAQs. The slugs stay as they were, since links point at them.
 const offices = [
-  { slug: 'toronto', source: 'canada', city: 'Toronto', landmark: 'Maple leaf', image: 'toronto', timezone: 'America/Toronto', lat: 43.65, lon: -79.38, industries: ['Financial services', 'Retail', 'Technology', 'Manufacturing'], question: 'How can businesses in Canada plan a digital transformation?', answer: 'We start with the processes and systems that matter most, then help your team prioritise changes it can deliver.' },
-  { slug: 'new-york', source: 'united-states', city: 'New York', landmark: 'Statue of Liberty', image: 'new-york', timezone: 'America/New_York', lat: 40.71, lon: -74.01, industries: ['Financial services', 'Healthcare', 'Retail', 'Technology'], question: 'How can teams in the USA assess where to use AI?', answer: 'We help teams identify a specific workflow, measure the current effort and define a pilot with human review.' },
-  { slug: 'nairobi', source: 'africa', city: 'Nairobi', landmark: 'Feathered headdress emblem', image: 'nairobi', timezone: 'Africa/Nairobi', lat: -1.29, lon: 36.82, industries: ['Financial services', 'Logistics', 'Technology', 'Consumer goods'], question: 'What digital product support is available for businesses in Africa?', answer: 'We can help map customer journeys, test a service prototype and plan delivery around local user needs.' },
-  { slug: 'dubai', source: 'middle-east', city: 'Dubai', landmark: 'Arabic calligraphic emblem', image: 'dubai', timezone: 'Asia/Dubai', lat: 25.20, lon: 55.27, industries: ['Hospitality', 'Retail', 'Logistics', 'Financial services'], question: 'How can businesses in the Middle East improve customer experience during a transformation?', answer: 'We connect brand, service design and technology decisions with the operating changes needed to deliver them.' },
-  { slug: 'mumbai', source: 'india', city: 'Mumbai', landmark: 'India Gate', image: 'india', timezone: 'Asia/Kolkata', lat: 19.08, lon: 72.88, industries: ['Manufacturing', 'Financial services', 'Technology', 'Consumer goods'], question: 'How can businesses in India use automation as they scale?', answer: 'We identify repeatable tasks, clarify process ownership and agree how to measure an automation pilot before expanding it.' },
+  {
+    slug: 'toronto', source: 'canada', city: 'Toronto', country: 'Canada', landmark: 'Maple leaf', image: 'toronto', timezone: 'America/Toronto', lat: 43.65, lon: -79.38, industries: ['Financial services', 'Retail', 'Technology', 'Manufacturing'],
+    focus: 'From Toronto, we help Canadian businesses turn enterprise architecture, digital solutions and brand strategy into practical transformation roadmaps.',
+    why: ['AI adoption is grounded in the processes that make it pay.', 'Practical roadmaps that turn productivity goals into results.'],
+    faqs: [
+      { question: 'How can businesses in Canada plan a digital transformation?', answer: 'We start by mapping your enterprise architecture, then help your team prioritize the changes that deliver the most value.' },
+      { question: 'Why do AI pilots stall in many Canadian businesses?', answer: 'Results depend on more than the tool. Our AI consulting in Canada aligns processes, data and skills first, so AI improves productivity.' },
+    ],
+  },
+  {
+    slug: 'new-york', source: 'united-states', city: 'Chicago', country: 'United States', landmark: 'Statue of Liberty', image: 'new-york', timezone: 'America/Chicago', lat: 41.88, lon: -87.63, industries: ['Financial services', 'Healthcare', 'Retail', 'Technology'],
+    focus: 'From Chicago, we partner with US leadership teams on business transformation, AI strategy and digital solutions that scale with confidence.',
+    why: ['AI strategy built around measurable return, not experimentation.', 'Business cases your board and CFO can stand behind.'],
+    faqs: [
+      { question: 'How can teams in the USA assess where to use AI?', answer: 'We identify high-value workflows, set a performance baseline and define a focused AI pilot with human review.' },
+      { question: 'How do you make sure AI investments in the USA deliver measurable ROI?', answer: 'Every AI strategy we build for US businesses starts with a business case, a performance baseline and agreed KPIs, so returns show from the first pilot.' },
+    ],
+  },
+  {
+    slug: 'nairobi', source: 'africa', city: 'Kampala', country: 'Uganda', landmark: 'Feathered headdress emblem', image: 'nairobi', timezone: 'Africa/Kampala', lat: 0.35, lon: 32.58, industries: ['Financial services', 'Logistics', 'Technology', 'Consumer goods'],
+    focus: 'From Kampala, we help businesses across Africa build strong foundations, combining enterprise architecture, digital solutions and brand strategy designed for local markets and future growth.',
+    why: ['Mobile-first thinking for markets that lead in digital payments.', 'Architecture ready to scale across borders and regulations.'],
+    faqs: [
+      { question: 'What digital product support is available for businesses in Africa?', answer: 'We map customer journeys, test service prototypes and plan digital delivery around local user needs and infrastructure.' },
+      { question: 'Can Gemstrat help us expand into other African markets?', answer: 'Yes, we design digital solutions and brands for Africa that adapt to each market’s payments, regulations and customers, ready to scale across borders.' },
+    ],
+  },
+  {
+    slug: 'dubai', source: 'middle-east', city: 'Dubai', country: 'United Arab Emirates', landmark: 'Arabic calligraphic emblem', image: 'dubai', timezone: 'Asia/Dubai', lat: 25.20, lon: 55.27, industries: ['Hospitality', 'Retail', 'Logistics', 'Financial services'],
+    focus: 'From Dubai, we support ambitious businesses across the Middle East with business transformation, 360° branding and leadership development shaped by regional culture and regulation.',
+    why: ['Strategy aligned with Vision 2030 and We the UAE 2031.', 'Delivery measured by outcomes, not announcements.'],
+    faqs: [
+      { question: 'How can businesses in the Middle East improve customer experience during a transformation?', answer: 'We align brand, service design and technology with the operating model needed to deliver them.' },
+      { question: 'How do you align business transformation in the Middle East with national vision goals?', answer: 'We map your priorities to national agendas such as Saudi Vision 2030 and We the UAE 2031, then track delivery against measurable milestones.' },
+    ],
+  },
+  {
+    slug: 'mumbai', source: 'india', city: 'Bangalore', country: 'India', landmark: 'India Gate', image: 'india', timezone: 'Asia/Kolkata', lat: 12.97, lon: 77.59, industries: ['Manufacturing', 'Financial services', 'Technology', 'Consumer goods'],
+    focus: 'From Bangalore, we help Indian businesses scale with business transformation, AI and intelligent automation, and 360° branding, from strategy through to execution.',
+    why: ['Growth plans built on India’s digital public infrastructure.', 'Scale-ready systems for Indian businesses going global.'],
+    faqs: [
+      { question: 'How can businesses in India use automation as they scale?', answer: 'We identify repeatable processes, clarify ownership and set clear KPIs for an automation pilot before scaling it.' },
+      { question: 'How can businesses in India use digital public infrastructure to scale?', answer: 'Our business transformation work in India integrates rails such as UPI and Aadhaar-based verification, then automates the processes that slow growth.' },
+    ],
+  },
 ];
 
 // Gemstrat's own short headlines per region. The hero shows them whenever
@@ -15,7 +58,6 @@ const offices = [
 // show, or can't be reached (for example on the local dev server).
 const perspectives: Record<string, string[]> = {
   'toronto': [
-    'Why Canadian firms are moving from AI pilots to everyday operations.',
     'Connecting brand, data and service as Canada’s mid-market scales.',
     'Workforce planning for a tighter Canadian talent market.',
   ],
@@ -48,15 +90,9 @@ export const presence = offices.map(office => {
     ...office,
     image: `/images/presence/${office.image}.png`,
     region: name,
-    focus: region.intro,
     keyServices: services.filter(service => region.services.includes(service.slug)),
-    why: ['A shared plan across business, technology, brand and people.', 'Practical milestones and clear ownership from the start.'],
     contact,
     perspectives: perspectives[office.slug],
-    faqs: [
-      { question: office.question, answer: office.answer },
-      { question: `How does Gemstrat support cross-market projects for its ${name} clients?`, answer: 'Yes. We agree working hours, decision owners and handovers with your team at the start of the engagement.' },
-    ],
   };
 });
 

@@ -12,10 +12,11 @@ export interface ClarityContent {
   variant?: 'approach' | 'leadership';
   /** Leadership variant: five perspectives, one per Z piece, in a focus pull */
   perspectives?: { title: string; body: string }[];
-  steps?: { title: string; body: string; detail: string }[];
+  steps?: { title: string; body: string; detail: string; links?: { text: string; href: string }[] }[];
   /** Two closing lines under the finished Z */
   closing: [string, string];
-  belief: { title: string; body: string; link: { label: string; href: string } };
+  /** `links`: phrases in the body that link to another page */
+  belief: { title: string; body: string; link: { label: string; href: string }; links?: { text: string; href: string }[] };
   practice: { title: string; cards: { title: string; body: string; href: string; label?: string }[] };
 }
 

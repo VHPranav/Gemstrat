@@ -260,7 +260,7 @@ export default function FocusScene() {
       </div>
       <header className={css.hero}>
         <h1 aria-label="Thinking, put to work."><span data-title-word aria-hidden="true">Thinking,</span><span data-title-word aria-hidden="true">put to work.</span></h1>
-        <p aria-label="Real challenges. Connected thinking. Measurable progress.">{words('Real challenges. Connected thinking. Measurable progress.', 'data-sub-word')}</p>
+        <p aria-label="Our Success Stories. Real challenges. Measurable progress.">{words('Our Success Stories. Real challenges. Measurable progress.', 'data-sub-word')}</p>
       </header>
 
       {/* Cases */}
@@ -272,7 +272,7 @@ export default function FocusScene() {
         </div>
         <div className={css.shade} aria-hidden="true" />
         <Block className={css.meta} timing={[0, .06, .9, .95]}>
-          <span data-w>{`0${i + 1}`}</span> <span data-w>—</span> {words(`${c.practice} · ${c.industry}, ${c.location}`)}<em data-w>Sample case</em>
+          <span data-w>{`0${i + 1}`}</span> <span data-w>—</span> {words(`${c.practice} · ${c.industry}, ${c.location}`)}<em data-w>Illustrative engagement</em>
         </Block>
         <Block className={css.challenge} timing={[.04, .14, .27, .32]}>
           <small>{words('The challenge')}</small>

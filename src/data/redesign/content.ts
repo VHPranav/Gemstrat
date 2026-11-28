@@ -13,18 +13,18 @@ export const regions = [
 ];
 
 export const values = [
-  { title: 'Clarity', body: 'Understand the problem before defining the solution. Make choices and their implications easy to see.' },
-  { title: 'Responsibility', body: 'Make decisions with care for the people affected by them. Be clear about ownership and follow through.' },
-  { title: 'Collaboration', body: 'Build shared understanding with the people doing the work. Different perspectives make a stronger plan.' },
-  { title: 'Curiosity', body: 'Test assumptions and remain open to a better answer. Ask useful questions before reaching for familiar solutions.' },
-  { title: 'Follow-through', body: 'Connect recommendations to action and learning. Leave teams with useful tools and a clear next step.' },
+  { title: 'Clarity', body: 'Clarity first, we map your people, processes and platforms before recommending anything, and make trade-offs visible.' },
+  { title: 'Responsibility', body: 'We own outcomes, not deliverables, with clear governance, measurable KPIs and long-term value over short-term goals.' },
+  { title: 'Collaboration', body: 'Partnership over transaction. Cross-functional, expert-led teams co-create the roadmap with your people, in agile sprints.' },
+  { title: 'Curiosity', body: 'We test every assumption against data, from predictive analytics to user behavior. No off-the-shelf solutions.' },
+  { title: 'Follow-through', body: 'Execution that matches vision. Every strategy ships with an implementation plan, clear milestones and a next step.' },
 ];
 
 export const process = [
-  { title: 'Understand', body: 'Listen to leaders, teams and customers. Understand the challenge, its context and the constraints around it.', detail: 'Shared brief / current-state understanding' },
-  { title: 'Define', body: 'Bring evidence and different perspectives together. Explore the options, agree priorities and give the work a direction.', detail: 'Priorities / roadmap / accountable owners' },
-  { title: 'Make', body: 'Translate direction into designs, systems or campaigns. Use prototypes and focused pilots to test what matters.', detail: 'Prototypes / delivery plan / focused pilots' },
-  { title: 'Move forward', body: 'Implement together, review progress and adapt to what the work reveals. Build the capability to keep going.', detail: 'Implementation / review / knowledge transfer' },
+  { title: 'Understand', body: 'We begin with a structured assessment of your business model, objectives and stakeholders to ground every recommendation.', detail: 'Current-state assessment / gap analysis' },
+  { title: 'Define', body: 'Big moves need solid foundations. We prioritize the options and shape an architecture-led strategic roadmap.', detail: 'Target architecture / roadmap / owners', links: [{ text: 'architecture-led strategic roadmap', href: '/services/enterprise-architecture' }] },
+  { title: 'Make', body: 'We turn the roadmap into systems, platforms, brands or campaigns, testing with prototypes and focused pilots first.', detail: 'Prototypes / delivery plan / focused pilots' },
+  { title: 'Move forward', body: 'Insightful execution. We implement agile sprints with defined milestones, measure outcomes and iterate with your team.', detail: 'Implementation / review / knowledge transfer' },
 ];
 
 export const industries = [
